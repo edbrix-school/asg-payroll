@@ -1,64 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="EmpAppraisal" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="800" leftMargin="21" rightMargin="21" topMargin="14" bottomMargin="14" uuid="51f26c1c-332c-43f0-beb9-5722768520c7">
-	<property name="ireport.zoom" value="1.3310000000000008"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
-	<style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
-	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
-	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true" pdfFontName="Helvetica-Bold"/>
-	<style name="Detail" fontName="Arial" fontSize="12"/>
-	<style name="Row" mode="Transparent">
-		<conditionalStyle>
-			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
-			<style backcolor="#E6DAC3"/>
-		</conditionalStyle>
-	</style>
-	<style name="table">
-		<box>
-			<pen lineWidth="1.0" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table 1">
-		<box>
-			<pen lineWidth="1.0" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<subDataset name="APPR_DTL" uuid="b4344b76-4874-4659-b115-e7a8fa073955">
-		<parameter name="DOC_KEY_POID" class="java.lang.String">
-			<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-		</parameter>
-		<queryString>
-			<![CDATA[SELECT NVL(CR.CR_NUMBER,'Others') CR_NUMBER, NVL(CR.CR_NAME,'Others') COMPANY_NAME, DTL.TRANSACTION_POID,DTL.DET_ROW_ID,DTL.JOIN_DATE, EM.EMPLOYEE_CODE, EMPLOYEE_NAME || ' ' || EMPLOYEE_NAME2 AS EMPLOYEE_NAME, GET_CR_NAME(
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="EmpAppraisal" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape"
+              columnWidth="800" leftMargin="21" rightMargin="21" topMargin="14" bottomMargin="14"
+              uuid="51f26c1c-332c-43f0-beb9-5722768520c7">
+    <property name="ireport.zoom" value="1.3310000000000008"/>
+    <property name="ireport.x" value="0"/>
+    <property name="ireport.y" value="0"/>
+    <style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
+    <style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+    <style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"
+           pdfFontName="Helvetica-Bold"/>
+    <style name="Detail" fontName="Arial" fontSize="12"/>
+    <style name="Row" mode="Transparent">
+        <conditionalStyle>
+            <conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+            <style backcolor="#E6DAC3"/>
+        </conditionalStyle>
+    </style>
+    <style name="table">
+        <box>
+            <pen lineWidth="1.0" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table 1">
+        <box>
+            <pen lineWidth="1.0" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <subDataset name="APPR_DTL" uuid="b4344b76-4874-4659-b115-e7a8fa073955">
+        <parameter name="DOC_KEY_POID" class="java.lang.String">
+            <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+        </parameter>
+        <queryString>
+            <![CDATA[SELECT NVL(CR.CR_NUMBER,'Others') CR_NUMBER, NVL(CR.CR_NAME,'Others') COMPANY_NAME, DTL.TRANSACTION_POID,DTL.DET_ROW_ID,DTL.JOIN_DATE, EM.EMPLOYEE_CODE, EMPLOYEE_NAME || ' ' || EMPLOYEE_NAME2 AS EMPLOYEE_NAME, GET_CR_NAME(
       EM.CR_POID)EMP_REG_COMP,EM.ACTIVE, EM.EMP_GL_POID, GET_DESIGNATION_NAME(DTL.NEW_DESIGNATION_POID) NEW_DESIGNATION, DTL.CUR_NO_OF_TICKETS,
       DTL.CUR_AIR_ENTITLE, DTL.CUR_BONUS,DTL.CUR_INCREMENT, DTL.CUR_BASIC_SALARY,DTL.CUR_FA_ALW,DTL.CUR_TA_ALW,DTL.CUR_HRA_ALW,DTL.CUR_FIXOT_ALW,
       DTL.CUR_SPL_ALW, DTL.CUR_OTH_ALW,DTL.CUR_AVGOT,DTL.CUR_GROSS_PAY,
@@ -68,1144 +74,1411 @@
       DTL.NEW_FIXOT_ALW,DTL.NEW_SPL_ALW,DTL.NEW_OTH_ALW,DTL.NEW_AVGOT,DTL.NEW_GROSS_PAY, DTL.NET_INCREMENT, DTL.ARREARS, DTL.NEW_BONUS_PER
 FROM  HR_APPRAISAL_DTL DTL
 INNER JOIN HR_EMPLOYEE_MASTER EM ON EM.EMPLOYEE_POID=DTL.EMPLOYEE_POID
-LEFT JOIN ADMIN_CR_MASTER CR     ON EM.CR_POID        = CR.CR_POID
-LEFT JOIN GLOBAL_COMPANY_MASTER GCM ON CR.COMPANY_POID     = GCM.COMPANY_POID
-WHERE DTL.TRANSACTION_POID                          = $P{DOC_KEY_POID}
+LEFT JOIN ADMIN_CR_MASTER CR ON EM.CR_POID = CR.CR_POID
+LEFT JOIN GLOBAL_COMPANY_MASTER GCM ON CR.COMPANY_POID = GCM.COMPANY_POID
+WHERE DTL.TRANSACTION_POID = $P{DOC_KEY_POID}
 ORDER BY NVL(CR.CR_NAME,'Others'), TO_NUMBER(EM.EMPLOYEE_CODE)]]>
-		</queryString>
-		<field name="CR_NUMBER" class="java.lang.String"/>
-		<field name="COMPANY_NAME" class="java.lang.String"/>
-		<field name="TRANSACTION_POID" class="java.math.BigDecimal"/>
-		<field name="DET_ROW_ID" class="java.math.BigDecimal"/>
-		<field name="JOIN_DATE" class="java.sql.Timestamp"/>
-		<field name="EMPLOYEE_CODE" class="java.lang.String"/>
-		<field name="EMPLOYEE_NAME" class="java.lang.String"/>
-		<field name="EMP_REG_COMP" class="java.lang.String"/>
-		<field name="ACTIVE" class="java.lang.String"/>
-		<field name="EMP_GL_POID" class="java.math.BigDecimal"/>
-		<field name="NEW_DESIGNATION" class="java.lang.String"/>
-		<field name="CUR_NO_OF_TICKETS" class="java.math.BigDecimal"/>
-		<field name="CUR_AIR_ENTITLE" class="java.lang.String"/>
-		<field name="CUR_BONUS" class="java.math.BigDecimal"/>
-		<field name="CUR_INCREMENT" class="java.math.BigDecimal"/>
-		<field name="CUR_BASIC_SALARY" class="java.math.BigDecimal"/>
-		<field name="CUR_FA_ALW" class="java.math.BigDecimal"/>
-		<field name="CUR_TA_ALW" class="java.math.BigDecimal"/>
-		<field name="CUR_HRA_ALW" class="java.math.BigDecimal"/>
-		<field name="CUR_FIXOT_ALW" class="java.math.BigDecimal"/>
-		<field name="CUR_SPL_ALW" class="java.math.BigDecimal"/>
-		<field name="CUR_OTH_ALW" class="java.math.BigDecimal"/>
-		<field name="CUR_AVGOT" class="java.math.BigDecimal"/>
-		<field name="CUR_GROSS_PAY" class="java.math.BigDecimal"/>
-		<field name="TICKET_PERIOD" class="java.lang.String"/>
-		<field name="NEW_BONUS" class="java.math.BigDecimal"/>
-		<field name="NEW_INCREMENT_PER" class="java.math.BigDecimal"/>
-		<field name="NEW_BASIC_SALARY" class="java.math.BigDecimal"/>
-		<field name="NEW_FA_ALW" class="java.math.BigDecimal"/>
-		<field name="NEW_TA_ALW" class="java.math.BigDecimal"/>
-		<field name="NEW_HRA_ALW" class="java.math.BigDecimal"/>
-		<field name="NEW_FIXOT_ALW" class="java.math.BigDecimal"/>
-		<field name="NEW_SPL_ALW" class="java.math.BigDecimal"/>
-		<field name="NEW_OTH_ALW" class="java.math.BigDecimal"/>
-		<field name="NEW_AVGOT" class="java.math.BigDecimal"/>
-		<field name="NEW_GROSS_PAY" class="java.math.BigDecimal"/>
-		<field name="NET_INCREMENT" class="java.math.BigDecimal"/>
-		<field name="ARREARS" class="java.math.BigDecimal"/>
-		<field name="NEW_BONUS_PER" class="java.math.BigDecimal"/>
-		<variable name="TotalGrossCurrent" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_GROSS_PAY}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="TotalGrossNew" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_GROSS_PAY}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="TotNetDiff" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NET_INCREMENT}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="TotArrears" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{ARREARS}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="TotBonus" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="TotCount" class="java.math.BigDecimal" calculation="Count">
-			<variableExpression><![CDATA[$F{DET_ROW_ID}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotBasic" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_BASIC_SALARY}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotTransport" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_TA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotFixedAlw" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_FA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotFixOT" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_FIXOT_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotHRA" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_HRA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="New_Basic" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_BASIC_SALARY}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="New_Transport" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_TA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="New_FixedAlw" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_FA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="New_FixOT" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_FIXOT_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="New_HRA" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_HRA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA[0]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotBasic_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_BASIC_SALARY}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="New_HRA_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_HRA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="TotNetDiff_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{NET_INCREMENT}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="New_Basic_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_BASIC_SALARY}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="TotBonus_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="New_FixedAlw_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_FA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotHRA_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_HRA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="TotalGrossNew_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_GROSS_PAY}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="TotCount_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Count">
-			<variableExpression><![CDATA[$F{DET_ROW_ID}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="New_Transport_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_TA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotFixedAlw_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_FA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotFixOT_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_FIXOT_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="Cur_TotTransport_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_TA_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="New_FixOT_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_FIXOT_ALW}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="TotArrears_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{ARREARS}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<variable name="TotalGrossCurrent_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup" calculation="Sum">
-			<variableExpression><![CDATA[$F{CUR_GROSS_PAY}]]></variableExpression>
-			<initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
-		</variable>
-		<group name="companyGroup" isStartNewPage="true">
-			<groupExpression><![CDATA[$F{COMPANY_NAME}]]></groupExpression>
-		</group>
-	</subDataset>
-	<parameter name="LOGIN_GROUP_POID" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-	</parameter>
-	<parameter name="LOGIN_COMP_POID" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-	</parameter>
-	<parameter name="LOGIN_USER_POID" class="java.lang.String" isForPrompting="false"/>
-	<parameter name="DOC_ID" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["000-000"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="DOC_KEY_POID" class="java.lang.String"/>
-	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["\\\\shippingbahrain.com\\data\\ERP_REPORTS\\Reports\\"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="SUB_FOOTER" class="net.sf.jasperreports.engine.JasperReport"/>
-	<queryString>
-		<![CDATA[SELECT HDR.TRANSACTION_POID, HDR.TRANSACTION_DATE, HDR.COMPANY_POID, HDR.DOC_REF, HDR.PERIOD_FROM, HDR.DESCRIPTION, CM.COMPANY_NAME
+        </queryString>
+        <field name="CR_NUMBER" class="java.lang.String"/>
+        <field name="COMPANY_NAME" class="java.lang.String"/>
+        <field name="TRANSACTION_POID" class="java.math.BigDecimal"/>
+        <field name="DET_ROW_ID" class="java.math.BigDecimal"/>
+        <field name="JOIN_DATE" class="java.sql.Timestamp"/>
+        <field name="EMPLOYEE_CODE" class="java.lang.String"/>
+        <field name="EMPLOYEE_NAME" class="java.lang.String"/>
+        <field name="EMP_REG_COMP" class="java.lang.String"/>
+        <field name="ACTIVE" class="java.lang.String"/>
+        <field name="EMP_GL_POID" class="java.math.BigDecimal"/>
+        <field name="NEW_DESIGNATION" class="java.lang.String"/>
+        <field name="CUR_NO_OF_TICKETS" class="java.math.BigDecimal"/>
+        <field name="CUR_AIR_ENTITLE" class="java.lang.String"/>
+        <field name="CUR_BONUS" class="java.math.BigDecimal"/>
+        <field name="CUR_INCREMENT" class="java.math.BigDecimal"/>
+        <field name="CUR_BASIC_SALARY" class="java.math.BigDecimal"/>
+        <field name="CUR_FA_ALW" class="java.math.BigDecimal"/>
+        <field name="CUR_TA_ALW" class="java.math.BigDecimal"/>
+        <field name="CUR_HRA_ALW" class="java.math.BigDecimal"/>
+        <field name="CUR_FIXOT_ALW" class="java.math.BigDecimal"/>
+        <field name="CUR_SPL_ALW" class="java.math.BigDecimal"/>
+        <field name="CUR_OTH_ALW" class="java.math.BigDecimal"/>
+        <field name="CUR_AVGOT" class="java.math.BigDecimal"/>
+        <field name="CUR_GROSS_PAY" class="java.math.BigDecimal"/>
+        <field name="TICKET_PERIOD" class="java.lang.String"/>
+        <field name="NEW_BONUS" class="java.math.BigDecimal"/>
+        <field name="NEW_INCREMENT_PER" class="java.math.BigDecimal"/>
+        <field name="NEW_BASIC_SALARY" class="java.math.BigDecimal"/>
+        <field name="NEW_FA_ALW" class="java.math.BigDecimal"/>
+        <field name="NEW_TA_ALW" class="java.math.BigDecimal"/>
+        <field name="NEW_HRA_ALW" class="java.math.BigDecimal"/>
+        <field name="NEW_FIXOT_ALW" class="java.math.BigDecimal"/>
+        <field name="NEW_SPL_ALW" class="java.math.BigDecimal"/>
+        <field name="NEW_OTH_ALW" class="java.math.BigDecimal"/>
+        <field name="NEW_AVGOT" class="java.math.BigDecimal"/>
+        <field name="NEW_GROSS_PAY" class="java.math.BigDecimal"/>
+        <field name="NET_INCREMENT" class="java.math.BigDecimal"/>
+        <field name="ARREARS" class="java.math.BigDecimal"/>
+        <field name="NEW_BONUS_PER" class="java.math.BigDecimal"/>
+        <variable name="TotalGrossCurrent" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_GROSS_PAY}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="TotalGrossNew" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_GROSS_PAY}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="TotNetDiff" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NET_INCREMENT}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="TotArrears" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{ARREARS}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="TotBonus" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="TotCount" class="java.math.BigDecimal" calculation="Count">
+            <variableExpression><![CDATA[$F{DET_ROW_ID}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotBasic" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_BASIC_SALARY}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotTransport" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_TA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotFixedAlw" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_FA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotFixOT" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_FIXOT_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotHRA" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_HRA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="New_Basic" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_BASIC_SALARY}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="New_Transport" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_TA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="New_FixedAlw" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_FA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="New_FixOT" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_FIXOT_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="New_HRA" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_HRA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA[0]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotBasic_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_BASIC_SALARY}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="New_HRA_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_HRA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="TotNetDiff_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{NET_INCREMENT}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="New_Basic_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_BASIC_SALARY}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="TotBonus_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="New_FixedAlw_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_FA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotHRA_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_HRA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="TotalGrossNew_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_GROSS_PAY}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="TotCount_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Count">
+            <variableExpression><![CDATA[$F{DET_ROW_ID}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="New_Transport_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_TA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotFixedAlw_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_FA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotFixOT_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_FIXOT_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="Cur_TotTransport_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_TA_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="New_FixOT_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_FIXOT_ALW}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="TotArrears_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{ARREARS}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <variable name="TotalGrossCurrent_1" class="java.math.BigDecimal" resetType="Group" resetGroup="companyGroup"
+                  calculation="Sum">
+            <variableExpression><![CDATA[$F{CUR_GROSS_PAY}]]></variableExpression>
+            <initialValueExpression><![CDATA["0".toBigDecimal()]]></initialValueExpression>
+        </variable>
+        <group name="companyGroup" isStartNewPage="true">
+            <groupExpression><![CDATA[$F{COMPANY_NAME}]]></groupExpression>
+        </group>
+    </subDataset>
+    <parameter name="LOGIN_GROUP_POID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+    </parameter>
+    <parameter name="LOGIN_COMP_POID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+    </parameter>
+    <parameter name="LOGIN_USER_POID" class="java.lang.String" isForPrompting="false"/>
+    <parameter name="DOC_ID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA["000-000"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DOC_KEY_POID" class="java.lang.String"/>
+    <parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression>
+            <![CDATA["\\\\shippingbahrain.com\\data\\ERP_REPORTS\\Reports\\"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="SUB_FOOTER" class="net.sf.jasperreports.engine.JasperReport"/>
+    <queryString>
+        <![CDATA[SELECT HDR.TRANSACTION_POID, HDR.TRANSACTION_DATE, HDR.COMPANY_POID, HDR.DOC_REF, HDR.PERIOD_FROM, HDR.DESCRIPTION, CM.COMPANY_NAME
 FROM  HR_APPRAISAL_HDR HDR
 INNER JOIN GLOBAL_COMPANY_MASTER CM ON HDR.COMPANY_POID = CM.COMPANY_POID
 WHERE TRANSACTION_POID = $P{DOC_KEY_POID}]]>
-	</queryString>
-	<field name="TRANSACTION_POID" class="java.math.BigDecimal"/>
-	<field name="TRANSACTION_DATE" class="java.sql.Timestamp"/>
-	<field name="COMPANY_POID" class="java.math.BigDecimal"/>
-	<field name="DOC_REF" class="java.lang.String"/>
-	<field name="PERIOD_FROM" class="java.sql.Timestamp"/>
-	<field name="DESCRIPTION" class="java.lang.String"/>
-	<field name="COMPANY_NAME" class="java.lang.String"/>
-	<background>
-		<band splitType="Stretch"/>
-	</background>
-	<title>
-		<band height="60" splitType="Stretch">
-			<textField>
-				<reportElement x="10" y="10" width="804" height="46" uuid="2575b530-5b01-414a-a446-e490ddf22568"/>
-				<textElement verticalAlignment="Middle">
-					<font size="24"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
-			</textField>
-		</band>
-	</title>
-	<pageHeader>
-		<band height="41" splitType="Stretch">
-			<textField>
-				<reportElement x="714" y="1" width="100" height="20" uuid="f3eaff6d-a1f3-43c2-b154-664fc3a06e1d"/>
-				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{DOC_REF}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="657" y="1" width="57" height="20" uuid="152ab1d8-554f-4045-b1b4-907318c4f0fd"/>
-				<textElement verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Doc Ref  ]]></text>
-			</staticText>
-			<textField pattern="dd-MMM-yyyy" isBlankWhenNull="true">
-				<reportElement x="85" y="0" width="83" height="20" uuid="59c78d1e-b3b9-41f9-acc6-8d106b75f428"/>
-				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{PERIOD_FROM}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="1" y="0" width="84" height="20" uuid="6b6118b1-d559-4bed-9c04-26bb4ca2a939"/>
-				<textElement verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Effective Date ]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="85" y="21" width="441" height="20" uuid="450e5759-3d04-4f59-9c22-6e52cfffe14b"/>
-				<textElement verticalAlignment="Top"/>
-				<textFieldExpression><![CDATA[$F{DESCRIPTION}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="1" y="21" width="84" height="20" uuid="fc9258b9-c167-4224-8df7-a702b7146be9"/>
-				<textElement verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Remarks :]]></text>
-			</staticText>
-		</band>
-	</pageHeader>
-	<detail>
-		<band height="46" splitType="Stretch">
-			<componentElement>
-				<reportElement key="table 1" style="table 1" x="2" y="0" width="812" height="46" uuid="f4523a16-d126-4d0b-927e-693a542cdff4"/>
-				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="APPR_DTL" uuid="f1fbd2b3-e783-44fc-a727-139d80f079dd">
-						<datasetParameter name="DOC_KEY_POID">
-							<datasetParameterExpression><![CDATA[$P{DOC_KEY_POID}]]></datasetParameterExpression>
-						</datasetParameter>
-						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					</datasetRun>
-					<jr:columnGroup width="190" uuid="20d7de15-016c-402d-a185-6497636d09d4">
-						<jr:groupHeader groupName="companyGroup">
-							<jr:cell height="30" rowSpan="1">
-								<textField>
-									<reportElement mode="Opaque" x="0" y="0" width="190" height="30" backcolor="#F3F2F2" uuid="85d8b414-006b-48dd-bd72-638fba1ac2b0"/>
-									<textElement verticalAlignment="Middle">
-										<font size="12"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
-								</textField>
-							</jr:cell>
-						</jr:groupHeader>
-						<jr:columnHeader style="table 1_CH" height="11" rowSpan="1"/>
-						<jr:column width="28" uuid="2ba04d86-cbdd-43e4-9014-05b3852c8c59">
-							<jr:groupHeader groupName="companyGroup">
-								<jr:cell height="0" rowSpan="1"/>
-							</jr:groupHeader>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1"/>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="28" height="30" uuid="e6da2fde-c724-4248-8e1e-58f84572e6fe"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-									</textElement>
-									<text><![CDATA[Code]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="28" height="15" uuid="e569aadb-07c8-4ae1-ab33-de4c763be9d6"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{EMPLOYEE_CODE}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="110" uuid="c1fc0187-e54a-4fdc-aa24-f5933623fa8d">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="110" height="20" uuid="c66f49d4-2cd9-4085-a78d-ea1bb8b9e41f"/>
-									<textElement verticalAlignment="Middle"/>
-									<textFieldExpression><![CDATA["Total Count : " + $V{TotCount}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupHeader groupName="companyGroup">
-								<jr:cell height="0" rowSpan="1"/>
-							</jr:groupHeader>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField>
-										<reportElement x="0" y="0" width="110" height="15" uuid="8330e7ad-3326-42cb-98da-2821ea826840"/>
-										<textFieldExpression><![CDATA["Count : " + $V{TotCount_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="110" height="30" uuid="31d2f2e6-d3d8-4799-9b44-b556cbf133c2"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-									</textElement>
-									<text><![CDATA[Name]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="110" height="15" uuid="06896b0d-02e6-4457-b873-0680f9687dd5"/>
-									<textElement verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
-								</textField>
-								<textField isBlankWhenNull="true">
-									<reportElement x="0" y="15" width="110" height="12" uuid="c534febb-a7ab-40b7-947a-79e2a90cd8e3"/>
-									<textElement>
-										<font size="8" isItalic="true"/>
-										<paragraph leftIndent="3" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_DESIGNATION}]]></textFieldExpression>
-								</textField>
-								<textField pattern="" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="27" width="110" height="12" forecolor="#000000" backcolor="#FFFFFF" uuid="80d924ff-d28e-42a4-99d4-9c20dac3c8ac"/>
-									<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single" leftIndent="3" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{TICKET_PERIOD}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="52" uuid="0b6a6d73-2006-492d-8319-329aa223dfce">
-							<jr:groupHeader groupName="companyGroup">
-								<jr:cell height="0" rowSpan="1"/>
-							</jr:groupHeader>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="52" height="30" uuid="2489d99c-c926-43ef-a7bd-9c334b63752f"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-									</textElement>
-									<text><![CDATA[Join Date]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="dd-MMM-yyyy">
-									<reportElement x="0" y="0" width="52" height="20" uuid="55620e26-b4de-42e8-a28f-cdea013f3867"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{JOIN_DATE}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-					</jr:columnGroup>
-					<jr:columnGroup width="232" uuid="29425cd5-88ba-4772-bbfd-0866de8abb99">
-						<jr:groupHeader groupName="companyGroup">
-							<jr:cell height="30" rowSpan="1"/>
-						</jr:groupHeader>
-						<jr:columnHeader style="table 1_CH" height="11" rowSpan="1">
-							<staticText>
-								<reportElement mode="Transparent" x="0" y="0" width="207" height="11" forecolor="#000000" backcolor="#FFFFFF" uuid="65c9ac96-e038-4443-8024-0a97b52cf8fc"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Current Values]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:column width="40" uuid="5536034a-ab32-4a40-927e-748e3c92640c">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="2" y="0" width="38" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="12d3b95b-7923-41dc-a4e3-b6ae818e4228"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{Cur_TotBasic}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="40" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="05ed6bc9-292a-4255-9cc7-690931dfa1b1"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{Cur_TotBasic_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="40" height="19" uuid="d85ad0ec-9aa8-44ad-9133-63af6e38be6e"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-									</textElement>
-									<text><![CDATA[Basic]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="40" height="20" uuid="8b21362a-5257-4e3a-a278-1a2981b46ec9"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{CUR_BASIC_SALARY}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="42" uuid="d0ae3ef3-b990-4d53-9579-9ddf5d949de9">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="42" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="a92f1d79-a595-454b-a0ce-4fe3a2c75ad0"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{Cur_TotTransport}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="42" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="8c16b21f-d707-4c89-82bf-4cd5767bead4"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{Cur_TotTransport_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="42" height="19" uuid="0bda7cf2-01fc-4bb7-87eb-9cf7a63138b8"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-									</textElement>
-									<text><![CDATA[Transpt]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="42" height="20" uuid="ae24a212-e136-4683-bc27-f61bae4c4f9a"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{CUR_TA_ALW}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="40" uuid="36e6ad57-1781-4a86-be4c-0fd830c0c418">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="40" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="e5000e01-681d-4e24-a5ec-f35fd7e43f10"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{Cur_TotFixedAlw}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="40" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="49d6fe86-405a-4bd1-b941-987ce2336b68"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{Cur_TotFixedAlw_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="40" height="19" uuid="17784432-291d-460b-a445-e84fdb59593b"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-									</textElement>
-									<text><![CDATA[Fixed]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="1" y="0" width="39" height="20" uuid="e5d2856e-8241-457a-93c7-060a4e1420dd"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{CUR_FA_ALW}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="30" uuid="7418eb40-7f3d-47a2-8c2a-f079ad20a9b9">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="30" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="23e4557c-0797-47be-ba37-9526659ef5fa"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{Cur_TotFixOT}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="30" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="5e1df1a3-6ba6-481e-a6ed-0031ff3fb1e6"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{Cur_TotFixOT_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="30" height="19" uuid="631c5228-f4c3-4faa-ba66-cadb7add315d"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-									</textElement>
-									<text><![CDATA[FixOT]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="30" height="20" uuid="d59cc945-444a-4bb1-b860-cef50737c5d4"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{CUR_FIXOT_ALW}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="35" uuid="eac7902d-3447-48c9-814b-6610a6a3f968">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="35" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="fb4de79b-213d-4e15-acf4-e1cf023dcb6e"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{Cur_TotHRA}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="35" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="86448348-02c1-422b-ace7-c9ed5a0097a1"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{Cur_TotHRA_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="35" height="19" uuid="c899a184-8501-4e1a-9963-6df7f3622ae0"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8"/>
-									</textElement>
-									<text><![CDATA[HRA]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="35" height="20" uuid="83e1bd4b-c715-4497-9c2f-23b73cf471e9"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{CUR_HRA_ALW}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="45" uuid="dfc6f05a-a0e4-4c0b-9712-693d95d55dd5">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="45" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="7f655002-c3c7-4cf9-80b4-8950fae93d7f"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{TotalGrossCurrent}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="45" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="16f2b5f9-09d4-4684-92a7-4df234b84a58"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{TotalGrossCurrent_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="45" height="19" uuid="d8cb7819-e5da-4a9d-bfde-b74ca5cdc8da"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font size="8" isBold="true"/>
-									</textElement>
-									<text><![CDATA[Gross]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="45" height="20" uuid="9129073f-975e-4278-bbfd-96357435bc20"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8" isBold="true"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{CUR_GROSS_PAY}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-					</jr:columnGroup>
-					<jr:columnGroup width="230" uuid="f1605be2-3cf0-490f-ad0d-3a1a33fcb294">
-						<jr:columnHeader style="table 1_CH" height="11" rowSpan="1">
-							<box>
-								<pen lineStyle="Double"/>
-								<topPen lineStyle="Double"/>
-								<leftPen lineStyle="Double"/>
-								<bottomPen lineStyle="Double"/>
-								<rightPen lineStyle="Double"/>
-							</box>
-							<staticText>
-								<reportElement mode="Transparent" x="0" y="0" width="200" height="11" forecolor="#000000" backcolor="#FFFFFF" uuid="a9ddd36f-5620-4310-bba9-9ae42daf18d7"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Proposed Values]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:column width="40" uuid="f15bf9b9-635d-47aa-a02c-139e4c6db01f">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="40" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="e32fddc3-32f9-492c-9c51-c796dafae48f"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{New_Basic}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="40" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="46b9b46d-0393-4ece-b3b7-ba3d78eeea02"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{New_Basic_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement mode="Transparent" x="0" y="0" width="40" height="19" forecolor="#000000" backcolor="#FFFFFF" uuid="0ecbdb29-7979-4b33-9b0b-7ffa366f9266"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<text><![CDATA[Basic]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="40" height="20" uuid="585538d4-c6b4-45cb-848e-06cb6966b1cc"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_BASIC_SALARY}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="40" uuid="d1a007fc-7bf1-444a-86ce-025b1ca64344">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="40" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="6a6a8d4d-c5e5-4551-85b2-f32a5b7d12ae"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{New_Transport}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="40" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="8c01c759-3412-46ff-b643-4fbe42d7661f"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{New_Transport_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement mode="Transparent" x="0" y="0" width="40" height="19" forecolor="#000000" backcolor="#FFFFFF" uuid="9074fe60-2aca-40c5-b4ca-92383dcb9dcc"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<text><![CDATA[Transpt]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="40" height="20" uuid="5460492c-0f5e-462d-9fc8-ae5ccece1636"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_TA_ALW}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="39" uuid="adcf3a90-1059-4aad-bc24-08c5935d048b">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="39" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="6c909740-6e3b-4fd9-a652-57cf2303c95e"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{New_FixedAlw}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="39" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="6127e286-66d7-400b-8beb-c938909c4a40"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{New_FixedAlw_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement mode="Transparent" x="0" y="0" width="39" height="19" forecolor="#000000" backcolor="#FFFFFF" uuid="49dca356-f5cf-4bd5-ba26-424113cb7c59"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<text><![CDATA[Fixed]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="39" height="20" uuid="db31b0c1-1c59-4513-b257-b3357f0bac9b"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_FA_ALW}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="30" uuid="3c93bb3a-4d9c-4c06-b3b3-05bda8cfcd4f">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="30" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="53abed42-73fa-41fd-b65a-7e9e17f38d37"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{New_FixOT}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="30" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="84d585ff-b868-4dff-bea3-5bca292d994a"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{New_FixOT_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement mode="Transparent" x="0" y="0" width="30" height="19" forecolor="#000000" backcolor="#FFFFFF" uuid="2bb71cee-dab0-4438-8287-30a583214948"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<text><![CDATA[FixOT]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="30" height="20" uuid="6e4f35a4-eeab-4265-88d3-1b2ef1fdd537"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_FIXOT_ALW}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="36" uuid="78b53332-df34-4ebf-aee0-ff8b322d711f">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="36" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="96b0a102-a62e-4ad2-9a62-14583506e28c"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{New_HRA}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="36" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="5c857161-b442-42b9-9497-7698c34c9f20"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{New_HRA_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement mode="Transparent" x="0" y="0" width="36" height="19" forecolor="#000000" backcolor="#FFFFFF" uuid="6d7760b2-e80a-4a5e-ae83-ae3743a94a33"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<text><![CDATA[HRA]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="1" y="0" width="35" height="20" uuid="190f5ff2-c8ce-4506-b56d-dbc83e5713c3"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_HRA_ALW}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="45" uuid="ef1b5b48-6fb7-45be-aee0-45594401cb6e">
-							<jr:tableFooter height="20" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Transparent" x="0" y="0" width="45" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="364c45f8-ef89-496b-b0ac-0d738e79d676"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{TotalGrossNew}]]></textFieldExpression>
-								</textField>
-							</jr:tableFooter>
-							<jr:groupFooter groupName="companyGroup">
-								<jr:cell height="15" rowSpan="1">
-									<textField pattern="#,##0.000" isBlankWhenNull="true">
-										<reportElement mode="Opaque" x="0" y="0" width="45" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="b8f8f389-7568-48cb-a07d-593d7ba4f01d"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-											<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-											<paragraph lineSpacing="Single"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{TotalGrossNew_1}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
-								<staticText>
-									<reportElement mode="Transparent" x="0" y="0" width="45" height="19" forecolor="#000000" backcolor="#FFFFFF" uuid="54176d98-4088-471b-8470-41e193b5aa43"/>
-									<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<text><![CDATA[Gross]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="45" height="20" uuid="21bf8dd7-3aae-4562-bc82-0acb042f3535"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="8" isBold="true"/>
-										<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_GROSS_PAY}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-					</jr:columnGroup>
-					<jr:column width="43" uuid="02061ce1-7aa4-4f61-b9ca-339729501d4b">
-						<jr:tableHeader height="0" rowSpan="1"/>
-						<jr:tableFooter height="20" rowSpan="1">
-							<textField pattern="#,##0.000" isBlankWhenNull="true">
-								<reportElement mode="Transparent" x="0" y="0" width="43" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="b9d16659-7b3c-4def-b532-f75cf412a03f"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-									<paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{TotNetDiff}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:groupFooter groupName="companyGroup">
-							<jr:cell height="15" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Opaque" x="0" y="0" width="43" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="9789ba5e-6e83-4d74-9c74-ddf52fbff847"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{TotNetDiff_1}]]></textFieldExpression>
-								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader style="table 1_CH" height="41" rowSpan="2">
-							<staticText>
-								<reportElement mode="Transparent" x="0" y="0" width="43" height="30" forecolor="#000000" backcolor="#FFFFFF" uuid="9f6a16a8-0273-41f0-873a-b7823c2bcb2a"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Net Increment]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:columnFooter style="table 1_CH" height="0" rowSpan="1"/>
-						<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-							<textField pattern="#,##0.000" isBlankWhenNull="true">
-								<reportElement mode="Transparent" x="0" y="0" width="43" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="d4f981cb-cde4-4717-8d60-f757c0223120"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{NET_INCREMENT}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="24" uuid="328ececd-54af-41a5-a85a-f06512cb015c">
-						<jr:groupFooter groupName="companyGroup">
-							<jr:cell height="15" rowSpan="1"/>
-						</jr:groupFooter>
-						<jr:columnHeader style="table 1_CH" height="41" rowSpan="2">
-							<staticText>
-								<reportElement mode="Transparent" x="0" y="0" width="23" height="30" forecolor="#000000" backcolor="#FFFFFF" uuid="aefa3f2b-179f-4532-9d26-b7c5e2d5c095"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Incr%]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:columnFooter style="table 1_CH" height="0" rowSpan="1"/>
-						<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-							<textField pattern="0.00" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="23" height="20" uuid="a723adfd-0f18-4a89-b607-43fb4f9ebc57"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font size="8"/>
-									<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{NEW_INCREMENT_PER}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="46" uuid="3b218830-f972-479c-9705-33b220dfc950">
-						<jr:tableFooter height="20" rowSpan="1">
-							<textField pattern="#,##0.000" isBlankWhenNull="true">
-								<reportElement mode="Transparent" x="0" y="0" width="46" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="476392a9-7c18-48d1-95b1-9d8611ac3399"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-									<paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{TotBonus}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:groupFooter groupName="companyGroup">
-							<jr:cell height="15" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Opaque" x="0" y="0" width="46" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="3277f657-e35b-494d-9091-e9affb2ec717"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{TotBonus_1}]]></textFieldExpression>
-								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader style="table 1_CH" height="41" rowSpan="2">
-							<staticText>
-								<reportElement mode="Transparent" x="0" y="0" width="46" height="30" forecolor="#000000" backcolor="#FFFFFF" uuid="75850a54-913c-45dd-a44f-648a35f79bdb"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Bonus]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:columnFooter style="table 1_CH" height="0" rowSpan="1"/>
-						<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-							<textField pattern="#,##0.000" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="46" height="20" uuid="217a2da3-c77c-4639-9623-8acea05e7fc5"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font size="8"/>
-									<paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{NEW_BONUS}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="40" uuid="fca6f0f5-f497-4b15-95a3-7e5bf4bb86bc">
-						<jr:tableHeader height="0" rowSpan="1"/>
-						<jr:tableFooter height="20" rowSpan="1">
-							<textField pattern="#,##0.000" isBlankWhenNull="true">
-								<reportElement mode="Transparent" x="0" y="0" width="40" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="0aa6d0eb-4db0-4a92-8211-e5270c34f44e"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="6" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-									<paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{TotArrears}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:groupFooter groupName="companyGroup">
-							<jr:cell height="15" rowSpan="1">
-								<textField pattern="#,##0.000" isBlankWhenNull="true">
-									<reportElement mode="Opaque" x="0" y="0" width="40" height="15" forecolor="#000000" backcolor="#DAD8D8" uuid="d220c8d3-6830-4842-9e77-5bd65b999213"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-										<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
-										<paragraph lineSpacing="Single"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{TotArrears_1}]]></textFieldExpression>
-								</textField>
-							</jr:cell>
-						</jr:groupFooter>
-						<jr:columnHeader style="table 1_CH" height="41" rowSpan="2">
-							<staticText>
-								<reportElement mode="Transparent" x="0" y="0" width="40" height="30" forecolor="#000000" backcolor="#FFFFFF" uuid="72e5c7e6-b9c5-422e-89bb-f522c94afd04"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single"/>
-								</textElement>
-								<text><![CDATA[Arrears]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:columnFooter style="table 1_CH" height="0" rowSpan="1"/>
-						<jr:detailCell style="table 1_TD" height="39" rowSpan="1">
-							<textField pattern="#,##0.000" isBlankWhenNull="true">
-								<reportElement mode="Transparent" x="0" y="0" width="40" height="20" forecolor="#000000" backcolor="#FFFFFF" uuid="e33266b7-3678-4259-bce9-49e41dda25dc"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-									<font fontName="SansSerif" size="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-									<paragraph lineSpacing="Single" leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$F{ARREARS}]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="0" uuid="1bf5bd1a-a7ff-4de0-b33f-8d6c76acbc7a">
-						<jr:tableHeader height="0" rowSpan="1"/>
-						<jr:tableFooter height="20" rowSpan="1"/>
-						<jr:columnHeader height="41" rowSpan="2"/>
-						<jr:columnFooter height="0" rowSpan="1"/>
-						<jr:detailCell height="39" rowSpan="1"/>
-					</jr:column>
-				</jr:table>
-			</componentElement>
-		</band>
-	</detail>
-	<pageFooter>
-		<band height="24" splitType="Stretch">
-			<subreport>
-				<reportElement x="2" y="0" width="638" height="24" uuid="326ecd66-b7ad-4850-8e0f-10877494dc9d"/>
-				<subreportParameter name="LOGIN_COMP_POID">
-					<subreportParameterExpression><![CDATA[$P{LOGIN_COMP_POID}]]></subreportParameterExpression>
-				</subreportParameter>
-				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUB_FOOTER}]]></subreportExpression>
-			</subreport>
-			<textField isBlankWhenNull="true">
-				<reportElement x="685" y="4" width="100" height="20" forecolor="#666666" uuid="3d45fcdc-9bb3-42a6-aa21-da1b5209cdda"/>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font size="8" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA['Page-'+$V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-		</band>
-	</pageFooter>
-	<summary>
-		<band splitType="Stretch"/>
-	</summary>
+    </queryString>
+    <field name="TRANSACTION_POID" class="java.math.BigDecimal"/>
+    <field name="TRANSACTION_DATE" class="java.sql.Timestamp"/>
+    <field name="COMPANY_POID" class="java.math.BigDecimal"/>
+    <field name="DOC_REF" class="java.lang.String"/>
+    <field name="PERIOD_FROM" class="java.sql.Timestamp"/>
+    <field name="DESCRIPTION" class="java.lang.String"/>
+    <field name="COMPANY_NAME" class="java.lang.String"/>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="60" splitType="Stretch">
+            <textField>
+                <reportElement x="10" y="10" width="804" height="46" uuid="2575b530-5b01-414a-a446-e490ddf22568"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="24"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <pageHeader>
+        <band height="41" splitType="Stretch">
+            <textField>
+                <reportElement x="714" y="1" width="100" height="20" uuid="f3eaff6d-a1f3-43c2-b154-664fc3a06e1d"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{DOC_REF}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="657" y="1" width="57" height="20" uuid="152ab1d8-554f-4045-b1b4-907318c4f0fd"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[Doc Ref  ]]></text>
+            </staticText>
+            <textField pattern="dd-MMM-yyyy" isBlankWhenNull="true">
+                <reportElement x="85" y="0" width="83" height="20" uuid="59c78d1e-b3b9-41f9-acc6-8d106b75f428"/>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{PERIOD_FROM}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="1" y="0" width="84" height="20" uuid="6b6118b1-d559-4bed-9c04-26bb4ca2a939"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[Effective Date ]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="85" y="21" width="441" height="20" uuid="450e5759-3d04-4f59-9c22-6e52cfffe14b"/>
+                <textElement verticalAlignment="Top"/>
+                <textFieldExpression><![CDATA[$F{DESCRIPTION}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="1" y="21" width="84" height="20" uuid="fc9258b9-c167-4224-8df7-a702b7146be9"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[Remarks :]]></text>
+            </staticText>
+        </band>
+    </pageHeader>
+    <detail>
+        <band height="46" splitType="Stretch">
+            <componentElement>
+                <reportElement key="table 1" style="table 1" x="2" y="0" width="805" height="46"
+                               uuid="f4523a16-d126-4d0b-927e-693a542cdff4"/>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
+                          xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+                    <datasetRun subDataset="APPR_DTL" uuid="f1fbd2b3-e783-44fc-a727-139d80f079dd">
+                        <datasetParameter name="DOC_KEY_POID">
+                            <datasetParameterExpression><![CDATA[$P{DOC_KEY_POID}]]></datasetParameterExpression>
+                        </datasetParameter>
+                        <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                    </datasetRun>
+                    <jr:columnGroup width="190" uuid="20d7de15-016c-402d-a185-6497636d09d4">
+                        <jr:groupHeader groupName="companyGroup">
+                            <jr:cell height="30" rowSpan="1">
+                                <textField>
+                                    <reportElement mode="Opaque" x="0" y="0" width="190" height="30" backcolor="#F3F2F2"
+                                                   uuid="85d8b414-006b-48dd-bd72-638fba1ac2b0"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <font size="12"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
+                                </textField>
+                            </jr:cell>
+                        </jr:groupHeader>
+                        <jr:columnHeader style="table 1_CH" height="11" rowSpan="1"/>
+                        <jr:column width="28" uuid="2ba04d86-cbdd-43e4-9014-05b3852c8c59">
+                            <jr:groupHeader groupName="companyGroup">
+                                <jr:cell height="0" rowSpan="1"/>
+                            </jr:groupHeader>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1"/>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="28" height="30"
+                                                   uuid="e6da2fde-c724-4248-8e1e-58f84572e6fe"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                    </textElement>
+                                    <text><![CDATA[Code]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="28" height="15"
+                                                   uuid="e569aadb-07c8-4ae1-ab33-de4c763be9d6"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{EMPLOYEE_CODE}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="110" uuid="c1fc0187-e54a-4fdc-aa24-f5933623fa8d">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="110" height="20"
+                                                   uuid="c66f49d4-2cd9-4085-a78d-ea1bb8b9e41f"/>
+                                    <textElement verticalAlignment="Middle"/>
+                                    <textFieldExpression>
+                                        <![CDATA["Total Count : " + $V{TotCount}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupHeader groupName="companyGroup">
+                                <jr:cell height="0" rowSpan="1"/>
+                            </jr:groupHeader>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField>
+                                        <reportElement x="0" y="0" width="110" height="15"
+                                                       uuid="8330e7ad-3326-42cb-98da-2821ea826840"/>
+                                        <textFieldExpression>
+                                            <![CDATA["Count : " + $V{TotCount_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="110" height="30"
+                                                   uuid="31d2f2e6-d3d8-4799-9b44-b556cbf133c2"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                    </textElement>
+                                    <text><![CDATA[Name]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="110" height="15"
+                                                   uuid="06896b0d-02e6-4457-b873-0680f9687dd5"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
+                                </textField>
+                                <textField isBlankWhenNull="true">
+                                    <reportElement x="0" y="15" width="110" height="12"
+                                                   uuid="c534febb-a7ab-40b7-947a-79e2a90cd8e3"/>
+                                    <textElement>
+                                        <font size="8" isItalic="true"/>
+                                        <paragraph leftIndent="3" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_DESIGNATION}]]></textFieldExpression>
+                                </textField>
+                                <textField pattern="" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="27" width="110" height="12"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="80d924ff-d28e-42a4-99d4-9c20dac3c8ac"/>
+                                    <textElement textAlignment="Left" verticalAlignment="Top" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="false" isItalic="true"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false"/>
+                                        <paragraph lineSpacing="Single" leftIndent="3" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{TICKET_PERIOD}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="52" uuid="0b6a6d73-2006-492d-8319-329aa223dfce">
+                            <jr:groupHeader groupName="companyGroup">
+                                <jr:cell height="0" rowSpan="1"/>
+                            </jr:groupHeader>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="52" height="30"
+                                                   uuid="2489d99c-c926-43ef-a7bd-9c334b63752f"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                    </textElement>
+                                    <text><![CDATA[Join Date]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="dd-MMM-yyyy">
+                                    <reportElement x="0" y="0" width="52" height="20"
+                                                   uuid="55620e26-b4de-42e8-a28f-cdea013f3867"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{JOIN_DATE}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                    </jr:columnGroup>
+                    <jr:columnGroup width="232" uuid="29425cd5-88ba-4772-bbfd-0866de8abb99">
+                        <jr:groupHeader groupName="companyGroup">
+                            <jr:cell height="30" rowSpan="1"/>
+                        </jr:groupHeader>
+                        <jr:columnHeader style="table 1_CH" height="11" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Transparent" x="0" y="0" width="207" height="11"
+                                               forecolor="#000000" backcolor="#FFFFFF"
+                                               uuid="65c9ac96-e038-4443-8024-0a97b52cf8fc"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="8" isBold="false" isItalic="true"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false"/>
+                                    <paragraph lineSpacing="Single"/>
+                                </textElement>
+                                <text><![CDATA[Current Values]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:column width="40" uuid="5536034a-ab32-4a40-927e-748e3c92640c">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="2" y="0" width="38" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="12d3b95b-7923-41dc-a4e3-b6ae818e4228"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{Cur_TotBasic}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="40" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="05ed6bc9-292a-4255-9cc7-690931dfa1b1"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{Cur_TotBasic_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="40" height="19"
+                                                   uuid="d85ad0ec-9aa8-44ad-9133-63af6e38be6e"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                    </textElement>
+                                    <text><![CDATA[Basic]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="40" height="20"
+                                                   uuid="8b21362a-5257-4e3a-a278-1a2981b46ec9"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{CUR_BASIC_SALARY}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="42" uuid="d0ae3ef3-b990-4d53-9579-9ddf5d949de9">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="42" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="a92f1d79-a595-454b-a0ce-4fe3a2c75ad0"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{Cur_TotTransport}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="42" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="8c16b21f-d707-4c89-82bf-4cd5767bead4"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{Cur_TotTransport_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="42" height="19"
+                                                   uuid="0bda7cf2-01fc-4bb7-87eb-9cf7a63138b8"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                    </textElement>
+                                    <text><![CDATA[Transpt]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="42" height="20"
+                                                   uuid="ae24a212-e136-4683-bc27-f61bae4c4f9a"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{CUR_TA_ALW}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="40" uuid="36e6ad57-1781-4a86-be4c-0fd830c0c418">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="40" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="e5000e01-681d-4e24-a5ec-f35fd7e43f10"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{Cur_TotFixedAlw}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="40" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="49d6fe86-405a-4bd1-b941-987ce2336b68"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{Cur_TotFixedAlw_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="40" height="19"
+                                                   uuid="17784432-291d-460b-a445-e84fdb59593b"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                    </textElement>
+                                    <text><![CDATA[Fixed]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="1" y="0" width="39" height="20"
+                                                   uuid="e5d2856e-8241-457a-93c7-060a4e1420dd"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{CUR_FA_ALW}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="30" uuid="7418eb40-7f3d-47a2-8c2a-f079ad20a9b9">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="30" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="23e4557c-0797-47be-ba37-9526659ef5fa"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{Cur_TotFixOT}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="30" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="5e1df1a3-6ba6-481e-a6ed-0031ff3fb1e6"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{Cur_TotFixOT_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="30" height="19"
+                                                   uuid="631c5228-f4c3-4faa-ba66-cadb7add315d"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                    </textElement>
+                                    <text><![CDATA[FixOT]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="30" height="20"
+                                                   uuid="d59cc945-444a-4bb1-b860-cef50737c5d4"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{CUR_FIXOT_ALW}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="35" uuid="eac7902d-3447-48c9-814b-6610a6a3f968">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="35" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="fb4de79b-213d-4e15-acf4-e1cf023dcb6e"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{Cur_TotHRA}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="35" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="86448348-02c1-422b-ace7-c9ed5a0097a1"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{Cur_TotHRA_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="35" height="19"
+                                                   uuid="c899a184-8501-4e1a-9963-6df7f3622ae0"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                    </textElement>
+                                    <text><![CDATA[HRA]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="35" height="20"
+                                                   uuid="83e1bd4b-c715-4497-9c2f-23b73cf471e9"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{CUR_HRA_ALW}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="45" uuid="dfc6f05a-a0e4-4c0b-9712-693d95d55dd5">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="45" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="7f655002-c3c7-4cf9-80b4-8950fae93d7f"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{TotalGrossCurrent}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="45" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="16f2b5f9-09d4-4684-92a7-4df234b84a58"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{TotalGrossCurrent_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="45" height="19"
+                                                   uuid="d8cb7819-e5da-4a9d-bfde-b74ca5cdc8da"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
+                                    </textElement>
+                                    <text><![CDATA[Gross]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="45" height="20"
+                                                   uuid="9129073f-975e-4278-bbfd-96357435bc20"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{CUR_GROSS_PAY}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                    </jr:columnGroup>
+                    <jr:columnGroup width="230" uuid="f1605be2-3cf0-490f-ad0d-3a1a33fcb294">
+                        <jr:columnHeader style="table 1_CH" height="11" rowSpan="1">
+                            <box>
+                                <pen lineStyle="Double"/>
+                                <topPen lineStyle="Double"/>
+                                <leftPen lineStyle="Double"/>
+                                <bottomPen lineStyle="Double"/>
+                                <rightPen lineStyle="Double"/>
+                            </box>
+                            <staticText>
+                                <reportElement mode="Transparent" x="0" y="0" width="200" height="11"
+                                               forecolor="#000000" backcolor="#FFFFFF"
+                                               uuid="a9ddd36f-5620-4310-bba9-9ae42daf18d7"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="8" isBold="false" isItalic="true"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false"/>
+                                    <paragraph lineSpacing="Single"/>
+                                </textElement>
+                                <text><![CDATA[Proposed Values]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:column width="40" uuid="f15bf9b9-635d-47aa-a02c-139e4c6db01f">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="40" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="e32fddc3-32f9-492c-9c51-c796dafae48f"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{New_Basic}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="40" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="46b9b46d-0393-4ece-b3b7-ba3d78eeea02"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{New_Basic_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="40" height="19"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="0ecbdb29-7979-4b33-9b0b-7ffa366f9266"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <text><![CDATA[Basic]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="40" height="20"
+                                                   uuid="585538d4-c6b4-45cb-848e-06cb6966b1cc"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_BASIC_SALARY}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="40" uuid="d1a007fc-7bf1-444a-86ce-025b1ca64344">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="40" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="6a6a8d4d-c5e5-4551-85b2-f32a5b7d12ae"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{New_Transport}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="40" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="8c01c759-3412-46ff-b643-4fbe42d7661f"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{New_Transport_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="40" height="19"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="9074fe60-2aca-40c5-b4ca-92383dcb9dcc"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <text><![CDATA[Transpt]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="40" height="20"
+                                                   uuid="5460492c-0f5e-462d-9fc8-ae5ccece1636"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_TA_ALW}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="39" uuid="adcf3a90-1059-4aad-bc24-08c5935d048b">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="39" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="6c909740-6e3b-4fd9-a652-57cf2303c95e"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{New_FixedAlw}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="39" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="6127e286-66d7-400b-8beb-c938909c4a40"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{New_FixedAlw_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="39" height="19"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="49dca356-f5cf-4bd5-ba26-424113cb7c59"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <text><![CDATA[Fixed]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="39" height="20"
+                                                   uuid="db31b0c1-1c59-4513-b257-b3357f0bac9b"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_FA_ALW}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="30" uuid="3c93bb3a-4d9c-4c06-b3b3-05bda8cfcd4f">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="30" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="53abed42-73fa-41fd-b65a-7e9e17f38d37"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{New_FixOT}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="30" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="84d585ff-b868-4dff-bea3-5bca292d994a"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{New_FixOT_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="30" height="19"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="2bb71cee-dab0-4438-8287-30a583214948"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <text><![CDATA[FixOT]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="30" height="20"
+                                                   uuid="6e4f35a4-eeab-4265-88d3-1b2ef1fdd537"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_FIXOT_ALW}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="36" uuid="78b53332-df34-4ebf-aee0-ff8b322d711f">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="36" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="96b0a102-a62e-4ad2-9a62-14583506e28c"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{New_HRA}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="36" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="5c857161-b442-42b9-9497-7698c34c9f20"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{New_HRA_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="36" height="19"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="6d7760b2-e80a-4a5e-ae83-ae3743a94a33"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <text><![CDATA[HRA]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="1" y="0" width="35" height="20"
+                                                   uuid="190f5ff2-c8ce-4506-b56d-dbc83e5713c3"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_HRA_ALW}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="45" uuid="ef1b5b48-6fb7-45be-aee0-45594401cb6e">
+                            <jr:tableFooter height="20" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Transparent" x="0" y="0" width="45" height="20"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="364c45f8-ef89-496b-b0ac-0d738e79d676"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{TotalGrossNew}]]></textFieldExpression>
+                                </textField>
+                            </jr:tableFooter>
+                            <jr:groupFooter groupName="companyGroup">
+                                <jr:cell height="15" rowSpan="1">
+                                    <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                        <reportElement mode="Opaque" x="0" y="0" width="45" height="15"
+                                                       forecolor="#000000" backcolor="#DAD8D8"
+                                                       uuid="b8f8f389-7568-48cb-a07d-593d7ba4f01d"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                     markup="none">
+                                            <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                                  isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                                  isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph lineSpacing="Single"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{TotalGrossNew_1}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="45" height="19"
+                                                   forecolor="#000000" backcolor="#FFFFFF"
+                                                   uuid="54176d98-4088-471b-8470-41e193b5aa43"/>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <text><![CDATA[Gross]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="45" height="20"
+                                                   uuid="21bf8dd7-3aae-4562-bc82-0acb042f3535"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_GROSS_PAY}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                    </jr:columnGroup>
+                    <jr:column width="43" uuid="02061ce1-7aa4-4f61-b9ca-339729501d4b">
+                        <jr:tableHeader height="0" rowSpan="1"/>
+                        <jr:tableFooter height="20" rowSpan="1">
+                            <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                <reportElement mode="Transparent" x="0" y="0" width="43" height="20" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="b9d16659-7b3c-4def-b532-f75cf412a03f"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                    <paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{TotNetDiff}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:groupFooter groupName="companyGroup">
+                            <jr:cell height="15" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Opaque" x="0" y="0" width="43" height="15" forecolor="#000000"
+                                                   backcolor="#DAD8D8" uuid="9789ba5e-6e83-4d74-9c74-ddf52fbff847"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{TotNetDiff_1}]]></textFieldExpression>
+                                </textField>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="table 1_CH" height="41" rowSpan="2">
+                            <staticText>
+                                <reportElement mode="Transparent" x="0" y="0" width="43" height="30" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="9f6a16a8-0273-41f0-873a-b7823c2bcb2a"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false"/>
+                                    <paragraph lineSpacing="Single"/>
+                                </textElement>
+                                <text><![CDATA[Net Increment]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:columnFooter style="table 1_CH" height="0" rowSpan="1"/>
+                        <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                            <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                <reportElement mode="Transparent" x="0" y="0" width="43" height="20" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="d4f981cb-cde4-4717-8d60-f757c0223120"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false"/>
+                                    <paragraph lineSpacing="Single" leftIndent="2" rightIndent="2" spacingBefore="2"
+                                               spacingAfter="2"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{NET_INCREMENT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="24" uuid="328ececd-54af-41a5-a85a-f06512cb015c">
+                        <jr:groupFooter groupName="companyGroup">
+                            <jr:cell height="15" rowSpan="1"/>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="table 1_CH" height="41" rowSpan="2">
+                            <staticText>
+                                <reportElement mode="Transparent" x="0" y="0" width="23" height="30" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="aefa3f2b-179f-4532-9d26-b7c5e2d5c095"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false"/>
+                                    <paragraph lineSpacing="Single"/>
+                                </textElement>
+                                <text><![CDATA[Incr%]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:columnFooter style="table 1_CH" height="0" rowSpan="1"/>
+                        <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                            <textField pattern="0.00" isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="23" height="20"
+                                               uuid="a723adfd-0f18-4a89-b607-43fb4f9ebc57"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{NEW_INCREMENT_PER}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="46" uuid="3b218830-f972-479c-9705-33b220dfc950">
+                        <jr:tableFooter height="20" rowSpan="1">
+                            <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                <reportElement mode="Transparent" x="0" y="0" width="46" height="20" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="476392a9-7c18-48d1-95b1-9d8611ac3399"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                    <paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{TotBonus}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:groupFooter groupName="companyGroup">
+                            <jr:cell height="15" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Opaque" x="0" y="0" width="46" height="15" forecolor="#000000"
+                                                   backcolor="#DAD8D8" uuid="3277f657-e35b-494d-9091-e9affb2ec717"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{TotBonus_1}]]></textFieldExpression>
+                                </textField>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="table 1_CH" height="41" rowSpan="2">
+                            <staticText>
+                                <reportElement mode="Transparent" x="0" y="0" width="46" height="30" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="75850a54-913c-45dd-a44f-648a35f79bdb"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false"/>
+                                    <paragraph lineSpacing="Single"/>
+                                </textElement>
+                                <text><![CDATA[Bonus]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:columnFooter style="table 1_CH" height="0" rowSpan="1"/>
+                        <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                            <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                <reportElement x="0" y="0" width="46" height="20"
+                                               uuid="217a2da3-c77c-4639-9623-8acea05e7fc5"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="2" rightIndent="2" spacingBefore="2" spacingAfter="2"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{NEW_BONUS}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="40" uuid="fca6f0f5-f497-4b15-95a3-7e5bf4bb86bc">
+                        <jr:tableHeader height="0" rowSpan="1"/>
+                        <jr:tableFooter height="20" rowSpan="1">
+                            <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                <reportElement mode="Transparent" x="0" y="0" width="40" height="20" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="0aa6d0eb-4db0-4a92-8211-e5270c34f44e"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="6" isBold="true" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                    <paragraph lineSpacing="Single" leftIndent="2" rightIndent="2"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{TotArrears}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:groupFooter groupName="companyGroup">
+                            <jr:cell height="15" rowSpan="1">
+                                <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                    <reportElement mode="Opaque" x="0" y="0" width="40" height="15" forecolor="#000000"
+                                                   backcolor="#DAD8D8" uuid="d220c8d3-6830-4842-9e77-5bd65b999213"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                                 markup="none">
+                                        <font fontName="SansSerif" size="8" isBold="true" isItalic="false"
+                                              isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                              isPdfEmbedded="false" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph lineSpacing="Single"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{TotArrears_1}]]></textFieldExpression>
+                                </textField>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="table 1_CH" height="41" rowSpan="2">
+                            <staticText>
+                                <reportElement mode="Transparent" x="0" y="0" width="40" height="30" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="72e5c7e6-b9c5-422e-89bb-f522c94afd04"/>
+                                <textElement textAlignment="Center" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false"/>
+                                    <paragraph lineSpacing="Single"/>
+                                </textElement>
+                                <text><![CDATA[Arrears]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:columnFooter style="table 1_CH" height="0" rowSpan="1"/>
+                        <jr:detailCell style="table 1_TD" height="39" rowSpan="1">
+                            <textField pattern="#,##0.000" isBlankWhenNull="true">
+                                <reportElement mode="Transparent" x="0" y="0" width="40" height="20" forecolor="#000000"
+                                               backcolor="#FFFFFF" uuid="e33266b7-3678-4259-bce9-49e41dda25dc"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
+                                             markup="none">
+                                    <font fontName="SansSerif" size="8" isBold="false" isItalic="false"
+                                          isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"
+                                          isPdfEmbedded="false"/>
+                                    <paragraph lineSpacing="Single" leftIndent="2" rightIndent="2" spacingBefore="2"
+                                               spacingAfter="2"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{ARREARS}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="0" uuid="1bf5bd1a-a7ff-4de0-b33f-8d6c76acbc7a">
+                        <jr:tableHeader height="0" rowSpan="1"/>
+                        <jr:tableFooter height="20" rowSpan="1"/>
+                        <jr:columnHeader height="41" rowSpan="2"/>
+                        <jr:columnFooter height="0" rowSpan="1"/>
+                        <jr:detailCell height="39" rowSpan="1"/>
+                    </jr:column>
+                </jr:table>
+            </componentElement>
+        </band>
+    </detail>
+    <pageFooter>
+        <band height="24" splitType="Stretch">
+            <subreport>
+                <reportElement x="2" y="0" width="638" height="24" uuid="326ecd66-b7ad-4850-8e0f-10877494dc9d"/>
+                <subreportParameter name="LOGIN_COMP_POID">
+                    <subreportParameterExpression><![CDATA[$P{LOGIN_COMP_POID}]]></subreportParameterExpression>
+                </subreportParameter>
+                <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                <subreportExpression><![CDATA[$P{SUB_FOOTER}]]></subreportExpression>
+            </subreport>
+            <textField isBlankWhenNull="true">
+                <reportElement x="685" y="4" width="100" height="20" forecolor="#666666"
+                               uuid="3d45fcdc-9bb3-42a6-aa21-da1b5209cdda"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <textFieldExpression><![CDATA['Page-'+$V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+    <summary>
+        <band splitType="Stretch"/>
+    </summary>
 </jasperReport>

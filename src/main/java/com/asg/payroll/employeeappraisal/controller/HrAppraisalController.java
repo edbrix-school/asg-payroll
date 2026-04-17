@@ -26,7 +26,7 @@ import static com.asg.common.lib.dto.response.ApiResponse.error;
 import static com.asg.common.lib.dto.response.ApiResponse.success;
 
 @RestController
-@RequestMapping("/v1/employee-appraisals")
+@RequestMapping("/v1/employee-appraisal")
 @RequiredArgsConstructor
 public class HrAppraisalController {
 

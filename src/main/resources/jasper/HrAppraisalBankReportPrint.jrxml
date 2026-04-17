@@ -1,585 +1,633 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="HrPayrollCustomPrint.jrxml" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51f26c1c-332c-43f0-beb9-5722768520c7">
-	<property name="ireport.zoom" value="1.6105100000000032"/>
-	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
-	<style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
-	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
-	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
-	<style name="Detail" fontName="Arial" fontSize="12"/>
-	<style name="Row" mode="Transparent">
-		<conditionalStyle>
-			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
-			<style backcolor="#E6DAC3"/>
-		</conditionalStyle>
-	</style>
-	<style name="table">
-		<box>
-			<pen lineWidth="1.0" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table_TH" mode="Opaque" backcolor="#F5F5DC">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table_CH" mode="Opaque" backcolor="#FFFFBF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue()%2==0)]]></conditionExpression>
-			<style backcolor="#FFFFEF"/>
-		</conditionalStyle>
-	</style>
-	<style name="table 1">
-		<box>
-			<pen lineWidth="1.0" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table 1_TH" mode="Opaque" backcolor="#C3C3D9">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table 1_CH" mode="Opaque" backcolor="#E6E6FF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-	</style>
-	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
-		<box>
-			<pen lineWidth="0.5" lineColor="#000000"/>
-		</box>
-		<conditionalStyle>
-			<conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue()%2==0)]]></conditionExpression>
-			<style backcolor="#F8F8FF"/>
-		</conditionalStyle>
-	</style>
-	<subDataset name="AppraisalData" uuid="f0e63e52-1a9e-42a5-a3b3-ddbe663c2b48">
-		<parameter name="TRANSACTION_POID" class="java.lang.String">
-			<defaultValueExpression><![CDATA[181]]></defaultValueExpression>
-		</parameter>
-		<queryString>
-			<![CDATA[SELECT DTL.EMPLOYEE_POID, EM.EMPLOYEE_CODE CODE, EM.EMPLOYEE_NAME || ' ' || NVL(EM.EMPLOYEE_NAME2, '') NAME, EMSAL.IBAN_ACCOUNT_NO, BM.BANK_CODE,
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="HrPayrollCustomPrint.jrxml" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555"
+              leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20"
+              uuid="51f26c1c-332c-43f0-beb9-5722768520c7">
+    <property name="ireport.zoom" value="1.6105100000000032"/>
+    <property name="ireport.x" value="0"/>
+    <property name="ireport.y" value="0"/>
+    <style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
+    <style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+    <style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"
+           pdfFontName="Helvetica-Bold"/>
+    <style name="Detail" fontName="Arial" fontSize="12"/>
+    <style name="Row" mode="Transparent">
+        <conditionalStyle>
+            <conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+            <style backcolor="#E6DAC3"/>
+        </conditionalStyle>
+    </style>
+    <style name="table">
+        <box>
+            <pen lineWidth="1.0" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table_TH" mode="Opaque" backcolor="#F5F5DC">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table_CH" mode="Opaque" backcolor="#FFFFBF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+        <conditionalStyle>
+            <conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue()%2==0)]]></conditionExpression>
+            <style backcolor="#FFFFEF"/>
+        </conditionalStyle>
+    </style>
+    <style name="table 1">
+        <box>
+            <pen lineWidth="1.0" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table 1_TH" mode="Opaque" backcolor="#C3C3D9">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table 1_CH" mode="Opaque" backcolor="#E6E6FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+        <conditionalStyle>
+            <conditionExpression><![CDATA[new Boolean($V{REPORT_COUNT}.intValue()%2==0)]]></conditionExpression>
+            <style backcolor="#F8F8FF"/>
+        </conditionalStyle>
+    </style>
+    <subDataset name="AppraisalData" uuid="f0e63e52-1a9e-42a5-a3b3-ddbe663c2b48">
+        <parameter name="TRANSACTION_POID" class="java.lang.String">
+            <defaultValueExpression><![CDATA[181]]></defaultValueExpression>
+        </parameter>
+        <queryString>
+            <![CDATA[SELECT DTL.EMPLOYEE_POID, EM.EMPLOYEE_CODE CODE, EM.EMPLOYEE_NAME || ' ' || NVL(EM.EMPLOYEE_NAME2, '') NAME, EMSAL.IBAN_ACCOUNT_NO, BM.BANK_CODE,
       BM.BANK_DESCRIPTION, DTL.NEW_BONUS, EMSAL.BANK_POID
 FROM  HR_APPRAISAL_DTL DTL
-INNER JOIN HR_APPRAISAL_HDR HDR              ON DTL.TRANSACTION_POID = HDR.TRANSACTION_POID
-INNER JOIN HR_EMPLOYEE_MASTER EM           ON DTL.EMPLOYEE_POID    = EM.EMPLOYEE_POID
+INNER JOIN HR_APPRAISAL_HDR HDR ON DTL.TRANSACTION_POID = HDR.TRANSACTION_POID
+INNER JOIN HR_EMPLOYEE_MASTER EM ON DTL.EMPLOYEE_POID    = EM.EMPLOYEE_POID
 INNER JOIN HR_EMPLOYEE_SALARY_MASTER EMSAL ON EMSAL.EMPLOYEE_POID  = EM.EMPLOYEE_POID
-LEFT JOIN GLOBAL_CUSTOMER_BANK_MASTER BM   ON EMSAL.BANK_POID        = BM.BANK_POID
-WHERE HDR.TRANSACTION_POID                                         = $P{TRANSACTION_POID}
-  AND NVL( DTL.NEW_BONUS,0)                                       >0
-  AND EMSAL.PAYMENT_METHOD                                         = 'BANK'
+LEFT JOIN GLOBAL_CUSTOMER_BANK_MASTER BM   ON EMSAL.BANK_POID = BM.BANK_POID
+WHERE HDR.TRANSACTION_POID = $P{TRANSACTION_POID}
+  AND NVL( DTL.NEW_BONUS,0)>0
+  AND EMSAL.PAYMENT_METHOD = 'BANK'
 ORDER BY BM.BANK_CODE, TO_CHAR(LPAD(EM.EMPLOYEE_CODE,4,'0'))]]>
-		</queryString>
-		<field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
-		<field name="CODE" class="java.lang.String"/>
-		<field name="NAME" class="java.lang.String"/>
-		<field name="IBAN_ACCOUNT_NO" class="java.lang.String"/>
-		<field name="BANK_CODE" class="java.lang.String"/>
-		<field name="BANK_DESCRIPTION" class="java.lang.String"/>
-		<field name="NEW_BONUS" class="java.math.BigDecimal"/>
-		<field name="BANK_POID" class="java.math.BigDecimal"/>
-		<variable name="TotalNet" class="java.math.BigDecimal" resetType="Group" resetGroup="Bank" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
-			<initialValueExpression><![CDATA[BigDecimal.valueOf(0)]]></initialValueExpression>
-		</variable>
-		<variable name="GrandTotal" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
-			<initialValueExpression><![CDATA[BigDecimal.valueOf(0)]]></initialValueExpression>
-		</variable>
-		<group name="Bank">
-			<groupExpression><![CDATA[$F{BANK_CODE}]]></groupExpression>
-		</group>
-	</subDataset>
-	<subDataset name="Appraisal_Cash" uuid="d9959274-3634-44cc-8a1c-0b2ce20e49da">
-		<parameter name="TRANSACTION_POID" class="java.lang.String">
-			<defaultValueExpression><![CDATA[181]]></defaultValueExpression>
-		</parameter>
-		<queryString>
-			<![CDATA[SELECT DTL.EMPLOYEE_POID, EM.EMPLOYEE_CODE CODE, EM.EMPLOYEE_NAME || ' ' || NVL(EM.EMPLOYEE_NAME2,
+        </queryString>
+        <field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
+        <field name="CODE" class="java.lang.String"/>
+        <field name="NAME" class="java.lang.String"/>
+        <field name="IBAN_ACCOUNT_NO" class="java.lang.String"/>
+        <field name="BANK_CODE" class="java.lang.String"/>
+        <field name="BANK_DESCRIPTION" class="java.lang.String"/>
+        <field name="NEW_BONUS" class="java.math.BigDecimal"/>
+        <field name="BANK_POID" class="java.math.BigDecimal"/>
+        <variable name="TotalNet" class="java.math.BigDecimal" resetType="Group" resetGroup="Bank" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
+            <initialValueExpression><![CDATA[BigDecimal.valueOf(0)]]></initialValueExpression>
+        </variable>
+        <variable name="GrandTotal" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
+            <initialValueExpression><![CDATA[BigDecimal.valueOf(0)]]></initialValueExpression>
+        </variable>
+        <group name="Bank">
+            <groupExpression><![CDATA[$F{BANK_CODE}]]></groupExpression>
+        </group>
+    </subDataset>
+    <subDataset name="Appraisal_Cash" uuid="d9959274-3634-44cc-8a1c-0b2ce20e49da">
+        <parameter name="TRANSACTION_POID" class="java.lang.String">
+            <defaultValueExpression><![CDATA[181]]></defaultValueExpression>
+        </parameter>
+        <queryString>
+            <![CDATA[SELECT DTL.EMPLOYEE_POID, EM.EMPLOYEE_CODE CODE, EM.EMPLOYEE_NAME || ' ' || NVL(EM.EMPLOYEE_NAME2,
       '') NAME,  DTL.NEW_BONUS
 FROM  HR_APPRAISAL_DTL DTL
-INNER JOIN HR_APPRAISAL_HDR HDR              ON DTL.TRANSACTION_POID = HDR.TRANSACTION_POID
-INNER JOIN HR_EMPLOYEE_MASTER EM           ON DTL.EMPLOYEE_POID    = EM.EMPLOYEE_POID
-INNER JOIN HR_EMPLOYEE_SALARY_MASTER EMSAL ON EMSAL.EMPLOYEE_POID  = EM.EMPLOYEE_POID
-WHERE HDR.TRANSACTION_POID                                         = $P{TRANSACTION_POID}
+INNER JOIN HR_APPRAISAL_HDR HDR ON DTL.TRANSACTION_POID = HDR.TRANSACTION_POID
+INNER JOIN HR_EMPLOYEE_MASTER EM ON DTL.EMPLOYEE_POID = EM.EMPLOYEE_POID
+INNER JOIN HR_EMPLOYEE_SALARY_MASTER EMSAL ON EMSAL.EMPLOYEE_POID = EM.EMPLOYEE_POID
+WHERE HDR.TRANSACTION_POID = $P{TRANSACTION_POID}
 AND NVL( DTL.NEW_BONUS,0) >0 AND EMSAL.PAYMENT_METHOD = 'CASH'
 ORDER BY TO_CHAR(LPAD(EM.EMPLOYEE_CODE,4,'0'))]]>
-		</queryString>
-		<field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
-		<field name="CODE" class="java.lang.String"/>
-		<field name="NAME" class="java.lang.String"/>
-		<field name="NEW_BONUS" class="java.math.BigDecimal"/>
-		<variable name="TotalNet" class="java.math.BigDecimal" calculation="Sum">
-			<variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
-			<initialValueExpression><![CDATA[BigDecimal.valueOf(0)]]></initialValueExpression>
-		</variable>
-	</subDataset>
-	<parameter name="LOGIN_COMP_POID" class="java.lang.String">
-		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-	</parameter>
-	<parameter name="LOGIN_USER_ID" class="java.lang.String"/>
-	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["\\\\10.100.1.24\\adflibrary\\deployed\\Reports\\Templates\\"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="LOGIN_COMP_NAME" class="java.lang.String">
-		<defaultValueExpression><![CDATA["AlSharif Group WLL"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="REPORT_NAME" class="java.lang.String">
-		<defaultValueExpression><![CDATA["Report Name"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="REPORT_FILTERS" class="java.lang.String">
-		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
-	</parameter>
-	<parameter name="TRANSACTION_POID" class="java.lang.String">
-		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
-	</parameter>
-	<queryString>
-		<![CDATA[SELECT SUM(DTL.NEW_BONUS) AS TOTAL_BONUS
+        </queryString>
+        <field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
+        <field name="CODE" class="java.lang.String"/>
+        <field name="NAME" class="java.lang.String"/>
+        <field name="NEW_BONUS" class="java.math.BigDecimal"/>
+        <variable name="TotalNet" class="java.math.BigDecimal" calculation="Sum">
+            <variableExpression><![CDATA[$F{NEW_BONUS}]]></variableExpression>
+            <initialValueExpression><![CDATA[BigDecimal.valueOf(0)]]></initialValueExpression>
+        </variable>
+    </subDataset>
+    <parameter name="LOGIN_COMP_POID" class="java.lang.String">
+        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+    </parameter>
+    <parameter name="LOGIN_USER_ID" class="java.lang.String"/>
+    <parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression>
+            <![CDATA["\\\\10.100.1.24\\adflibrary\\deployed\\Reports\\Templates\\"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="LOGIN_COMP_NAME" class="java.lang.String">
+        <defaultValueExpression><![CDATA["AlSharif Group WLL"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="REPORT_NAME" class="java.lang.String">
+        <defaultValueExpression><![CDATA["Report Name"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="REPORT_FILTERS" class="java.lang.String">
+        <defaultValueExpression><![CDATA[]]></defaultValueExpression>
+    </parameter>
+    <parameter name="TRANSACTION_POID" class="java.lang.String">
+        <defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+    </parameter>
+    <queryString>
+        <![CDATA[SELECT SUM(DTL.NEW_BONUS) AS TOTAL_BONUS
 FROM  HR_APPRAISAL_DTL DTL
 INNER JOIN HR_APPRAISAL_HDR HDR ON DTL.TRANSACTION_POID = HDR.TRANSACTION_POID
-      WHERE HDR.TRANSACTION_POID                                 = $P{TRANSACTION_POID} AND DTL.NEW_BONUS >0]]>
-	</queryString>
-	<field name="TOTAL_BONUS" class="java.math.BigDecimal"/>
-	<background>
-		<band splitType="Stretch"/>
-	</background>
-	<pageHeader>
-		<band height="73" splitType="Stretch">
-			<textField>
-				<reportElement x="307" y="25" width="248" height="21" uuid="04209bf3-7d92-4d39-8544-d5220c75973a"/>
-				<textElement textAlignment="Right">
-					<font size="14" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Bonus Bank Summary"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="0" y="0" width="359" height="46" uuid="85ad36a0-203e-43c5-9f7d-45ef483a2ebb"/>
-				<textElement verticalAlignment="Middle">
-					<font size="24"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{LOGIN_COMP_NAME}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="0" y="50" width="555" height="20" uuid="30089053-a131-4c39-a71e-71d1fe31f100"/>
-				<textElement>
-					<font isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{REPORT_FILTERS}]]></textFieldExpression>
-			</textField>
-			<line>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="70" width="554" height="1" uuid="9ec55f57-eda0-48ce-a06e-ffab81edbcc6"/>
-				<graphicElement>
-					<pen lineWidth="0.5" lineColor="#999999"/>
-				</graphicElement>
-			</line>
-		</band>
-	</pageHeader>
-	<detail>
-		<band height="25" splitType="Stretch">
-			<componentElement>
-				<reportElement key="table 1" style="table 1" x="0" y="0" width="554" height="25" uuid="9885d6a5-ea35-4598-8bca-0ce42e06ff4a"/>
-				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="AppraisalData" uuid="e86f5494-ca05-4cbf-8318-43a54173cb37">
-						<datasetParameter name="TRANSACTION_POID">
-							<datasetParameterExpression><![CDATA[$P{TRANSACTION_POID}]]></datasetParameterExpression>
-						</datasetParameter>
-						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					</datasetRun>
-					<jr:columnGroup width="554" uuid="1f44fe7c-dabc-4b27-aa13-3dfbbd26e8b4">
-						<jr:tableFooter height="47" rowSpan="1">
-							<textField pattern="###,###,##0.000">
-								<reportElement x="404" y="11" width="149" height="30" uuid="a316d963-d29d-4e38-bfc0-419981f93b48"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font size="14" isBold="false"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{GrandTotal}]]></textFieldExpression>
-							</textField>
-							<staticText>
-								<reportElement x="245" y="11" width="159" height="30" uuid="eadd7e9f-26b1-4aec-859e-79efc8dfd23b"/>
-								<textElement textAlignment="Right" verticalAlignment="Middle">
-									<font size="14" isBold="false"/>
-								</textElement>
-								<text><![CDATA[Total Bank Payments]]></text>
-							</staticText>
-							<staticText>
-								<reportElement x="0" y="11" width="128" height="30" uuid="f844caf5-c77b-4dd8-8d31-fe3bc68a4122"/>
-								<textElement verticalAlignment="Middle">
-									<font size="14"/>
-								</textElement>
-								<text><![CDATA[Count :]]></text>
-							</staticText>
-							<textField>
-								<reportElement x="138" y="11" width="43" height="30" uuid="100f5a14-f50a-4218-b7b8-0d962cfe9af9"/>
-								<textElement verticalAlignment="Middle">
-									<font size="14"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
-							</textField>
-						</jr:tableFooter>
-						<jr:groupHeader groupName="Bank">
-							<jr:cell height="29" rowSpan="1">
-								<line>
-									<reportElement x="0" y="0" width="554" height="1" uuid="a3eb952d-8441-42fa-9efd-625421ffade2"/>
-								</line>
-								<textField>
-									<reportElement x="0" y="2" width="554" height="26" uuid="03337a64-aa41-4963-b7c9-17b7d742acdd"/>
-									<textElement verticalAlignment="Middle">
-										<font size="11" isBold="true"/>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{BANK_DESCRIPTION}]]></textFieldExpression>
-								</textField>
-								<line>
-									<reportElement x="0" y="28" width="554" height="1" uuid="49be5433-2ba6-42e3-8d86-d4bdb5a06871"/>
-								</line>
-							</jr:cell>
-						</jr:groupHeader>
-						<jr:column width="29" uuid="37d3e4d6-7f02-401b-bbbf-13c9525346b0">
-							<jr:groupHeader groupName="Bank">
-								<jr:cell height="0" rowSpan="1"/>
-							</jr:groupHeader>
-							<jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="28" height="15" uuid="8895c5ef-ca33-4c14-903d-36dc4edb5642"/>
-									<textElement>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[SlNo]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1"/>
-						</jr:column>
-						<jr:column width="59" uuid="06f4a318-a630-4bb3-ad26-738cf08f8d0e">
-							<jr:groupHeader groupName="Bank">
-								<jr:cell height="0" rowSpan="1"/>
-							</jr:groupHeader>
-							<jr:groupFooter groupName="Bank">
-								<jr:cell height="20" rowSpan="1"/>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="59" height="15" uuid="0ac2d85b-3ab2-4d5a-9ca3-112d46253f86"/>
-									<textElement>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[Code]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="53" height="20" uuid="e3396298-9e13-4b16-8520-17a2034312ea"/>
-									<textElement verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{CODE}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="169" uuid="c4d8a3b7-b6ee-4821-ab0b-53d46544097c">
-							<jr:groupHeader groupName="Bank">
-								<jr:cell height="0" rowSpan="1"/>
-							</jr:groupHeader>
-							<jr:groupFooter groupName="Bank">
-								<jr:cell height="20" rowSpan="1">
-									<staticText>
-										<reportElement x="0" y="0" width="169" height="20" uuid="3a4acce9-6f67-4278-99e4-f941d0f51105"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle">
-											<font isBold="true"/>
-											<paragraph leftIndent="2" rightIndent="2"/>
-										</textElement>
-										<text><![CDATA[Count]]></text>
-									</staticText>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="152" height="15" uuid="82c8e445-78d0-46a7-95da-d10d49194e8d"/>
-									<textElement>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[Name]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="167" height="20" uuid="358727c8-ecab-4b4c-bc7f-aee534555fde"/>
-									<textElement verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="55" uuid="e1779df6-d8d3-4a44-93bc-52aacc12b685">
-							<jr:groupHeader groupName="Bank">
-								<jr:cell height="0" rowSpan="1"/>
-							</jr:groupHeader>
-							<jr:groupFooter groupName="Bank">
-								<jr:cell height="20" rowSpan="1">
-									<textField>
-										<reportElement x="0" y="0" width="55" height="20" uuid="58ce4090-dd44-486f-9e1c-239713c3bf4f"/>
-										<textElement textAlignment="Center" verticalAlignment="Middle">
-											<font isBold="true"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{Bank_COUNT}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="30" height="15" uuid="887ab010-f50e-4c09-95d7-663f707fe594"/>
-									<textElement>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[Bank]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="54" height="20" uuid="e492ba0d-0315-485e-93b6-3062cd5dfc33"/>
-									<textElement verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{BANK_CODE}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="153" uuid="5ae5743c-3447-44ed-bd63-84c6bc7f9587">
-							<jr:groupFooter groupName="Bank">
-								<jr:cell height="20" rowSpan="1">
-									<staticText>
-										<reportElement x="0" y="0" width="153" height="20" uuid="e901636a-29d7-401f-b18f-8cb91386c8bb"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle">
-											<font isBold="true"/>
-											<paragraph leftIndent="2" rightIndent="2"/>
-										</textElement>
-										<text><![CDATA[Sub Total ]]></text>
-									</staticText>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="153" height="16" uuid="0ad10be9-ccdd-482e-9552-95db545193b8"/>
-									<textElement>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[Account Number]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="153" height="20" uuid="0db4814a-5d60-47ed-8a7d-5211f43f06a5"/>
-									<textElement verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{IBAN_ACCOUNT_NO}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="89" uuid="1024044b-bff7-4fe6-9343-d80788efefd5">
-							<jr:groupHeader groupName="Bank">
-								<jr:cell height="0" rowSpan="1"/>
-							</jr:groupHeader>
-							<jr:groupFooter groupName="Bank">
-								<jr:cell height="20" rowSpan="1">
-									<textField pattern="###,###,##0.000">
-										<reportElement x="0" y="0" width="89" height="20" uuid="234efcfd-2694-4bff-be2f-01ff55144857"/>
-										<textElement textAlignment="Right" verticalAlignment="Middle">
-											<font isBold="true"/>
-										</textElement>
-										<textFieldExpression><![CDATA[$V{TotalNet}]]></textFieldExpression>
-									</textField>
-								</jr:cell>
-							</jr:groupFooter>
-							<jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="89" height="15" uuid="efd2b81a-5e7b-4a3c-8867-595551f2040f"/>
-									<textElement textAlignment="Right">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[Bonus]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1">
-								<textField pattern="###,###,,##0.000" isBlankWhenNull="true">
-									<reportElement x="0" y="0" width="89" height="20" uuid="23380d1f-bc45-483f-a95e-efb3f4df311c"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_BONUS}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-					</jr:columnGroup>
-				</jr:table>
-			</componentElement>
-		</band>
-		<band height="72">
-			<staticText>
-				<reportElement x="0" y="12" width="554" height="26" uuid="b700df3b-a9e4-4460-9465-b43659b0195b"/>
-				<textElement>
-					<font size="18"/>
-				</textElement>
-				<text><![CDATA[Cash Payment]]></text>
-			</staticText>
-			<componentElement>
-				<reportElement key="table 1" style="table 1" x="1" y="38" width="554" height="25" uuid="195464c4-a234-4236-be74-0a1b707840b6"/>
-				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="Appraisal_Cash" uuid="ea3ea71f-aca2-4afa-b67c-e63203ee1847">
-						<datasetParameter name="TRANSACTION_POID">
-							<datasetParameterExpression><![CDATA[$P{TRANSACTION_POID}]]></datasetParameterExpression>
-						</datasetParameter>
-						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-					</datasetRun>
-					<jr:columnGroup width="557" uuid="0ddfe306-9b7a-4022-ac88-74e7166bdad7">
-						<jr:column width="29" uuid="2949ebc5-191d-41a5-8874-52cc9409be46">
-							<jr:columnHeader style="table 1_CH" height="15" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="28" height="15" uuid="96fac8ea-f707-4ca9-b8d3-2bb13bf19b17"/>
-									<textElement>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[SlNo]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1"/>
-						</jr:column>
-						<jr:column width="59" uuid="f9f93f02-63e6-42de-ba26-a6dc909918b0">
-							<jr:columnHeader style="table 1_CH" height="15" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="59" height="15" uuid="cfc09867-ac9a-4b2c-a66e-9d23511238fa"/>
-									<textElement>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[Code]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="53" height="20" uuid="931eb248-face-4494-b21e-c8510bd26dc5"/>
-									<textElement verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{CODE}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="296" uuid="f39ed7d5-2cdc-48a8-983d-879130fad112">
-							<jr:columnHeader style="table 1_CH" height="15" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="152" height="15" uuid="6f03073d-7fbe-4485-8521-6bdf08dd1ae3"/>
-									<textElement>
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[Name]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:columnFooter height="30" rowSpan="1">
-								<staticText>
-									<reportElement x="0" y="0" width="288" height="30" uuid="f9e6d606-9f9b-4224-a743-4b98f0646e37"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="14" isBold="false"/>
-									</textElement>
-									<text><![CDATA[Total Cash Payments]]></text>
-								</staticText>
-							</jr:columnFooter>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1">
-								<textField>
-									<reportElement x="0" y="0" width="288" height="20" uuid="3f31a7d9-a24d-4d78-bcfb-b9eefddac4b9"/>
-									<textElement verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-						<jr:column width="173" uuid="f3d34584-e30e-41be-ba2b-365ad78f93db">
-							<jr:columnHeader style="table 1_CH" height="15" rowSpan="1">
-								<staticText>
-									<reportElement x="14" y="0" width="159" height="15" uuid="5cfaac13-221a-47da-9f3e-419657625ef3"/>
-									<textElement textAlignment="Right">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<text><![CDATA[Net Salary]]></text>
-								</staticText>
-							</jr:columnHeader>
-							<jr:columnFooter height="30" rowSpan="1">
-								<textField pattern="###,###,##0.000">
-									<reportElement x="14" y="0" width="159" height="30" uuid="3abebeef-042e-4e97-9450-3c4f83bb0a65"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<font size="14" isBold="false"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$V{TotalNet}]]></textFieldExpression>
-								</textField>
-							</jr:columnFooter>
-							<jr:detailCell style="table 1_TD" height="20" rowSpan="1">
-								<textField isStretchWithOverflow="true" pattern="###,###,##0.000" isBlankWhenNull="true">
-									<reportElement x="14" y="0" width="159" height="20" uuid="f555a399-e8b0-4704-8845-81c96ea8ad57"/>
-									<textElement textAlignment="Right" verticalAlignment="Middle">
-										<paragraph leftIndent="2" rightIndent="2"/>
-									</textElement>
-									<textFieldExpression><![CDATA[$F{NEW_BONUS}]]></textFieldExpression>
-								</textField>
-							</jr:detailCell>
-						</jr:column>
-					</jr:columnGroup>
-				</jr:table>
-			</componentElement>
-		</band>
-		<band height="50">
-			<staticText>
-				<reportElement x="294" y="1" width="104" height="21" uuid="00e82211-c1da-45d6-a743-ab5d1de13b4c"/>
-				<textElement verticalAlignment="Middle">
-					<font size="14"/>
-				</textElement>
-				<text><![CDATA[Grand Total  :]]></text>
-			</staticText>
-			<textField pattern="###,###,##0.000">
-				<reportElement x="398" y="1" width="156" height="20" uuid="9d8d584e-cd0b-42df-8884-d4e3a3e0a601"/>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{TOTAL_BONUS}]]></textFieldExpression>
-			</textField>
-		</band>
-	</detail>
-	<pageFooter>
-		<band height="24" splitType="Stretch">
-			<frame>
-				<reportElement mode="Opaque" x="0" y="0" width="555" height="24" forecolor="#D0B48E" backcolor="#F2EBDF" uuid="3c223957-1683-40fa-b4af-8d9e665c2d3c"/>
-				<textField evaluationTime="Report">
-					<reportElement style="Column header" x="514" y="4" width="40" height="20" forecolor="#736343" uuid="ff4f6e28-3714-4411-bd68-58ab2557d702"/>
-					<textElement verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
-				</textField>
-				<textField>
-					<reportElement style="Column header" x="434" y="4" width="80" height="20" forecolor="#736343" uuid="c3e9e1d9-fcb0-4735-9bb9-b6a5282a26b2"/>
-					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
-				</textField>
-				<textField pattern="EEEEE dd MMMMM yyyy">
-					<reportElement style="Column header" x="0" y="0" width="197" height="20" forecolor="#736343" uuid="15e0e975-5c55-4ebf-b1f1-20761df054fa"/>
-					<textElement verticalAlignment="Middle">
-						<font size="10" isBold="false"/>
-					</textElement>
-					<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
-				</textField>
-			</frame>
-		</band>
-	</pageFooter>
-	<summary>
-		<band splitType="Stretch"/>
-	</summary>
+      WHERE HDR.TRANSACTION_POID = $P{TRANSACTION_POID} AND DTL.NEW_BONUS >0]]>
+    </queryString>
+    <field name="TOTAL_BONUS" class="java.math.BigDecimal"/>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <pageHeader>
+        <band height="73" splitType="Stretch">
+            <textField>
+                <reportElement x="307" y="25" width="248" height="21" uuid="04209bf3-7d92-4d39-8544-d5220c75973a"/>
+                <textElement textAlignment="Right">
+                    <font size="14" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Bonus Bank Summary"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="0" width="359" height="46" uuid="85ad36a0-203e-43c5-9f7d-45ef483a2ebb"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="24"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{LOGIN_COMP_NAME}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="0" y="50" width="555" height="20" uuid="30089053-a131-4c39-a71e-71d1fe31f100"/>
+                <textElement>
+                    <font isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{REPORT_FILTERS}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="FixRelativeToBottom" x="0" y="70" width="554" height="1"
+                               uuid="9ec55f57-eda0-48ce-a06e-ffab81edbcc6"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#999999"/>
+                </graphicElement>
+            </line>
+        </band>
+    </pageHeader>
+    <detail>
+        <band height="25" splitType="Stretch">
+            <componentElement>
+                <reportElement key="table 1" style="table 1" x="0" y="0" width="554" height="25"
+                               uuid="9885d6a5-ea35-4598-8bca-0ce42e06ff4a"/>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
+                          xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+                    <datasetRun subDataset="AppraisalData" uuid="e86f5494-ca05-4cbf-8318-43a54173cb37">
+                        <datasetParameter name="TRANSACTION_POID">
+                            <datasetParameterExpression><![CDATA[$P{TRANSACTION_POID}]]></datasetParameterExpression>
+                        </datasetParameter>
+                        <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                    </datasetRun>
+                    <jr:columnGroup width="554" uuid="1f44fe7c-dabc-4b27-aa13-3dfbbd26e8b4">
+                        <jr:tableFooter height="47" rowSpan="1">
+                            <textField pattern="###,###,##0.000">
+                                <reportElement x="404" y="11" width="149" height="30"
+                                               uuid="a316d963-d29d-4e38-bfc0-419981f93b48"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="14" isBold="false"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{GrandTotal}]]></textFieldExpression>
+                            </textField>
+                            <staticText>
+                                <reportElement x="245" y="11" width="159" height="30"
+                                               uuid="eadd7e9f-26b1-4aec-859e-79efc8dfd23b"/>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="14" isBold="false"/>
+                                </textElement>
+                                <text><![CDATA[Total Bank Payments]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="11" width="128" height="30"
+                                               uuid="f844caf5-c77b-4dd8-8d31-fe3bc68a4122"/>
+                                <textElement verticalAlignment="Middle">
+                                    <font size="14"/>
+                                </textElement>
+                                <text><![CDATA[Count :]]></text>
+                            </staticText>
+                            <textField>
+                                <reportElement x="138" y="11" width="43" height="30"
+                                               uuid="100f5a14-f50a-4218-b7b8-0d962cfe9af9"/>
+                                <textElement verticalAlignment="Middle">
+                                    <font size="14"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:groupHeader groupName="Bank">
+                            <jr:cell height="29" rowSpan="1">
+                                <line>
+                                    <reportElement x="0" y="0" width="554" height="1"
+                                                   uuid="a3eb952d-8441-42fa-9efd-625421ffade2"/>
+                                </line>
+                                <textField>
+                                    <reportElement x="0" y="2" width="554" height="26"
+                                                   uuid="03337a64-aa41-4963-b7c9-17b7d742acdd"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <font size="11" isBold="true" pdfFontName="Helvetica-Bold"/>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{BANK_DESCRIPTION}]]></textFieldExpression>
+                                </textField>
+                                <line>
+                                    <reportElement x="0" y="28" width="554" height="1"
+                                                   uuid="49be5433-2ba6-42e3-8d86-d4bdb5a06871"/>
+                                </line>
+                            </jr:cell>
+                        </jr:groupHeader>
+                        <jr:column width="29" uuid="37d3e4d6-7f02-401b-bbbf-13c9525346b0">
+                            <jr:groupHeader groupName="Bank">
+                                <jr:cell height="0" rowSpan="1"/>
+                            </jr:groupHeader>
+                            <jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="28" height="15"
+                                                   uuid="8895c5ef-ca33-4c14-903d-36dc4edb5642"/>
+                                    <textElement>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[SlNo]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1"/>
+                        </jr:column>
+                        <jr:column width="59" uuid="06f4a318-a630-4bb3-ad26-738cf08f8d0e">
+                            <jr:groupHeader groupName="Bank">
+                                <jr:cell height="0" rowSpan="1"/>
+                            </jr:groupHeader>
+                            <jr:groupFooter groupName="Bank">
+                                <jr:cell height="20" rowSpan="1"/>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="59" height="15"
+                                                   uuid="0ac2d85b-3ab2-4d5a-9ca3-112d46253f86"/>
+                                    <textElement>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[Code]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="53" height="20"
+                                                   uuid="e3396298-9e13-4b16-8520-17a2034312ea"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{CODE}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="169" uuid="c4d8a3b7-b6ee-4821-ab0b-53d46544097c">
+                            <jr:groupHeader groupName="Bank">
+                                <jr:cell height="0" rowSpan="1"/>
+                            </jr:groupHeader>
+                            <jr:groupFooter groupName="Bank">
+                                <jr:cell height="20" rowSpan="1">
+                                    <staticText>
+                                        <reportElement x="0" y="0" width="169" height="20"
+                                                       uuid="3a4acce9-6f67-4278-99e4-f941d0f51105"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle">
+                                            <font isBold="true" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph leftIndent="2" rightIndent="2"/>
+                                        </textElement>
+                                        <text><![CDATA[Count]]></text>
+                                    </staticText>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="152" height="15"
+                                                   uuid="82c8e445-78d0-46a7-95da-d10d49194e8d"/>
+                                    <textElement>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[Name]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="167" height="20"
+                                                   uuid="358727c8-ecab-4b4c-bc7f-aee534555fde"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="55" uuid="e1779df6-d8d3-4a44-93bc-52aacc12b685">
+                            <jr:groupHeader groupName="Bank">
+                                <jr:cell height="0" rowSpan="1"/>
+                            </jr:groupHeader>
+                            <jr:groupFooter groupName="Bank">
+                                <jr:cell height="20" rowSpan="1">
+                                    <textField>
+                                        <reportElement x="0" y="0" width="55" height="20"
+                                                       uuid="58ce4090-dd44-486f-9e1c-239713c3bf4f"/>
+                                        <textElement textAlignment="Center" verticalAlignment="Middle">
+                                            <font isBold="true" pdfFontName="Helvetica-Bold"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{Bank_COUNT}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="30" height="15"
+                                                   uuid="887ab010-f50e-4c09-95d7-663f707fe594"/>
+                                    <textElement>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[Bank]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="54" height="20"
+                                                   uuid="e492ba0d-0315-485e-93b6-3062cd5dfc33"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{BANK_CODE}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="153" uuid="5ae5743c-3447-44ed-bd63-84c6bc7f9587">
+                            <jr:groupFooter groupName="Bank">
+                                <jr:cell height="20" rowSpan="1">
+                                    <staticText>
+                                        <reportElement x="0" y="0" width="153" height="20"
+                                                       uuid="e901636a-29d7-401f-b18f-8cb91386c8bb"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle">
+                                            <font isBold="true" pdfFontName="Helvetica-Bold"/>
+                                            <paragraph leftIndent="2" rightIndent="2"/>
+                                        </textElement>
+                                        <text><![CDATA[Sub Total ]]></text>
+                                    </staticText>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="153" height="16"
+                                                   uuid="0ad10be9-ccdd-482e-9552-95db545193b8"/>
+                                    <textElement>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[Account Number]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="153" height="20"
+                                                   uuid="0db4814a-5d60-47ed-8a7d-5211f43f06a5"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{IBAN_ACCOUNT_NO}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="89" uuid="1024044b-bff7-4fe6-9343-d80788efefd5">
+                            <jr:groupHeader groupName="Bank">
+                                <jr:cell height="0" rowSpan="1"/>
+                            </jr:groupHeader>
+                            <jr:groupFooter groupName="Bank">
+                                <jr:cell height="20" rowSpan="1">
+                                    <textField pattern="###,###,##0.000">
+                                        <reportElement x="0" y="0" width="89" height="20"
+                                                       uuid="234efcfd-2694-4bff-be2f-01ff55144857"/>
+                                        <textElement textAlignment="Right" verticalAlignment="Middle">
+                                            <font isBold="true" pdfFontName="Helvetica-Bold"/>
+                                        </textElement>
+                                        <textFieldExpression><![CDATA[$V{TotalNet}]]></textFieldExpression>
+                                    </textField>
+                                </jr:cell>
+                            </jr:groupFooter>
+                            <jr:columnHeader style="table 1_CH" height="16" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="89" height="15"
+                                                   uuid="efd2b81a-5e7b-4a3c-8867-595551f2040f"/>
+                                    <textElement textAlignment="Right">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[Bonus]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1">
+                                <textField pattern="###,###,##0.000" isBlankWhenNull="true">
+                                    <reportElement x="0" y="0" width="89" height="20"
+                                                   uuid="23380d1f-bc45-483f-a95e-efb3f4df311c"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_BONUS}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                    </jr:columnGroup>
+                </jr:table>
+            </componentElement>
+        </band>
+        <band height="72">
+            <staticText>
+                <reportElement x="0" y="12" width="554" height="26" uuid="b700df3b-a9e4-4460-9465-b43659b0195b"/>
+                <textElement>
+                    <font size="18"/>
+                </textElement>
+                <text><![CDATA[Cash Payment]]></text>
+            </staticText>
+            <componentElement>
+                <reportElement key="table 1" style="table 1" x="1" y="38" width="554" height="25"
+                               uuid="195464c4-a234-4236-be74-0a1b707840b6"/>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
+                          xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+                    <datasetRun subDataset="Appraisal_Cash" uuid="ea3ea71f-aca2-4afa-b67c-e63203ee1847">
+                        <datasetParameter name="TRANSACTION_POID">
+                            <datasetParameterExpression><![CDATA[$P{TRANSACTION_POID}]]></datasetParameterExpression>
+                        </datasetParameter>
+                        <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                    </datasetRun>
+                    <jr:columnGroup width="557" uuid="0ddfe306-9b7a-4022-ac88-74e7166bdad7">
+                        <jr:column width="29" uuid="2949ebc5-191d-41a5-8874-52cc9409be46">
+                            <jr:columnHeader style="table 1_CH" height="15" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="28" height="15"
+                                                   uuid="96fac8ea-f707-4ca9-b8d3-2bb13bf19b17"/>
+                                    <textElement>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[SlNo]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1"/>
+                        </jr:column>
+                        <jr:column width="59" uuid="f9f93f02-63e6-42de-ba26-a6dc909918b0">
+                            <jr:columnHeader style="table 1_CH" height="15" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="59" height="15"
+                                                   uuid="cfc09867-ac9a-4b2c-a66e-9d23511238fa"/>
+                                    <textElement>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[Code]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="53" height="20"
+                                                   uuid="931eb248-face-4494-b21e-c8510bd26dc5"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{CODE}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="296" uuid="f39ed7d5-2cdc-48a8-983d-879130fad112">
+                            <jr:columnHeader style="table 1_CH" height="15" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="152" height="15"
+                                                   uuid="6f03073d-7fbe-4485-8521-6bdf08dd1ae3"/>
+                                    <textElement>
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[Name]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:columnFooter height="30" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="0" y="0" width="288" height="30"
+                                                   uuid="f9e6d606-9f9b-4224-a743-4b98f0646e37"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="14" isBold="false"/>
+                                    </textElement>
+                                    <text><![CDATA[Total Cash Payments]]></text>
+                                </staticText>
+                            </jr:columnFooter>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="288" height="20"
+                                                   uuid="3f31a7d9-a24d-4d78-bcfb-b9eefddac4b9"/>
+                                    <textElement verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="173" uuid="f3d34584-e30e-41be-ba2b-365ad78f93db">
+                            <jr:columnHeader style="table 1_CH" height="15" rowSpan="1">
+                                <staticText>
+                                    <reportElement x="14" y="0" width="159" height="15"
+                                                   uuid="5cfaac13-221a-47da-9f3e-419657625ef3"/>
+                                    <textElement textAlignment="Right">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <text><![CDATA[Net Salary]]></text>
+                                </staticText>
+                            </jr:columnHeader>
+                            <jr:columnFooter height="30" rowSpan="1">
+                                <textField pattern="###,###,##0.000">
+                                    <reportElement x="14" y="0" width="159" height="30"
+                                                   uuid="3abebeef-042e-4e97-9450-3c4f83bb0a65"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <font size="14" isBold="false"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$V{TotalNet}]]></textFieldExpression>
+                                </textField>
+                            </jr:columnFooter>
+                            <jr:detailCell style="table 1_TD" height="20" rowSpan="1">
+                                <textField isStretchWithOverflow="true" pattern="###,###,##0.000"
+                                           isBlankWhenNull="true">
+                                    <reportElement x="14" y="0" width="159" height="20"
+                                                   uuid="f555a399-e8b0-4704-8845-81c96ea8ad57"/>
+                                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                                        <paragraph leftIndent="2" rightIndent="2"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{NEW_BONUS}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                    </jr:columnGroup>
+                </jr:table>
+            </componentElement>
+        </band>
+        <band height="50">
+            <staticText>
+                <reportElement x="294" y="1" width="104" height="21" uuid="00e82211-c1da-45d6-a743-ab5d1de13b4c"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="14"/>
+                </textElement>
+                <text><![CDATA[Grand Total  :]]></text>
+            </staticText>
+            <textField pattern="###,###,##0.000">
+                <reportElement x="398" y="1" width="156" height="20" uuid="9d8d584e-cd0b-42df-8884-d4e3a3e0a601"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="14"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{TOTAL_BONUS}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <pageFooter>
+        <band height="30" splitType="Stretch">
+            <frame>
+                <reportElement mode="Opaque" x="0" y="0" width="555" height="24" forecolor="#D0B48E" backcolor="#F2EBDF"
+                               uuid="3c223957-1683-40fa-b4af-8d9e665c2d3c"/>
+                <textField evaluationTime="Report">
+                    <reportElement style="Column header" x="514" y="4" width="40" height="20" forecolor="#736343"
+                                   uuid="ff4f6e28-3714-4411-bd68-58ab2557d702"/>
+                    <textElement verticalAlignment="Middle">
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+                </textField>
+                <textField>
+                    <reportElement style="Column header" x="434" y="4" width="80" height="20" forecolor="#736343"
+                                   uuid="c3e9e1d9-fcb0-4735-9bb9-b6a5282a26b2"/>
+                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+                </textField>
+                <textField pattern="EEEEE dd MMMMM yyyy">
+                    <reportElement style="Column header" x="0" y="0" width="197" height="20" forecolor="#736343"
+                                   uuid="15e0e975-5c55-4ebf-b1f1-20761df054fa"/>
+                    <textElement verticalAlignment="Middle">
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+                </textField>
+            </frame>
+        </band>
+    </pageFooter>
+    <summary>
+        <band splitType="Stretch"/>
+    </summary>
 </jasperReport>

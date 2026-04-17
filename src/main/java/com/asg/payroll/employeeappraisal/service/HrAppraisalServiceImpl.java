@@ -223,6 +223,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     private byte[] generatePdf(String reportFile, Long transactionPoid) throws JRException {
         Map<String, Object> params = printService.buildBaseParams(transactionPoid, UserContext.getDocumentId());
+        params.put("TRANSACTION_POID", transactionPoid);
         JasperReport report = printService.load(reportFile);
         try {
             return printService.fillReportToPdf(report, params, dataSource);
