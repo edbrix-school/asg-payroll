@@ -18,6 +18,8 @@ import com.asg.payroll.payrollvariables.dto.PayrollVariablesResponseDTO;
 import com.asg.payroll.payrollvariables.entity.HrPayrollVariablesHdr;
 import com.asg.payroll.payrollvariables.repository.PayrollVariablesRepository;
 import com.asg.payroll.payrollvariables.service.PayrollVariablesService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -40,6 +42,9 @@ public class PayrollVariablesServiceImpl implements PayrollVariablesService {
 
     private static final String EMPLOYEE_NAME_LOV = "EMPLOYEE_NAME";
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final PayrollVariablesRepository repository;
     private final LovDataService lovDataService;
     private final LoggingService loggingService;
@@ -52,9 +57,9 @@ public class PayrollVariablesServiceImpl implements PayrollVariablesService {
         try {
             HrPayrollVariablesHdr entity = toEntity(request);
             HrPayrollVariablesHdr saved = repository.saveAndFlush(entity);
-            HrPayrollVariablesHdr refreshed = findOrThrow(saved.getTransactionPoid());
-            loggingService.createLogSummaryEntry(LogDetailsEnum.CREATED, UserContext.getDocumentId(), refreshed.getTransactionPoid().toString());
-            return toDto(refreshed);
+            entityManager.refresh(saved);
+            loggingService.createLogSummaryEntry(LogDetailsEnum.CREATED, UserContext.getDocumentId(), saved.getTransactionPoid().toString());
+            return toDto(saved);
         } catch (Exception ex) {
             throw new ValidationException(extractTriggerErrorMessage(ex));
         }

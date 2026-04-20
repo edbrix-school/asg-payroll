@@ -17,6 +17,7 @@ import com.asg.payroll.payrollvariables.dto.PayrollVariablesResponseDTO;
 import com.asg.payroll.payrollvariables.entity.HrPayrollVariablesHdr;
 import com.asg.payroll.payrollvariables.repository.PayrollVariablesRepository;
 import com.asg.payroll.payrollvariables.service.impl.PayrollVariablesServiceImpl;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,9 @@ class PayrollVariablesServiceImplTest {
 
     @Mock
     private PayrollVariablesRepository repository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @Mock
     private LovDataService lovDataService;
@@ -96,7 +100,7 @@ class PayrollVariablesServiceImplTest {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
             when(repository.saveAndFlush(any(HrPayrollVariablesHdr.class))).thenReturn(entity);
-            when(repository.findByTransactionPoid(1L)).thenReturn(Optional.of(entity));
+            doNothing().when(entityManager).refresh(entity);
             when(lovDataService.getDetailsByPoidAndLovNameFast(10L, "EMPLOYEE_NAME")).thenReturn(empDet);
 
             PayrollVariablesResponseDTO result = service.create(requestDTO);
@@ -107,6 +111,7 @@ class PayrollVariablesServiceImplTest {
             assertEquals("VAR-001", result.getDocRef());
             assertNotNull(result.getEmployeeDet());
             assertEquals("EMP001", result.getEmployeeDet().getCode());
+            verify(entityManager).refresh(entity);
             verify(loggingService).createLogSummaryEntry(any(LogDetailsEnum.class), eq("DOC123"), eq("1"));
         }
     }
@@ -120,13 +125,14 @@ class PayrollVariablesServiceImplTest {
 
             entity.setEmployeePoid(null);
             when(repository.saveAndFlush(any(HrPayrollVariablesHdr.class))).thenReturn(entity);
-            when(repository.findByTransactionPoid(1L)).thenReturn(Optional.of(entity));
+            doNothing().when(entityManager).refresh(entity);
 
             PayrollVariablesResponseDTO result = service.create(requestDTO);
 
             assertNotNull(result);
             assertNull(result.getEmployeeDet());
             verify(lovDataService, never()).getDetailsByPoidAndLovNameFast(any(), any());
+            verify(entityManager).refresh(entity);
         }
     }
 
