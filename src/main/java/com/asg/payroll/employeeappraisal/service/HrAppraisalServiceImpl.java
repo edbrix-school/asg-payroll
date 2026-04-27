@@ -10,9 +10,12 @@ import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperReport;
+
 import javax.sql.DataSource;
+
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalActionRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalDtlRequest;
+import com.asg.payroll.employeeappraisal.dto.HrAppraisalRecalculationRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRequest;
 import com.asg.payroll.employeeappraisal.entity.HrAppraisalDtl;
 import com.asg.payroll.employeeappraisal.entity.HrAppraisalDtlId;
@@ -21,6 +24,7 @@ import com.asg.payroll.employeeappraisal.enums.ActionType;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalDtlRepository;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalHdrRepository;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
+import com.asg.payroll.exceptions.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import oracle.jdbc.OracleTypes;
@@ -34,6 +38,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.*;
@@ -76,6 +81,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> createAppraisal(HrAppraisalRequest request) {
+        validateHeaderForLegacySave(request);
         HrAppraisalHdr hdr = new HrAppraisalHdr();
         mapHeader(request, hdr);
         hdr.setGroupPoid(UserContext.getGroupPoid());
@@ -89,6 +95,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> updateAppraisal(Long transactionPoid, HrAppraisalRequest request) {
+        validateHeaderForLegacySave(request);
         HrAppraisalHdr existing = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException("Employee appraisal not found with ID: " + transactionPoid));
 
         mapHeader(request, existing);
@@ -122,20 +129,80 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> loadAppraisalDataSp(Long transactionPoid, String actionType) {
+        if (actionType == null || actionType.isBlank()) {
+            throw new ValidationException("Appraisal load action type is required (legacy: LOAD_EMPLOYEES_BLANK_DATA or LOAD_EMPLOYEES_WITH_CURRENT_DATA).");
+        }
         return execute(
                 "PROC_HR_LOAD_APPRAISAL_DATA",
                 List.of(new SqlParameter("P_TRANS_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER", Types.VARCHAR), new SqlParameter("P_LOGIN_COMPANY_POID", Types.NUMERIC), new SqlParameter("P_ACTION_TYPE", Types.VARCHAR), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_TRANS_POID", transactionPoid, "P_LOGIN_USER", String.valueOf(UserContext.getUserPoid()), "P_LOGIN_COMPANY_POID", UserContext.getCompanyPoid(), "P_ACTION_TYPE", actionType)
+                params("P_TRANS_POID", transactionPoid, "P_LOGIN_USER", UserContext.getUserId(), "P_LOGIN_COMPANY_POID", UserContext.getCompanyPoid(), "P_ACTION_TYPE", actionType)
+        );
+    }
+
+    @Override
+    public Map<String, Object> clearAppraisalDataSp(Long transactionPoid) {
+        return execute(
+                "PROC_HR_CLEAR_APPRAISAL_DATA",
+                List.of(new SqlParameter("P_TRANS_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER", Types.VARCHAR), new SqlParameter("P_LOGIN_COMPANY_POID", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
+                params("P_TRANS_POID", transactionPoid, "P_LOGIN_USER", UserContext.getUserId(), "P_LOGIN_COMPANY_POID", UserContext.getCompanyPoid())
         );
     }
 
     @Override
     public Map<String, Object> batchUpdateSp(Long transactionPoid, HrAppraisalActionRequest request) {
+        BigDecimal basic = nz(request.getBasicIncrementPercent());
+        BigDecimal bonus = nz(request.getBonusPercent());
+        if (basic.compareTo(BigDecimal.ZERO) == 0 && bonus.compareTo(BigDecimal.ZERO) == 0) {
+            throw new ValidationException("Both Basic and Bonus Percentages are zero...");
+        }
         return execute(
                 "PROC_HR_APPRAISAL_BATCH_UPDATE",
                 List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_BASIC_INCREMENT_PERCENT", Types.NUMERIC), new SqlParameter("P_BONUS_PERCENT", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
                 params("P_COMPANYID", UserContext.getCompanyPoid(), "P_TRANSACTION_POID", transactionPoid, "P_BASIC_INCREMENT_PERCENT", request.getBasicIncrementPercent(), "P_BONUS_PERCENT", request.getBonusPercent())
         );
+    }
+
+    @Override
+    public Map<String, Object> recalculateDetail(HrAppraisalRecalculationRequest request) {
+        if (request == null || request.getDetail() == null) {
+            throw new ValidationException("Recalculation payload and detail are required.");
+        }
+        if (request.getMode() == null || request.getMode().isBlank()) {
+            throw new ValidationException("Recalculation mode is required.");
+        }
+
+        HrAppraisalDtl row = new HrAppraisalDtl();
+        mapDetail(request.getDetail(), row);
+        LocalDate today = LocalDate.now();
+        String mode = request.getMode().trim().toUpperCase(Locale.ROOT);
+
+        switch (mode) {
+            case "AMOUNT_EDIT" ->
+                    HrAppraisalLegacyRecalculation.applyRecalculateGross(row, request.getPeriodFrom(), today);
+            case "PERCENT_EDIT" ->
+                    HrAppraisalLegacyRecalculation.applyRecalculateGrossFromPercent(row, request.getFieldName(), request.getPeriodFrom(), today);
+            case "NET_DIFF_EDIT" -> {
+                if (request.getAppraisalBasicPercent() == null) {
+                    throw new ValidationException("Appraisal Basic Percent should not be empty for autocalculation of basic and fixed allowances..");
+                }
+                if (request.getAppraisalFixedPercent() == null) {
+                    throw new ValidationException("Appraisal Fixed Percent should not be empty for autocalculation of basic and fixed allowances..");
+                }
+                BigDecimal basicPercent = nz(request.getAppraisalBasicPercent());
+                BigDecimal fixedPercent = nz(request.getAppraisalFixedPercent());
+                if (basicPercent.add(fixedPercent).compareTo(new BigDecimal("100")) != 0) {
+                    throw new ValidationException("Some of Basic and Fixed percentages should be 100 for autocalculation of basic and fixed allowances..");
+                }
+                HrAppraisalLegacyRecalculation.applyFromNetDifference(row, nz(row.getNetIncrement()), basicPercent, fixedPercent, request.getPeriodFrom(), today);
+            }
+            default ->
+                    throw new ValidationException("Unsupported recalculation mode. Use AMOUNT_EDIT, PERCENT_EDIT, or NET_DIFF_EDIT.");
+        }
+
+        Map<String, Object> out = new HashMap<>();
+        out.put("detail", row);
+        out.put("mode", mode);
+        return out;
     }
 
     @Override
@@ -149,6 +216,10 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> updateMasterSp(Long transactionPoid, HrAppraisalActionRequest request) {
+        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException("Employee appraisal not found with ID: " + transactionPoid));
+        if (hdr.getApprovedBy() == null || hdr.getApprovedBy().isBlank()) {
+            throw new ValidationException("Please enter approval by details... ");
+        }
         return execute(
                 "PROC_HR_APPRAISAL_UPDATE_MAST",
                 List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER_POID", Types.NUMERIC), new SqlParameter("P_BASIC_INCREMENT_PERCENT", Types.NUMERIC), new SqlParameter("P_BONUS_PERCENT", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
@@ -185,6 +256,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> arrearsSp(Long transactionPoid, Long payrollPoid) {
+        if (payrollPoid == null) {
+            throw new ValidationException("Please select the payroll for adding the arrears... ");
+        }
         return execute(
                 "PROC_HR_APPRAISAL_ARREARS",
                 List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER_POID", Types.NUMERIC), new SqlParameter("P_PAYROLL_POID", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
@@ -217,13 +291,20 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     }
 
     @Override
-    public byte[] printLetter(Long transactionPoid) throws JRException {
-        return generatePdf("HrAppraisalLetter.jrxml", transactionPoid);
+    public byte[] printLetter(Long transactionPoid, Long employeePoid) throws JRException {
+        return generatePdf("HrAppraisalLetter.jrxml", transactionPoid, employeePoid);
     }
 
     private byte[] generatePdf(String reportFile, Long transactionPoid) throws JRException {
+        return generatePdf(reportFile, transactionPoid, null);
+    }
+
+    private byte[] generatePdf(String reportFile, Long transactionPoid, Long employeePoid) throws JRException {
         Map<String, Object> params = printService.buildBaseParams(transactionPoid, UserContext.getDocumentId());
         params.put("TRANSACTION_POID", transactionPoid);
+        if (employeePoid != null) {
+            params.put("EMPLOYEE_POID", employeePoid);
+        }
         JasperReport report = printService.load(reportFile);
         try {
             return printService.fillReportToPdf(report, params, dataSource);
@@ -264,6 +345,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     private void upsertDetails(Long transactionPoid, List<HrAppraisalDtlRequest> requests, boolean createMode) {
         if (requests == null || requests.isEmpty()) return;
+        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException("Employee appraisal not found with ID: " + transactionPoid));
+        LocalDate today = LocalDate.now();
         for (HrAppraisalDtlRequest request : requests) {
             ActionType action = request.getActionType();
             if (createMode && action == null) action = ActionType.isCreated;
@@ -275,6 +358,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
                 entity.setDetRowId(nextDetRowId);
                 entity.setDeleted("N");
                 mapDetail(request, entity);
+                HrAppraisalLegacyRecalculation.applyRecalculateGross(entity, hdr.getPeriodFrom(), today);
                 dtlRepository.save(entity);
                 continue;
             }
@@ -287,6 +371,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             }
             HrAppraisalDtl existing = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appraisal detail not found for detRowId: " + request.getDetRowId()));
             mapDetail(request, existing);
+            HrAppraisalLegacyRecalculation.applyRecalculateGross(existing, hdr.getPeriodFrom(), today);
             dtlRepository.save(existing);
         }
     }
@@ -348,5 +433,31 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             out.put(String.valueOf(values[i]), values[i + 1]);
         }
         return out;
+    }
+
+    /**
+     * Legacy {@code HRAppraisalBean#DocumentBeforeSave} and header fields marked {@code required="true"}
+     * on {@code AppraisalPage.jsff} (Description, Period From, second-tab appraisal percents).
+     */
+    private void validateHeaderForLegacySave(HrAppraisalRequest request) {
+        if (request == null) {
+            throw new ValidationException("Request body is required.");
+        }
+        if (request.getDescription() == null || request.getDescription().isBlank()) {
+            throw new ValidationException("Description is required.");
+        }
+        if (request.getPeriodFrom() == null) {
+            throw new ValidationException("Effective date (period from) is required.");
+        }
+        if (request.getAppraisalBasicPercent() == null) {
+            throw new ValidationException("Appraisal Basic Percent is required in the second tab...");
+        }
+        if (request.getAppraisalFixedPercent() == null) {
+            throw new ValidationException("Appraisal Fixed Percent is required in the second tab...");
+        }
+    }
+
+    private static BigDecimal nz(BigDecimal v) {
+        return v != null ? v : BigDecimal.ZERO;
     }
 }

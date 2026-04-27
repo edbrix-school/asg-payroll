@@ -3,6 +3,7 @@ package com.asg.payroll.employeeappraisal.service;
 import com.asg.common.lib.dto.DeleteReasonDto;
 import com.asg.common.lib.dto.FilterRequestDto;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalActionRequest;
+import com.asg.payroll.employeeappraisal.dto.HrAppraisalRecalculationRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRequest;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +26,11 @@ public interface HrAppraisalService {
 
     Map<String, Object> loadAppraisalDataSp(Long transactionPoid, String actionType);
 
+    Map<String, Object> clearAppraisalDataSp(Long transactionPoid);
+
     Map<String, Object> batchUpdateSp(Long transactionPoid, HrAppraisalActionRequest request);
+
+    Map<String, Object> recalculateDetail(HrAppraisalRecalculationRequest request);
 
     Map<String, Object> updateDataSp(Long transactionPoid, Long employeePoid, HrAppraisalActionRequest request);
 
@@ -47,5 +52,5 @@ public interface HrAppraisalService {
 
     byte[] printBank(Long transactionPoid) throws JRException;
 
-    byte[] printLetter(Long transactionPoid) throws JRException;
+    byte[] printLetter(Long transactionPoid, Long employeePoid) throws JRException;
 }

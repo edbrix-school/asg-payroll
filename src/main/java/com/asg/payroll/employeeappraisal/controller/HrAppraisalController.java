@@ -8,6 +8,7 @@ import com.asg.common.lib.enums.UserRolesRightsEnum;
 import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalActionRequest;
+import com.asg.payroll.employeeappraisal.dto.HrAppraisalRecalculationRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRequest;
 import com.asg.payroll.employeeappraisal.service.HrAppraisalService;
 import jakarta.validation.Valid;
@@ -86,9 +87,21 @@ public class HrAppraisalController {
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
+    @PostMapping("/{transactionPoid}/clear-data")
+    public ResponseEntity<?> clearAppraisalData(@PathVariable Long transactionPoid) {
+        return success("Appraisal data clear completed", hrAppraisalService.clearAppraisalDataSp(transactionPoid));
+    }
+
+    @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/{transactionPoid}/batch-update")
     public ResponseEntity<?> batchUpdate(@PathVariable Long transactionPoid, @RequestBody HrAppraisalActionRequest request) {
         return success("Batch update completed", hrAppraisalService.batchUpdateSp(transactionPoid, request));
+    }
+
+    @AllowedAction(UserRolesRightsEnum.EDIT)
+    @PostMapping("/recalculate-detail")
+    public ResponseEntity<?> recalculateDetail(@RequestBody HrAppraisalRecalculationRequest request) {
+        return success("Appraisal detail recalculation completed", hrAppraisalService.recalculateDetail(request));
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
@@ -179,9 +192,10 @@ public class HrAppraisalController {
 
     @AllowedAction(UserRolesRightsEnum.PRINT)
     @GetMapping("/print/{transactionPoid}/letter")
-    public ResponseEntity<?> printLetter(@PathVariable Long transactionPoid) {
+    public ResponseEntity<?> printLetter(@PathVariable Long transactionPoid,
+                                         @RequestParam(required = false) Long employeePoid) {
         try {
-            byte[] pdf = hrAppraisalService.printLetter(transactionPoid);
+            byte[] pdf = hrAppraisalService.printLetter(transactionPoid, employeePoid);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=appraisal-letter-" + transactionPoid + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF)
