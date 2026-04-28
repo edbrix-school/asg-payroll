@@ -1,14 +1,15 @@
 package com.asg.payroll.employeeappraisal.dto;
 
 import com.asg.payroll.employeeappraisal.enums.ActionType;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class HrAppraisalDtlRequest {
     private Long detRowId;
     private Long employeePoid;

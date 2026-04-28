@@ -1,7 +1,6 @@
 package com.asg.payroll.employeeappraisal.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,6 +9,8 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class HrAppraisalRequest {
     private LocalDate transactionDate;
     private LocalDate periodFrom;

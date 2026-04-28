@@ -3,8 +3,7 @@ package com.asg.payroll.employeeappraisal.entity;
 import com.asg.common.lib.annotation.AuditIgnore;
 import com.asg.common.lib.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,6 +13,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @IdClass(HrAppraisalDtlId.class)
+@NoArgsConstructor
+@AllArgsConstructor
 public class HrAppraisalDtl extends BaseEntity {
 
     @Id
