@@ -74,15 +74,14 @@ public final class HrAppraisalLegacyRecalculation {
             row.setNewBonusPer(bonusPercent);
         }
 
-        if (periodFromHeader != null && today != null) {
-            if (periodFromHeader.isBefore(today)) {
+        if (periodFromHeader != null && today != null && periodFromHeader.isBefore(today)) {
                 int months = monthsBetweenCalendar(periodFromHeader, today);
                 if (months > 0) {
                     BigDecimal arrears = netDiff.multiply(BigDecimal.valueOf(months));
                     row.setArrears(arrears);
                 }
             }
-        }
+
     }
 
     public static void applyRecalculateGrossFromPercent(HrAppraisalDtl row, String fieldName, LocalDate periodFromHeader, LocalDate today) {
@@ -123,7 +122,7 @@ public final class HrAppraisalLegacyRecalculation {
         }
         BigDecimal netDiff = nz(netDiffAmount);
         BigDecimal basicPercent = nz(appraisalBasicPercent);
-        BigDecimal fixedPercent = nz(appraisalFixedPercent);
+        nz(appraisalFixedPercent);
 
         BigDecimal curBasicSalary = nz(row.getCurBasicSalary());
         BigDecimal curFaAlw = nz(row.getCurFaAlw());

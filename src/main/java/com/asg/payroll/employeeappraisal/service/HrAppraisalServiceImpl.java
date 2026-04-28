@@ -8,6 +8,7 @@ import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
+import org.springframework.context.annotation.Lazy;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperReport;
 
@@ -25,9 +26,9 @@ import com.asg.payroll.employeeappraisal.repository.HrAppraisalDtlRepository;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalHdrRepository;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
 import com.asg.payroll.exceptions.ValidationException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import oracle.jdbc.OracleTypes;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -44,10 +45,22 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class HrAppraisalServiceImpl implements HrAppraisalService {
+
+    public HrAppraisalServiceImpl(@Lazy HrAppraisalService self, HrAppraisalHdrRepository hdrRepository, HrAppraisalDtlRepository dtlRepository, DocumentSearchService documentSearchService, DocumentDeleteService documentDeleteService, LoggingService loggingService, PrintService printService, DataSource dataSource, JdbcTemplate jdbcTemplate) {
+        this.self = self;
+        this.hdrRepository = hdrRepository;
+        this.dtlRepository = dtlRepository;
+        this.documentSearchService = documentSearchService;
+        this.documentDeleteService = documentDeleteService;
+        this.loggingService = loggingService;
+        this.printService = printService;
+        this.dataSource = dataSource;
+        this.jdbcTemplate = jdbcTemplate;
+    }
+    private final HrAppraisalService self;
     private final HrAppraisalHdrRepository hdrRepository;
     private final HrAppraisalDtlRepository dtlRepository;
     private final DocumentSearchService documentSearchService;
@@ -57,13 +70,26 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
 
+
+    private static final String P_TRANS_POID = "P_TRANS_POID";
+    private static final String P_LOGIN_COMPANY_POID = "P_LOGIN_COMPANY_POID";
+    private static final String P_LOGIN_USER = "P_LOGIN_USER";
+    private static final String P_BASIC_INCREMENT_PERCENT = "P_BASIC_INCREMENT_PERCENT";
+    private static final String P_LOGIN_USER_POID = "P_LOGIN_USER_POID";
+    private static final String P_TRANSACTION_POID = "P_TRANSACTION_POID";
+    private static final String P_COMPANYID = "P_COMPANYID";
+    private static final String P_BONUS_PERCENT = "P_BONUS_PERCENT";
+    private static final String TRANSACTION_POID = "TRANSACTION_POID";
+    private static final String APPRAISAL_NOT_FOUND = "Employee appraisal not found with ID: ";
+    private static final String P_STATUS = "P_STATUS";
+
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> listAppraisals(String documentId, FilterRequestDto filters, Pageable pageable, LocalDate periodFrom, LocalDate periodTo) {
         String operator = documentSearchService.resolveOperator(filters);
         String isDeleted = documentSearchService.resolveIsDeleted(filters);
         List<FilterDto> resolvedFilters = documentSearchService.resolveDateFilters(filters, "TRANSACTION_DATE", periodFrom, periodTo);
-        RawSearchResult raw = documentSearchService.search(documentId, resolvedFilters, operator, pageable, isDeleted, "DOC_REF", "TRANSACTION_POID");
+        RawSearchResult raw = documentSearchService.search(documentId, resolvedFilters, operator, pageable, isDeleted, "DOC_REF", TRANSACTION_POID);
         Page<Map<String, Object>> page = new PageImpl<>(raw.records(), pageable, raw.totalRecords());
         return PaginationUtil.wrapPage(page, raw.displayFields());
     }
@@ -71,7 +97,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> getAppraisalById(Long transactionPoid) {
-        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException("Employee appraisal not found with ID: " + transactionPoid));
+        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
         List<HrAppraisalDtl> details = dtlRepository.findByTransactionPoid(transactionPoid);
         Map<String, Object> out = new HashMap<>();
         out.put("header", hdr);
@@ -89,30 +115,31 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         hdr.setDeleted("N");
         HrAppraisalHdr saved = hdrRepository.saveAndFlush(hdr);
         upsertDetails(saved.getTransactionPoid(), request.getDetails(), true);
-        loggingService.createLogSummaryEntry(LogDetailsEnum.CREATED, UserContext.getDocumentId(), saved.getTransactionPoid().toString());
-        return getAppraisalById(saved.getTransactionPoid());
+        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), saved.getTransactionPoid().toString(),String.format("%s %s", LogDetailsEnum.CREATED, saved.getDocRef()));
+        return self.getAppraisalById(saved.getTransactionPoid());
     }
 
     @Override
     public Map<String, Object> updateAppraisal(Long transactionPoid, HrAppraisalRequest request) {
         validateHeaderForLegacySave(request);
-        HrAppraisalHdr existing = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException("Employee appraisal not found with ID: " + transactionPoid));
-
+        HrAppraisalHdr existing = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
+        HrAppraisalHdr oldEntity = new HrAppraisalHdr();
+        BeanUtils.copyProperties(existing, oldEntity);
         mapHeader(request, existing);
         hdrRepository.save(existing);
         upsertDetails(transactionPoid, request.getDetails(), false);
-        loggingService.createLogSummaryEntry(LogDetailsEnum.MODIFIED, UserContext.getDocumentId(), transactionPoid.toString());
-        return getAppraisalById(transactionPoid);
+        loggingService.logChanges(oldEntity,existing,HrAppraisalHdr.class,UserContext.getDocumentId(),transactionPoid.toString(),LogDetailsEnum.MODIFIED,TRANSACTION_POID);
+        return self.getAppraisalById(transactionPoid);
     }
 
     @Override
     public void deleteAppraisal(Long transactionPoid, DeleteReasonDto deleteReasonDto) {
-        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException("Employee appraisal not found with ID: " + transactionPoid));
+        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
 
         documentDeleteService.deleteDocument(
                 transactionPoid,
                 "HR_APPRAISAL_HDR",
-                "TRANSACTION_POID",
+                TRANSACTION_POID,
                 deleteReasonDto,
                 hdr.getTransactionDate()
         );
@@ -122,8 +149,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> getDetailsSp(Long transactionPoid, Long employeePoid) {
         return execute(
                 "PROC_HR_APPRAISAL_GET_DETAILS",
-                List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_EMP_POID", Types.NUMERIC), new SqlOutParameter("OUTDATA", OracleTypes.CURSOR), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_COMPANYID", UserContext.getCompanyPoid(), "P_TRANSACTION_POID", transactionPoid, "P_EMP_POID", employeePoid)
+                List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter("P_EMP_POID", Types.NUMERIC), new SqlOutParameter("OUTDATA", OracleTypes.CURSOR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, "P_EMP_POID", employeePoid)
         );
     }
 
@@ -134,8 +161,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         }
         return execute(
                 "PROC_HR_LOAD_APPRAISAL_DATA",
-                List.of(new SqlParameter("P_TRANS_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER", Types.VARCHAR), new SqlParameter("P_LOGIN_COMPANY_POID", Types.NUMERIC), new SqlParameter("P_ACTION_TYPE", Types.VARCHAR), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_TRANS_POID", transactionPoid, "P_LOGIN_USER", UserContext.getUserId(), "P_LOGIN_COMPANY_POID", UserContext.getCompanyPoid(), "P_ACTION_TYPE", actionType)
+                List.of(new SqlParameter(P_TRANS_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER, Types.VARCHAR), new SqlParameter(P_LOGIN_COMPANY_POID, Types.NUMERIC), new SqlParameter("P_ACTION_TYPE", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_TRANS_POID, transactionPoid, P_LOGIN_USER, UserContext.getUserId(), P_LOGIN_COMPANY_POID, UserContext.getCompanyPoid(), "P_ACTION_TYPE", actionType)
         );
     }
 
@@ -143,8 +170,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> clearAppraisalDataSp(Long transactionPoid) {
         return execute(
                 "PROC_HR_CLEAR_APPRAISAL_DATA",
-                List.of(new SqlParameter("P_TRANS_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER", Types.VARCHAR), new SqlParameter("P_LOGIN_COMPANY_POID", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_TRANS_POID", transactionPoid, "P_LOGIN_USER", UserContext.getUserId(), "P_LOGIN_COMPANY_POID", UserContext.getCompanyPoid())
+                List.of(new SqlParameter(P_TRANS_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER, Types.VARCHAR), new SqlParameter(P_LOGIN_COMPANY_POID, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_TRANS_POID, transactionPoid, P_LOGIN_USER, UserContext.getUserId(), P_LOGIN_COMPANY_POID, UserContext.getCompanyPoid())
         );
     }
 
@@ -157,8 +184,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         }
         return execute(
                 "PROC_HR_APPRAISAL_BATCH_UPDATE",
-                List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_BASIC_INCREMENT_PERCENT", Types.NUMERIC), new SqlParameter("P_BONUS_PERCENT", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_COMPANYID", UserContext.getCompanyPoid(), "P_TRANSACTION_POID", transactionPoid, "P_BASIC_INCREMENT_PERCENT", request.getBasicIncrementPercent(), "P_BONUS_PERCENT", request.getBonusPercent())
+                List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_BASIC_INCREMENT_PERCENT, Types.NUMERIC), new SqlParameter(P_BONUS_PERCENT, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_BASIC_INCREMENT_PERCENT, request.getBasicIncrementPercent(), P_BONUS_PERCENT, request.getBonusPercent())
         );
     }
 
@@ -209,21 +236,21 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> updateDataSp(Long transactionPoid, Long employeePoid, HrAppraisalActionRequest request) {
         return execute(
                 "PROC_HR_APPRAISAL_UPDATE_DATA",
-                List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER_POID", Types.NUMERIC), new SqlParameter("P_EMPLOYEE_POID", Types.NUMERIC), new SqlParameter("P_ADDITIONAL_DATA", Types.VARCHAR), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_COMPANYID", UserContext.getCompanyPoid(), "P_TRANSACTION_POID", transactionPoid, "P_LOGIN_USER_POID", UserContext.getUserPoid(), "P_EMPLOYEE_POID", employeePoid, "P_ADDITIONAL_DATA", request.getAdditionalData())
+                List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_EMPLOYEE_POID", Types.NUMERIC), new SqlParameter("P_ADDITIONAL_DATA", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_EMPLOYEE_POID", employeePoid, "P_ADDITIONAL_DATA", request.getAdditionalData())
         );
     }
 
     @Override
     public Map<String, Object> updateMasterSp(Long transactionPoid, HrAppraisalActionRequest request) {
-        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException("Employee appraisal not found with ID: " + transactionPoid));
+        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
         if (hdr.getApprovedBy() == null || hdr.getApprovedBy().isBlank()) {
             throw new ValidationException("Please enter approval by details... ");
         }
         return execute(
                 "PROC_HR_APPRAISAL_UPDATE_MAST",
-                List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER_POID", Types.NUMERIC), new SqlParameter("P_BASIC_INCREMENT_PERCENT", Types.NUMERIC), new SqlParameter("P_BONUS_PERCENT", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_COMPANYID", UserContext.getCompanyPoid(), "P_TRANSACTION_POID", transactionPoid, "P_LOGIN_USER_POID", UserContext.getUserPoid(), "P_BASIC_INCREMENT_PERCENT", request.getBasicIncrementPercent(), "P_BONUS_PERCENT", request.getBonusPercent())
+                List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter(P_BASIC_INCREMENT_PERCENT, Types.NUMERIC), new SqlParameter(P_BONUS_PERCENT, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), P_BASIC_INCREMENT_PERCENT, request.getBasicIncrementPercent(), P_BONUS_PERCENT, request.getBonusPercent())
         );
     }
 
@@ -231,8 +258,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> createJvSp(Long transactionPoid) {
         return execute(
                 "PROC_HR_APPRAISAL_CREATE_JV",
-                List.of(new SqlParameter("P_LOGIN_USER_POID", Types.NUMERIC), new SqlParameter("P_APPRAISAL_POID", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_LOGIN_USER_POID", UserContext.getUserPoid(), "P_APPRAISAL_POID", transactionPoid)
+                List.of(new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_APPRAISAL_POID", Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_APPRAISAL_POID", transactionPoid)
         );
     }
 
@@ -240,8 +267,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> sendEmailSp(Long transactionPoid, String resend) {
         return execute(
                 "PROC_APPRAISAL_SEND_EMAIL",
-                List.of(new SqlParameter("P_LOGIN_USER_POID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_RESEND", Types.VARCHAR), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_LOGIN_USER_POID", UserContext.getUserPoid(), "P_TRANSACTION_POID", transactionPoid, "P_RESEND", resend)
+                List.of(new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter("P_RESEND", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_LOGIN_USER_POID, UserContext.getUserPoid(), P_TRANSACTION_POID, transactionPoid, "P_RESEND", resend)
         );
     }
 
@@ -249,8 +276,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> bankFileSp(Long transactionPoid) {
         return execute(
                 "PROC_HR_APPRAISAL_BANK_FILE",
-                List.of(new SqlParameter("P_COMPANY_POID", Types.NUMERIC), new SqlParameter("P_TRNNO", Types.NUMERIC), new SqlParameter("P_LOGIN_USER_POID", Types.NUMERIC), new SqlOutParameter("P_FILE_NAME", Types.VARCHAR)),
-                params("P_COMPANY_POID", UserContext.getCompanyPoid(), "P_TRNNO", transactionPoid, "P_LOGIN_USER_POID", UserContext.getUserPoid())
+                List.of(new SqlParameter("P_COMPANY_POID", Types.NUMERIC), new SqlParameter("P_TRNNO", Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlOutParameter("P_FILE_NAME", Types.VARCHAR)),
+                params("P_COMPANY_POID", UserContext.getCompanyPoid(), "P_TRNNO", transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid())
         );
     }
 
@@ -261,8 +288,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         }
         return execute(
                 "PROC_HR_APPRAISAL_ARREARS",
-                List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlParameter("P_LOGIN_USER_POID", Types.NUMERIC), new SqlParameter("P_PAYROLL_POID", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_COMPANYID", UserContext.getCompanyPoid(), "P_TRANSACTION_POID", transactionPoid, "P_LOGIN_USER_POID", UserContext.getUserPoid(), "P_PAYROLL_POID", payrollPoid)
+                List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_PAYROLL_POID", Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_PAYROLL_POID", payrollPoid)
         );
     }
 
@@ -270,8 +297,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> arrearsCalcSp(Long transactionPoid) {
         return execute(
                 "PROC_HR_APPRAISAL_ARREARS_CALC",
-                List.of(new SqlParameter("P_COMPANYID", Types.NUMERIC), new SqlParameter("P_TRANSACTION_POID", Types.NUMERIC), new SqlOutParameter("P_STATUS", Types.VARCHAR)),
-                params("P_COMPANYID", UserContext.getCompanyPoid(), "P_TRANSACTION_POID", transactionPoid)
+                List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
+                params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid)
         );
     }
 
@@ -301,7 +328,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     private byte[] generatePdf(String reportFile, Long transactionPoid, Long employeePoid) throws JRException {
         Map<String, Object> params = printService.buildBaseParams(transactionPoid, UserContext.getDocumentId());
-        params.put("TRANSACTION_POID", transactionPoid);
+        params.put(TRANSACTION_POID, transactionPoid);
         if (employeePoid != null) {
             params.put("EMPLOYEE_POID", employeePoid);
         }
@@ -319,9 +346,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
                 .withProcedureName(procedureName)
                 .declareParameters(parameters.toArray(new org.springframework.jdbc.core.SqlParameter[0]));
-        Map<String, Object> result = call.execute(inParams);
-        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), String.valueOf(inParams.getOrDefault("P_TRANSACTION_POID", inParams.getOrDefault("P_TRANS_POID", ""))), "Executed procedure: " + procedureName);
-        return result;
+        return call.execute(inParams);
     }
 
     private void mapHeader(HrAppraisalRequest request, HrAppraisalHdr entity) {
@@ -343,14 +368,18 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         entity.setAppraisalFixedPercent(request.getAppraisalFixedPercent());
     }
 
+    private ActionType resolveAction(HrAppraisalDtlRequest request, boolean createMode) {
+        ActionType action = createMode && request.getActionType() == null ? ActionType.isCreated : request.getActionType();
+        return (action == null || action == ActionType.noChange) ? null : action;
+    }
+
     private void upsertDetails(Long transactionPoid, List<HrAppraisalDtlRequest> requests, boolean createMode) {
         if (requests == null || requests.isEmpty()) return;
-        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException("Employee appraisal not found with ID: " + transactionPoid));
+        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
         LocalDate today = LocalDate.now();
         for (HrAppraisalDtlRequest request : requests) {
-            ActionType action = request.getActionType();
-            if (createMode && action == null) action = ActionType.isCreated;
-            if (action == null || action == ActionType.noChange) continue;
+            ActionType action = resolveAction(request, createMode);
+            if (action == null) continue;
             if (action == ActionType.isCreated) {
                 Long nextDetRowId = dtlRepository.findMaxDetRowIdByTransactionPoid(transactionPoid) + 1;
                 HrAppraisalDtl entity = new HrAppraisalDtl();
@@ -359,20 +388,28 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
                 entity.setDeleted("N");
                 mapDetail(request, entity);
                 HrAppraisalLegacyRecalculation.applyRecalculateGross(entity, hdr.getPeriodFrom(), today);
-                dtlRepository.save(entity);
-                continue;
+                HrAppraisalDtl saved = dtlRepository.save(entity);
+                String logDetail = String.format("Row Created on [Employee Appraisal Details] with DetRowId: %s", saved.getDetRowId());
+                loggingService.createLogSummaryEntry(UserContext.getDocumentId(), String.valueOf(transactionPoid), logDetail);
+            } else {
+                HrAppraisalDtlId id = new HrAppraisalDtlId();
+                id.setTransactionPoid(transactionPoid);
+                id.setDetRowId(request.getDetRowId());
+                if (action == ActionType.isDeleted) {
+                    HrAppraisalDtl detail = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Details", "DET_ROW_ID", id.getDetRowId()));
+                    dtlRepository.deleteById(id);
+                    loggingService.logDelete(detail, UserContext.getDocumentId(), id.toString());
+                } else {
+                    HrAppraisalDtl existing = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appraisal detail not found for detRowId: " + request.getDetRowId()));
+                    HrAppraisalDtl oldEntity = new HrAppraisalDtl();
+                    BeanUtils.copyProperties(existing, oldEntity);
+                    mapDetail(request, existing);
+                    HrAppraisalLegacyRecalculation.applyRecalculateGross(existing, hdr.getPeriodFrom(), today);
+                    HrAppraisalDtl saved = dtlRepository.save(existing);
+                    String logDetail = String.format("KeyId = TRANSACTION_POID %s: DET_ROW_ID %s", saved.getTransactionPoid(), saved.getDetRowId());
+                    loggingService.createLog(oldEntity, existing, HrAppraisalDtl.class, UserContext.getDocumentId(), transactionPoid.toString(), logDetail);
+                }
             }
-            HrAppraisalDtlId id = new HrAppraisalDtlId();
-            id.setTransactionPoid(transactionPoid);
-            id.setDetRowId(request.getDetRowId());
-            if (action == ActionType.isDeleted) {
-                dtlRepository.deleteById(id);
-                continue;
-            }
-            HrAppraisalDtl existing = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appraisal detail not found for detRowId: " + request.getDetRowId()));
-            mapDetail(request, existing);
-            HrAppraisalLegacyRecalculation.applyRecalculateGross(existing, hdr.getPeriodFrom(), today);
-            dtlRepository.save(existing);
         }
     }
 
