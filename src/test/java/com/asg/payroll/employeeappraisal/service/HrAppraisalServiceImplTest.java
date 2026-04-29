@@ -17,8 +17,11 @@ import com.asg.payroll.employeeappraisal.entity.HrAppraisalHdr;
 import com.asg.payroll.employeeappraisal.enums.ActionType;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalDtlRepository;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalHdrRepository;
+import com.asg.payroll.employeeappraisal.repository.HrEmployeeSalaryMasterRepository;
+import com.asg.payroll.employeeappraisal.repository.HrPayrollVarAlwdedDtlRepository;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
 import com.asg.payroll.exceptions.ValidationException;
+import jakarta.persistence.EntityManager;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperReport;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +54,15 @@ class HrAppraisalServiceImplTest {
 
     @Mock
     private HrAppraisalDtlRepository dtlRepository;
+
+    @Mock
+    private HrEmployeeSalaryMasterRepository salaryMasterRepository;
+
+    @Mock
+    private HrPayrollVarAlwdedDtlRepository payrollVarDtlRepository;
+
+    @Mock
+    private EntityManager entityManager;
 
     @Mock
     private DocumentSearchService documentSearchService;
@@ -542,13 +554,13 @@ class HrAppraisalServiceImplTest {
         HrAppraisalRecalculationRequest request = new HrAppraisalRecalculationRequest();
         request.setMode("NET_DIFF_EDIT");
         request.setPeriodFrom(LocalDate.of(2024, 1, 1));
+        request.setNetDiffAmount(BigDecimal.valueOf(500));
         request.setAppraisalBasicPercent(BigDecimal.valueOf(60));
         request.setAppraisalFixedPercent(BigDecimal.valueOf(40));
-        
+
         HrAppraisalDtlRequest dtlRequest = new HrAppraisalDtlRequest();
         dtlRequest.setCurBasicSalary(BigDecimal.valueOf(5000));
         dtlRequest.setCurFaAlw(BigDecimal.valueOf(2000));
-        dtlRequest.setNetIncrement(BigDecimal.valueOf(500));
         request.setDetail(dtlRequest);
 
         Map<String, Object> result = service.recalculateDetail(request);
@@ -557,37 +569,60 @@ class HrAppraisalServiceImplTest {
         assertEquals("NET_DIFF_EDIT", result.get("mode"));
     }
 
+    // ── recalculateDetail new branches ───────────────────────────────────
+
+    @Test
+    void recalculateDetail_NetDiffEdit_NullNetDiffAmount_ThrowsException() {
+        HrAppraisalRecalculationRequest request = new HrAppraisalRecalculationRequest();
+        request.setMode("NET_DIFF_EDIT");
+        request.setAppraisalBasicPercent(BigDecimal.valueOf(60));
+        request.setAppraisalFixedPercent(BigDecimal.valueOf(40));
+        request.setDetail(new HrAppraisalDtlRequest());
+        assertThrows(ValidationException.class, () -> service.recalculateDetail(request));
+    }
+
+    @Test
+    void recalculateDetail_NetDiffEdit_ZeroNetDiffAmount_ThrowsException() {
+        HrAppraisalRecalculationRequest request = new HrAppraisalRecalculationRequest();
+        request.setMode("NET_DIFF_EDIT");
+        request.setNetDiffAmount(BigDecimal.ZERO);
+        request.setAppraisalBasicPercent(BigDecimal.valueOf(60));
+        request.setAppraisalFixedPercent(BigDecimal.valueOf(40));
+        request.setDetail(new HrAppraisalDtlRequest());
+        assertThrows(ValidationException.class, () -> service.recalculateDetail(request));
+    }
+
+    // line 229/232/237: null-check false branches — basicPercent/fixedPercent not null but sum != 100
     @Test
     void recalculateDetail_NetDiffEdit_NullBasicPercent_ThrowsException() {
         HrAppraisalRecalculationRequest request = new HrAppraisalRecalculationRequest();
         request.setMode("NET_DIFF_EDIT");
+        request.setNetDiffAmount(BigDecimal.valueOf(500));
         request.setAppraisalFixedPercent(BigDecimal.valueOf(40));
         request.setDetail(new HrAppraisalDtlRequest());
-
         assertThrows(ValidationException.class, () -> service.recalculateDetail(request));
     }
 
+    // line 232: basicPercent not null — passes through to fixedPercent null check
     @Test
     void recalculateDetail_NetDiffEdit_NullFixedPercent_ThrowsException() {
         HrAppraisalRecalculationRequest request = new HrAppraisalRecalculationRequest();
         request.setMode("NET_DIFF_EDIT");
+        request.setNetDiffAmount(BigDecimal.valueOf(500));
         request.setAppraisalBasicPercent(BigDecimal.valueOf(60));
         request.setDetail(new HrAppraisalDtlRequest());
-
         assertThrows(ValidationException.class, () -> service.recalculateDetail(request));
     }
 
+    // line 237: fixedPercent not null — passes through to percent sum check
     @Test
     void recalculateDetail_NetDiffEdit_InvalidPercentSum_ThrowsException() {
         HrAppraisalRecalculationRequest request = new HrAppraisalRecalculationRequest();
         request.setMode("NET_DIFF_EDIT");
-        request.setPeriodFrom(LocalDate.of(2024, 1, 1));
+        request.setNetDiffAmount(BigDecimal.valueOf(500));
         request.setAppraisalBasicPercent(BigDecimal.valueOf(50));
-        request.setAppraisalFixedPercent(BigDecimal.valueOf(40));
-        
-        HrAppraisalDtlRequest dtlRequest = new HrAppraisalDtlRequest();
-        request.setDetail(dtlRequest);
-
+        request.setAppraisalFixedPercent(BigDecimal.valueOf(40)); // 50+40 != 100
+        request.setDetail(new HrAppraisalDtlRequest());
         assertThrows(ValidationException.class, () -> service.recalculateDetail(request));
     }
 
@@ -698,6 +733,326 @@ class HrAppraisalServiceImplTest {
         assertThrows(ValidationException.class, () -> service.updateMasterSp(1L, request));
     }
 
+    // line 281: salary exists — employee passes filter, list stays empty, no throw
+    @Test
+    void updateMasterSp_EmployeeHasSalary_Success() {
+        mockDtl.setNetIncrement(BigDecimal.valueOf(500));
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        when(salaryMasterRepository.existsByEmployeePoid(100L)).thenReturn(true);
+        HrAppraisalActionRequest request = new HrAppraisalActionRequest();
+        request.setBasicIncrementPercent(BigDecimal.valueOf(5));
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            assertDoesNotThrow(() -> service.updateMasterSp(1L, request));
+        }
+    }
+
+    @Test
+    void updateMasterSp_EmployeeWithoutSalary_ThrowsException() {
+        mockDtl.setNetIncrement(BigDecimal.valueOf(500));
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        when(salaryMasterRepository.existsByEmployeePoid(100L)).thenReturn(false);
+        assertThrows(ValidationException.class, () -> service.updateMasterSp(1L, new HrAppraisalActionRequest()));
+    }
+
+    // line 279: netIncrement != null && compareTo != 0 — false branch: netIncrement is zero
+    @Test
+    void updateMasterSp_ZeroNetIncrement_NoSalaryCheck_Success() {
+        mockDtl.setNetIncrement(BigDecimal.ZERO);
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        HrAppraisalActionRequest request = new HrAppraisalActionRequest();
+        request.setBasicIncrementPercent(BigDecimal.valueOf(5));
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            assertDoesNotThrow(() -> service.updateMasterSp(1L, request));
+        }
+    }
+
+    @Test
+    void updateMasterSp_NotFound_ThrowsException() {
+        when(hdrRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.updateMasterSp(1L, new HrAppraisalActionRequest()));
+    }
+
+    @Test
+    void createJvSp_NoBonusAmounts_ThrowsException() {
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        assertThrows(ValidationException.class, () -> service.createJvSp(1L));
+    }
+
+    // line 298: newBonus != null but == 0 — anyMatch returns false
+    @Test
+    void createJvSp_ZeroBonus_ThrowsException() {
+        mockDtl.setNewBonus(BigDecimal.ZERO);
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        assertThrows(ValidationException.class, () -> service.createJvSp(1L));
+    }
+
+    @Test
+    void bankFileSp_NoBonusEmployees_ThrowsException() {
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        assertThrows(ValidationException.class, () -> service.bankFileSp(1L));
+    }
+
+    // line 323: newBonus != null but == 0
+    @Test
+    void bankFileSp_ZeroBonus_ThrowsException() {
+        mockDtl.setNewBonus(BigDecimal.ZERO);
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        assertThrows(ValidationException.class, () -> service.bankFileSp(1L));
+    }
+
+    // line 341: arrears != null but == 0 — arrearsCount stays 0, no throw
+    @Test
+    void arrearsSp_ZeroArrears_MaxRowIdPositive_Success() {
+        mockDtl.setArrears(BigDecimal.ZERO);
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        when(payrollVarDtlRepository.findMaxDetRowIdByTransactionPoid(200L)).thenReturn(1L);
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            assertDoesNotThrow(() -> service.arrearsSp(1L, 200L));
+        }
+    }
+
+    @Test
+    void arrearsSp_AlreadyHasEntries_ThrowsException() {
+        HrAppraisalDtl dtlWithArrears = new HrAppraisalDtl();
+        dtlWithArrears.setArrears(BigDecimal.valueOf(1000));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(dtlWithArrears));
+        when(payrollVarDtlRepository.findMaxDetRowIdByTransactionPoid(200L)).thenReturn(1L);
+        assertThrows(ValidationException.class, () -> service.arrearsSp(1L, 200L));
+    }
+
+    @Test
+    void arrearsCalcSp_NotFound_ThrowsException() {
+        when(hdrRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.arrearsCalcSp(1L));
+    }
+
+    @Test
+    void arrearsCalcSp_NullPeriodFrom_ThrowsException() {
+        mockHdr.setPeriodFrom(null);
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        assertThrows(ValidationException.class, () -> service.arrearsCalcSp(1L));
+    }
+
+    @Test
+    void arrearsCalcSp_NoEligibleEmployees_ThrowsException() {
+        mockHdr.setPeriodFrom(LocalDate.of(2024, 1, 1));
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        assertThrows(ValidationException.class, () -> service.arrearsCalcSp(1L));
+    }
+
+    // line 364: netIncrement != null but == 0 — anyMatch returns false
+    @Test
+    void arrearsCalcSp_ZeroNetIncrement_ThrowsException() {
+        mockHdr.setPeriodFrom(LocalDate.of(2024, 1, 1));
+        mockDtl.setNetIncrement(BigDecimal.ZERO);
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        assertThrows(ValidationException.class, () -> service.arrearsCalcSp(1L));
+    }
+
+    @Test
+    void upsertDetails_IsCreated_DuplicateEmployee_ThrowsException() {
+        HrAppraisalDtlRequest dtlReq = new HrAppraisalDtlRequest();
+        dtlReq.setActionType(ActionType.isCreated);
+        dtlReq.setEmployeePoid(100L);
+
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(hdrRepository.save(any())).thenReturn(mockHdr);
+        when(dtlRepository.findByTransactionPoidAndEmployeePoid(1L, 100L)).thenReturn(List.of(mockDtl));
+
+        HrAppraisalRequest request = validRequest(List.of(dtlReq));
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            assertThrows(ValidationException.class, () -> service.updateAppraisal(1L, request));
+        }
+    }
+
+    // line 467: employeePoid == null — skip duplicate check, go straight to save
+    @Test
+    void upsertDetails_IsCreated_NullEmployeePoid_NoCheck() {
+        HrAppraisalDtlRequest dtlReq = new HrAppraisalDtlRequest();
+        dtlReq.setActionType(ActionType.isCreated);
+        // employeePoid is null — duplicate check skipped
+
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(hdrRepository.save(any())).thenReturn(mockHdr);
+        when(dtlRepository.findMaxDetRowIdByTransactionPoid(1L)).thenReturn(0L);
+        when(dtlRepository.save(any())).thenReturn(mockDtl);
+        when(self.getAppraisalById(1L)).thenReturn(Map.of());
+
+        HrAppraisalRequest request = validRequest(List.of(dtlReq));
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            assertDoesNotThrow(() -> service.updateAppraisal(1L, request));
+        }
+        verify(dtlRepository).save(any());
+    }
+
+    @Test
+    void deleteAppraisal_FinancialYearError_ThrowsException() {
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any()))
+                .thenReturn("ERROR: outside financial period");
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            assertThrows(ValidationException.class, () -> service.deleteAppraisal(1L, new DeleteReasonDto()));
+        }
+    }
+
+    @Test
+    void createAppraisal_FinancialYearError_ThrowsException() {
+        HrAppraisalRequest request = new HrAppraisalRequest();
+        request.setDescription("Test");
+        request.setPeriodFrom(LocalDate.now());
+        request.setAppraisalBasicPercent(BigDecimal.TEN);
+        request.setAppraisalFixedPercent(BigDecimal.TEN);
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any()))
+                .thenReturn("ERROR: outside financial period");
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getGroupPoid).thenReturn(10L);
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            assertThrows(ValidationException.class, () -> service.createAppraisal(request));
+        }
+    }
+
+    @Test
+    void updateAppraisal_FinancialYearError_ThrowsException() {
+        HrAppraisalRequest request = new HrAppraisalRequest();
+        request.setDescription("Test");
+        request.setPeriodFrom(LocalDate.now());
+        request.setAppraisalBasicPercent(BigDecimal.TEN);
+        request.setAppraisalFixedPercent(BigDecimal.TEN);
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any()))
+                .thenReturn("ERROR: outside financial period");
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            assertThrows(ValidationException.class, () -> service.updateAppraisal(1L, request));
+        }
+    }
+
+    @Test
+    void updateAppraisal_TransactionDateChanged_YearError_ThrowsException() {
+        mockHdr.setTransactionDate(LocalDate.of(2023, 1, 1));
+        HrAppraisalRequest request = new HrAppraisalRequest();
+        request.setDescription("Test");
+        request.setPeriodFrom(LocalDate.now());
+        request.setTransactionDate(LocalDate.of(2024, 6, 1));
+        request.setAppraisalBasicPercent(BigDecimal.TEN);
+        request.setAppraisalFixedPercent(BigDecimal.TEN);
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any()))
+                .thenReturn(null)  // first call: financial year OK
+                .thenReturn("ERROR: transaction year invalid"); // second call: transaction year error
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            assertThrows(ValidationException.class, () -> service.updateAppraisal(1L, request));
+        }
+    }
+
+    // line 612: transactionYearResult not null but no ERROR — no throw
+    @Test
+    void updateAppraisal_TransactionDateChanged_YearOk_NonNullResult_Success() {
+        mockHdr.setTransactionDate(LocalDate.of(2023, 1, 1));
+        HrAppraisalRequest request = new HrAppraisalRequest();
+        request.setDescription("Test");
+        request.setPeriodFrom(LocalDate.now());
+        request.setTransactionDate(LocalDate.of(2024, 6, 1));
+        request.setAppraisalBasicPercent(BigDecimal.TEN);
+        request.setAppraisalFixedPercent(BigDecimal.TEN);
+        request.setDetails(new ArrayList<>());
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(hdrRepository.save(any())).thenReturn(mockHdr);
+        when(self.getAppraisalById(1L)).thenReturn(Map.of());
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any()))
+                .thenReturn("OK")   // financial year OK (non-null, no ERROR)
+                .thenReturn("OK");  // transaction year OK (non-null, no ERROR)
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            assertDoesNotThrow(() -> service.updateAppraisal(1L, request));
+        }
+    }
+
+    // line 605: existingDate == transactionDate — second jdbcTemplate call skipped
+    @Test
+    void updateAppraisal_TransactionDateUnchanged_NoYearCheck() {
+        mockHdr.setTransactionDate(LocalDate.of(2024, 6, 1));
+        HrAppraisalRequest request = new HrAppraisalRequest();
+        request.setDescription("Test");
+        request.setPeriodFrom(LocalDate.now());
+        request.setTransactionDate(LocalDate.of(2024, 6, 1)); // same as existing
+        request.setAppraisalBasicPercent(BigDecimal.TEN);
+        request.setAppraisalFixedPercent(BigDecimal.TEN);
+        request.setDetails(new ArrayList<>());
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(hdrRepository.save(any())).thenReturn(mockHdr);
+        when(self.getAppraisalById(1L)).thenReturn(Map.of());
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any())).thenReturn(null);
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            assertDoesNotThrow(() -> service.updateAppraisal(1L, request));
+        }
+        // only one jdbcTemplate call (financial year), not two
+        verify(jdbcTemplate, times(1)).queryForObject(anyString(), eq(String.class), any(), any());
+    }
+
+    @Test
+    void validateFinancialYear_NullResult_NoException() {
+        HrAppraisalRequest request = new HrAppraisalRequest();
+        request.setDescription("Test");
+        request.setPeriodFrom(LocalDate.now());
+        request.setAppraisalBasicPercent(BigDecimal.TEN);
+        request.setAppraisalFixedPercent(BigDecimal.TEN);
+        request.setDetails(new ArrayList<>());
+        when(hdrRepository.saveAndFlush(any())).thenReturn(mockHdr);
+        when(self.getAppraisalById(1L)).thenReturn(Map.of());
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any())).thenReturn(null);
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getGroupPoid).thenReturn(10L);
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            assertDoesNotThrow(() -> service.createAppraisal(request));
+        }
+    }
+
+    // line 595: financialYearResult not null but no ERROR — no throw
+    @Test
+    void validateFinancialYear_NonNullOkResult_NoException() {
+        HrAppraisalRequest request = new HrAppraisalRequest();
+        request.setDescription("Test");
+        request.setPeriodFrom(LocalDate.now());
+        request.setAppraisalBasicPercent(BigDecimal.TEN);
+        request.setAppraisalFixedPercent(BigDecimal.TEN);
+        request.setDetails(new ArrayList<>());
+        when(hdrRepository.saveAndFlush(any())).thenReturn(mockHdr);
+        when(self.getAppraisalById(1L)).thenReturn(Map.of());
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any())).thenReturn("OK");
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getGroupPoid).thenReturn(10L);
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            assertDoesNotThrow(() -> service.createAppraisal(request));
+        }
+    }
+
     // ── Point 4: stored procedure happy paths ─────────────────────────────
 
     private MockedConstruction<SimpleJdbcCall> mockSp() {
@@ -753,6 +1108,7 @@ class HrAppraisalServiceImplTest {
     void updateDataSp_Success() {
         HrAppraisalActionRequest request = new HrAppraisalActionRequest();
         request.setAdditionalData("extra");
+        when(dtlRepository.findByTransactionPoidAndEmployeePoid(1L, 100L)).thenReturn(List.of(mockDtl));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
@@ -762,16 +1118,22 @@ class HrAppraisalServiceImplTest {
     }
 
     @Test
-    void updateMasterSp_NotFound_ThrowsException() {
-        when(hdrRepository.findById(1L)).thenReturn(Optional.empty());
-        HrAppraisalActionRequest request = new HrAppraisalActionRequest();
+    void updateDataSp_NullEmployeePoid_ThrowsException() {
+        assertThrows(ValidationException.class,
+                () -> service.updateDataSp(1L, null, new HrAppraisalActionRequest()));
+    }
+
+    @Test
+    void updateDataSp_EmployeeNotInAppraisal_ThrowsException() {
+        when(dtlRepository.findByTransactionPoidAndEmployeePoid(1L, 100L)).thenReturn(List.of());
         assertThrows(ResourceNotFoundException.class,
-                () -> service.updateMasterSp(1L, request));
+                () -> service.updateDataSp(1L, 100L, new HrAppraisalActionRequest()));
     }
 
     @Test
     void updateMasterSp_Success() {
         when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
         HrAppraisalActionRequest request = new HrAppraisalActionRequest();
         request.setBasicIncrementPercent(BigDecimal.valueOf(5));
         request.setBonusPercent(BigDecimal.valueOf(10));
@@ -785,6 +1147,9 @@ class HrAppraisalServiceImplTest {
 
     @Test
     void createJvSp_Success() {
+        HrAppraisalDtl dtlWithBonus = new HrAppraisalDtl();
+        dtlWithBonus.setNewBonus(BigDecimal.valueOf(500));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(dtlWithBonus));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
@@ -803,6 +1168,9 @@ class HrAppraisalServiceImplTest {
 
     @Test
     void bankFileSp_Success() {
+        HrAppraisalDtl dtlWithBonus = new HrAppraisalDtl();
+        dtlWithBonus.setNewBonus(BigDecimal.valueOf(500));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(dtlWithBonus));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
@@ -813,6 +1181,8 @@ class HrAppraisalServiceImplTest {
 
     @Test
     void arrearsSp_Success() {
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of());
+        when(payrollVarDtlRepository.findMaxDetRowIdByTransactionPoid(200L)).thenReturn(0L);
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
@@ -823,6 +1193,11 @@ class HrAppraisalServiceImplTest {
 
     @Test
     void arrearsCalcSp_Success() {
+        mockHdr.setPeriodFrom(LocalDate.of(2024, 1, 1));
+        HrAppraisalDtl dtlWithIncrement = new HrAppraisalDtl();
+        dtlWithIncrement.setNetIncrement(BigDecimal.valueOf(500));
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(dtlWithIncrement));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
@@ -894,19 +1269,8 @@ class HrAppraisalServiceImplTest {
     }
 
     @Test
-    void printLetter_WithoutEmployeePoid_Success() throws Exception {
-        JasperReport report = mock(JasperReport.class);
-        when(printService.buildBaseParams(anyLong(), any())).thenReturn(new HashMap<>());
-        when(printService.load("HrAppraisalLetter.jrxml")).thenReturn(report);
-        when(printService.fillReportToPdf(any(), anyMap(), any())).thenReturn("PDF".getBytes());
-
-        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
-            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
-
-            // employeePoid == null branch in generatePdf
-            byte[] result = service.printLetter(1L, null);
-            assertNotNull(result);
-        }
+    void printLetter_WithoutEmployeePoid_ThrowsValidationException() {
+        assertThrows(ValidationException.class, () -> service.printLetter(1L, null));
     }
 
     @Test
@@ -963,6 +1327,29 @@ class HrAppraisalServiceImplTest {
         // isUpdated path executed — save called (not findMaxDetRowId)
         verify(dtlRepository, never()).findMaxDetRowIdByTransactionPoid(any());
         verify(dtlRepository).save(any());
+    }
+
+    // line 341: dtl.getArrears() == null — null branch of arrears filter
+    @Test
+    void arrearsSp_NullArrears_TreatedAsZeroCount_Success() {
+        // mockDtl has arrears=null → filter predicate short-circuits on null check → arrearsCount stays 0
+        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
+        when(payrollVarDtlRepository.findMaxDetRowIdByTransactionPoid(200L)).thenReturn(0L);
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            assertDoesNotThrow(() -> service.arrearsSp(1L, 200L));
+        }
+    }
+
+    // line 612: nz(null) — covers the null branch returning BigDecimal.ZERO
+    @Test
+    void batchUpdateSp_NullPercentages_TreatedAsZero_ThrowsException() {
+        // both null → nz returns ZERO for each → both zero → ValidationException
+        HrAppraisalActionRequest request = new HrAppraisalActionRequest();
+        // basicIncrementPercent and bonusPercent left null
+        assertThrows(ValidationException.class, () -> service.batchUpdateSp(1L, request));
     }
 
     @Test

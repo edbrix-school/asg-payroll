@@ -1,8 +1,7 @@
 package com.asg.payroll.employeeappraisal.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,6 +11,8 @@ import java.time.LocalDateTime;
 @IdClass(HrPayrollVarAlwdedDtlId.class)
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class HrPayrollVarAlwdedDtl {
 
     @Id

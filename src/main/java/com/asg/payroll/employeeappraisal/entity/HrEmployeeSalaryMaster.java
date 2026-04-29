@@ -1,8 +1,7 @@
 package com.asg.payroll.employeeappraisal.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +11,8 @@ import java.time.LocalDateTime;
 @Table(name = "HR_EMPLOYEE_SALARY_MASTER")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class HrEmployeeSalaryMaster {
 
     @Id
