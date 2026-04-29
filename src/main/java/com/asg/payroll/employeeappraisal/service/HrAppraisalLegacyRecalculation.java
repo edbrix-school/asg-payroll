@@ -114,15 +114,13 @@ public final class HrAppraisalLegacyRecalculation {
     public static void applyFromNetDifference(HrAppraisalDtl row,
                                               BigDecimal netDiffAmount,
                                               BigDecimal appraisalBasicPercent,
-                                              BigDecimal appraisalFixedPercent,
-                                              LocalDate periodFromHeader,
+                                              BigDecimal fixedPercent, LocalDate periodFromHeader,
                                               LocalDate today) {
         if (row == null) {
             return;
         }
         BigDecimal netDiff = nz(netDiffAmount);
         BigDecimal basicPercent = nz(appraisalBasicPercent);
-        nz(appraisalFixedPercent);
 
         BigDecimal curBasicSalary = nz(row.getCurBasicSalary());
         BigDecimal curFaAlw = nz(row.getCurFaAlw());

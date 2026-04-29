@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class HrAppraisalHdr extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @AuditIgnore
     @Column(name = "TRANSACTION_POID")
     private Long transactionPoid;

@@ -1,5 +1,4 @@
 package com.asg.payroll.employeeappraisal.service;
-
 import com.asg.common.lib.dto.*;
 import com.asg.common.lib.enums.LogDetailsEnum;
 import com.asg.common.lib.security.util.UserContext;
@@ -8,6 +7,7 @@ import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
+import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Lazy;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperReport;
@@ -24,6 +24,8 @@ import com.asg.payroll.employeeappraisal.entity.HrAppraisalHdr;
 import com.asg.payroll.employeeappraisal.enums.ActionType;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalDtlRepository;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalHdrRepository;
+import com.asg.payroll.employeeappraisal.repository.HrEmployeeSalaryMasterRepository;
+import com.asg.payroll.employeeappraisal.repository.HrPayrollVarAlwdedDtlRepository;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
 import com.asg.payroll.exceptions.ValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -49,10 +51,16 @@ import java.util.*;
 @Transactional
 public class HrAppraisalServiceImpl implements HrAppraisalService {
 
-    public HrAppraisalServiceImpl(@Lazy HrAppraisalService self, HrAppraisalHdrRepository hdrRepository, HrAppraisalDtlRepository dtlRepository, DocumentSearchService documentSearchService, DocumentDeleteService documentDeleteService, LoggingService loggingService, PrintService printService, DataSource dataSource, JdbcTemplate jdbcTemplate) {
+
+    private final EntityManager entityManager;
+
+    public HrAppraisalServiceImpl(EntityManager entityManager, @Lazy HrAppraisalService self, HrAppraisalHdrRepository hdrRepository, HrAppraisalDtlRepository dtlRepository, HrEmployeeSalaryMasterRepository salaryMasterRepository, HrPayrollVarAlwdedDtlRepository payrollVarDtlRepository, DocumentSearchService documentSearchService, DocumentDeleteService documentDeleteService, LoggingService loggingService, PrintService printService, DataSource dataSource, JdbcTemplate jdbcTemplate) {
+        this.entityManager = entityManager;
         this.self = self;
         this.hdrRepository = hdrRepository;
         this.dtlRepository = dtlRepository;
+        this.salaryMasterRepository = salaryMasterRepository;
+        this.payrollVarDtlRepository = payrollVarDtlRepository;
         this.documentSearchService = documentSearchService;
         this.documentDeleteService = documentDeleteService;
         this.loggingService = loggingService;
@@ -63,6 +71,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private final HrAppraisalService self;
     private final HrAppraisalHdrRepository hdrRepository;
     private final HrAppraisalDtlRepository dtlRepository;
+    private final HrEmployeeSalaryMasterRepository salaryMasterRepository;
+    private final HrPayrollVarAlwdedDtlRepository payrollVarDtlRepository;
     private final DocumentSearchService documentSearchService;
     private final DocumentDeleteService documentDeleteService;
     private final LoggingService loggingService;
@@ -108,6 +118,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     @Override
     public Map<String, Object> createAppraisal(HrAppraisalRequest request) {
         validateHeaderForLegacySave(request);
+        validateFinancialYear(request.getTransactionDate(), null);
         HrAppraisalHdr hdr = new HrAppraisalHdr();
         mapHeader(request, hdr);
         hdr.setGroupPoid(UserContext.getGroupPoid());
@@ -115,6 +126,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         hdr.setDeleted("N");
         HrAppraisalHdr saved = hdrRepository.saveAndFlush(hdr);
         upsertDetails(saved.getTransactionPoid(), request.getDetails(), true);
+        entityManager.refresh(saved);
         loggingService.createLogSummaryEntry(UserContext.getDocumentId(), saved.getTransactionPoid().toString(),String.format("%s %s", LogDetailsEnum.CREATED, saved.getDocRef()));
         return self.getAppraisalById(saved.getTransactionPoid());
     }
@@ -123,6 +135,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> updateAppraisal(Long transactionPoid, HrAppraisalRequest request) {
         validateHeaderForLegacySave(request);
         HrAppraisalHdr existing = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
+        validateFinancialYear(request.getTransactionDate(), existing.getTransactionDate());
         HrAppraisalHdr oldEntity = new HrAppraisalHdr();
         BeanUtils.copyProperties(existing, oldEntity);
         mapHeader(request, existing);
@@ -135,6 +148,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     @Override
     public void deleteAppraisal(Long transactionPoid, DeleteReasonDto deleteReasonDto) {
         HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
+        validateFinancialYear(hdr.getTransactionDate(), null);
 
         documentDeleteService.deleteDocument(
                 transactionPoid,
@@ -209,6 +223,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             case "PERCENT_EDIT" ->
                     HrAppraisalLegacyRecalculation.applyRecalculateGrossFromPercent(row, request.getFieldName(), request.getPeriodFrom(), today);
             case "NET_DIFF_EDIT" -> {
+                if (request.getNetDiffAmount() == null) {
+                    throw new ValidationException("Net difference amount is required for NET_DIFF_EDIT mode.");
+                }
                 if (request.getAppraisalBasicPercent() == null) {
                     throw new ValidationException("Appraisal Basic Percent should not be empty for autocalculation of basic and fixed allowances..");
                 }
@@ -220,7 +237,11 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
                 if (basicPercent.add(fixedPercent).compareTo(new BigDecimal("100")) != 0) {
                     throw new ValidationException("Some of Basic and Fixed percentages should be 100 for autocalculation of basic and fixed allowances..");
                 }
-                HrAppraisalLegacyRecalculation.applyFromNetDifference(row, nz(row.getNetIncrement()), basicPercent, fixedPercent, request.getPeriodFrom(), today);
+                BigDecimal netDiffAmt = nz(request.getNetDiffAmount());
+                if (netDiffAmt.compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new ValidationException("Net difference amount must be greater than zero for autocalculation.");
+                }
+                HrAppraisalLegacyRecalculation.applyFromNetDifference(row, netDiffAmt, basicPercent, fixedPercent, request.getPeriodFrom(), today);
             }
             default ->
                     throw new ValidationException("Unsupported recalculation mode. Use AMOUNT_EDIT, PERCENT_EDIT, or NET_DIFF_EDIT.");
@@ -234,6 +255,12 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> updateDataSp(Long transactionPoid, Long employeePoid, HrAppraisalActionRequest request) {
+        if (employeePoid == null) {
+            throw new ValidationException("No Employee record is selected.");
+        }
+        if (dtlRepository.findByTransactionPoidAndEmployeePoid(transactionPoid, employeePoid).isEmpty()) {
+            throw new ResourceNotFoundException("Employee not found in appraisal.");
+        }
         return execute(
                 "PROC_HR_APPRAISAL_UPDATE_DATA",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_EMPLOYEE_POID", Types.NUMERIC), new SqlParameter("P_ADDITIONAL_DATA", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
@@ -247,6 +274,16 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (hdr.getApprovedBy() == null || hdr.getApprovedBy().isBlank()) {
             throw new ValidationException("Please enter approval by details... ");
         }
+
+        List<Long> employeesWithoutSalary = dtlRepository.findByTransactionPoid(transactionPoid).stream()
+                .filter(dtl -> dtl.getNetIncrement() != null && dtl.getNetIncrement().compareTo(BigDecimal.ZERO) != 0)
+                .map(HrAppraisalDtl::getEmployeePoid)
+                .filter(empPoid -> !salaryMasterRepository.existsByEmployeePoid(empPoid))
+                .toList();
+
+        if (!employeesWithoutSalary.isEmpty()) {
+            throw new ValidationException("Some employees in this appraisal do not have salary records.");
+        }
         return execute(
                 "PROC_HR_APPRAISAL_UPDATE_MAST",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter(P_BASIC_INCREMENT_PERCENT, Types.NUMERIC), new SqlParameter(P_BONUS_PERCENT, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
@@ -256,6 +293,13 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> createJvSp(Long transactionPoid) {
+
+        boolean hasBonusAmount = dtlRepository.findByTransactionPoid(transactionPoid).stream()
+                .anyMatch(dtl -> dtl.getNewBonus() != null && dtl.getNewBonus().compareTo(BigDecimal.ZERO) > 0);
+        if (!hasBonusAmount) {
+            throw new ValidationException("No bonus amounts found in appraisal details. Cannot create JV.");
+        }
+
         return execute(
                 "PROC_HR_APPRAISAL_CREATE_JV",
                 List.of(new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_APPRAISAL_POID", Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
@@ -274,6 +318,13 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> bankFileSp(Long transactionPoid) {
+
+        boolean hasBonusEmployees = dtlRepository.findByTransactionPoid(transactionPoid).stream()
+                .anyMatch(dtl -> dtl.getNewBonus() != null && dtl.getNewBonus().compareTo(BigDecimal.ZERO) > 0);
+
+        if (!hasBonusEmployees) {
+            throw new ValidationException("No employees with bonus amount found for bank file generation.");
+        }
         return execute(
                 "PROC_HR_APPRAISAL_BANK_FILE",
                 List.of(new SqlParameter("P_COMPANY_POID", Types.NUMERIC), new SqlParameter("P_TRNNO", Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlOutParameter("P_FILE_NAME", Types.VARCHAR)),
@@ -286,6 +337,13 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (payrollPoid == null) {
             throw new ValidationException("Please select the payroll for adding the arrears... ");
         }
+        long arrearsCount = dtlRepository.findByTransactionPoid(transactionPoid).stream()
+                .filter(dtl -> dtl.getArrears() != null && dtl.getArrears().compareTo(BigDecimal.ZERO) != 0)
+                .count();
+        long maxExistingRowId = payrollVarDtlRepository.findMaxDetRowIdByTransactionPoid(payrollPoid);
+        if (maxExistingRowId > 0 && arrearsCount > 0) {
+            throw new ValidationException("Payroll already has variable allowance entries. Please remove existing arrears entries before re-adding.");
+        }
         return execute(
                 "PROC_HR_APPRAISAL_ARREARS",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_PAYROLL_POID", Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
@@ -295,6 +353,19 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public Map<String, Object> arrearsCalcSp(Long transactionPoid) {
+        HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid)
+                .orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
+
+        if (hdr.getPeriodFrom() == null) {
+            throw new ValidationException("Appraisal effective date (period from) is not set. Cannot calculate arrears.");
+        }
+
+        boolean hasEligibleEmployees = dtlRepository.findByTransactionPoid(transactionPoid).stream()
+                .anyMatch(dtl -> dtl.getNetIncrement() != null && dtl.getNetIncrement().compareTo(BigDecimal.ZERO) > 0);
+        if (!hasEligibleEmployees) {
+            throw new ValidationException("No employees with a positive net increment found. Arrears calculation requires at least one employee with an increment.");
+        }
+
         return execute(
                 "PROC_HR_APPRAISAL_ARREARS_CALC",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
@@ -319,6 +390,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public byte[] printLetter(Long transactionPoid, Long employeePoid) throws JRException {
+        if (employeePoid == null) {
+            throw new ValidationException("Select any employee from the below list to print individual letter.");
+        }
         return generatePdf("HrAppraisalLetter.jrxml", transactionPoid, employeePoid);
     }
 
@@ -380,37 +454,54 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         for (HrAppraisalDtlRequest request : requests) {
             ActionType action = resolveAction(request, createMode);
             if (action == null) continue;
-            if (action == ActionType.isCreated) {
-                Long nextDetRowId = dtlRepository.findMaxDetRowIdByTransactionPoid(transactionPoid) + 1;
-                HrAppraisalDtl entity = new HrAppraisalDtl();
-                entity.setTransactionPoid(transactionPoid);
-                entity.setDetRowId(nextDetRowId);
-                entity.setDeleted("N");
-                mapDetail(request, entity);
-                HrAppraisalLegacyRecalculation.applyRecalculateGross(entity, hdr.getPeriodFrom(), today);
-                HrAppraisalDtl saved = dtlRepository.save(entity);
-                String logDetail = String.format("Row Created on [Employee Appraisal Details] with DetRowId: %s", saved.getDetRowId());
-                loggingService.createLogSummaryEntry(UserContext.getDocumentId(), String.valueOf(transactionPoid), logDetail);
-            } else {
-                HrAppraisalDtlId id = new HrAppraisalDtlId();
-                id.setTransactionPoid(transactionPoid);
-                id.setDetRowId(request.getDetRowId());
-                if (action == ActionType.isDeleted) {
-                    HrAppraisalDtl detail = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Details", "DET_ROW_ID", id.getDetRowId()));
-                    dtlRepository.deleteById(id);
-                    loggingService.logDelete(detail, UserContext.getDocumentId(), id.toString());
-                } else {
-                    HrAppraisalDtl existing = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appraisal detail not found for detRowId: " + request.getDetRowId()));
-                    HrAppraisalDtl oldEntity = new HrAppraisalDtl();
-                    BeanUtils.copyProperties(existing, oldEntity);
-                    mapDetail(request, existing);
-                    HrAppraisalLegacyRecalculation.applyRecalculateGross(existing, hdr.getPeriodFrom(), today);
-                    HrAppraisalDtl saved = dtlRepository.save(existing);
-                    String logDetail = String.format("KeyId = TRANSACTION_POID %s: DET_ROW_ID %s", saved.getTransactionPoid(), saved.getDetRowId());
-                    loggingService.createLog(oldEntity, existing, HrAppraisalDtl.class, UserContext.getDocumentId(), transactionPoid.toString(), logDetail);
-                }
+            switch (action) {
+                case isCreated -> createDetail(transactionPoid, request, hdr, today);
+                case isDeleted -> deleteDetail(transactionPoid, request);
+                default -> updateDetail(transactionPoid, request, hdr, today);
+
             }
         }
+    }
+
+    private void createDetail(Long transactionPoid, HrAppraisalDtlRequest request, HrAppraisalHdr hdr, LocalDate today) {
+        if (request.getEmployeePoid() != null && !dtlRepository.findByTransactionPoidAndEmployeePoid(transactionPoid, request.getEmployeePoid()).isEmpty()) {
+            throw new ValidationException("Employee already exists in this appraisal.");
+        }
+        HrAppraisalDtl entity = new HrAppraisalDtl();
+        entity.setTransactionPoid(transactionPoid);
+        entity.setDetRowId(dtlRepository.findMaxDetRowIdByTransactionPoid(transactionPoid) + 1);
+        entity.setDeleted("N");
+        mapDetail(request, entity);
+        HrAppraisalLegacyRecalculation.applyRecalculateGross(entity, hdr.getPeriodFrom(), today);
+        HrAppraisalDtl saved = dtlRepository.save(entity);
+        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), String.valueOf(transactionPoid),
+                String.format("Row Created on [Employee Appraisal Details] with DetRowId: %s", saved.getDetRowId()));
+    }
+
+    private void deleteDetail(Long transactionPoid, HrAppraisalDtlRequest request) {
+        HrAppraisalDtlId id = buildDtlId(transactionPoid, request.getDetRowId());
+        HrAppraisalDtl detail = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Details", "DET_ROW_ID", id.getDetRowId()));
+        dtlRepository.deleteById(id);
+        loggingService.logDelete(detail, UserContext.getDocumentId(), id.getTransactionPoid().toString());
+    }
+
+    private void updateDetail(Long transactionPoid, HrAppraisalDtlRequest request, HrAppraisalHdr hdr, LocalDate today) {
+        HrAppraisalDtlId id = buildDtlId(transactionPoid, request.getDetRowId());
+        HrAppraisalDtl existing = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appraisal detail not found for detRowId: " + request.getDetRowId()));
+        HrAppraisalDtl oldEntity = new HrAppraisalDtl();
+        BeanUtils.copyProperties(existing, oldEntity);
+        mapDetail(request, existing);
+        HrAppraisalLegacyRecalculation.applyRecalculateGross(existing, hdr.getPeriodFrom(), today);
+        HrAppraisalDtl saved = dtlRepository.save(existing);
+        loggingService.createLog(oldEntity, existing, HrAppraisalDtl.class, UserContext.getDocumentId(), transactionPoid.toString(),
+                String.format("KeyId = TRANSACTION_POID %s: DET_ROW_ID %s", saved.getTransactionPoid(), saved.getDetRowId()));
+    }
+
+    private HrAppraisalDtlId buildDtlId(Long transactionPoid, Long detRowId) {
+        HrAppraisalDtlId id = new HrAppraisalDtlId();
+        id.setTransactionPoid(transactionPoid);
+        id.setDetRowId(detRowId);
+        return id;
     }
 
     private void mapDetail(HrAppraisalDtlRequest request, HrAppraisalDtl entity) {
@@ -491,6 +582,29 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         }
         if (request.getAppraisalFixedPercent() == null) {
             throw new ValidationException("Appraisal Fixed Percent is required in the second tab...");
+        }
+    }
+
+    private void validateFinancialYear(LocalDate transactionDate, LocalDate existingTransactionDate) {
+        String financialYearResult = jdbcTemplate.queryForObject(
+                "SELECT FUNC_GLOB_FINANCIAL_YEAR_VALID(?, ?) FROM DUAL",
+                String.class,
+                UserContext.getCompanyPoid(),
+                transactionDate
+        );
+        if (financialYearResult != null && financialYearResult.toUpperCase().contains("ERROR")) {
+            throw new ValidationException("Changes allowed only within current Financial Period.");
+        }
+        if (existingTransactionDate != null && !existingTransactionDate.equals(transactionDate)) {
+            String transactionYearResult = jdbcTemplate.queryForObject(
+                    "SELECT FUNC_GLOB_TRANSACTN_YEAR_VALID(?, ?) FROM DUAL",
+                    String.class,
+                    UserContext.getCompanyPoid(),
+                    transactionDate
+            );
+            if (transactionYearResult != null && transactionYearResult.toUpperCase().contains("ERROR")) {
+                throw new ValidationException("Transaction date cannot be updated.");
+            }
         }
     }
 

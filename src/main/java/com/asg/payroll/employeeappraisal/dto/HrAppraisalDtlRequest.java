@@ -1,6 +1,8 @@
 package com.asg.payroll.employeeappraisal.dto;
 
 import com.asg.payroll.employeeappraisal.enums.ActionType;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -12,9 +14,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class HrAppraisalDtlRequest {
     private Long detRowId;
+    @NotNull(message = "Employee is required.")
     private Long employeePoid;
     private Long designationPoid;
     private LocalDate joinDate;
+    @Size(max = 20, message = "Current air entitlement must not exceed 20 characters.")
     private String curAirEntitle;
     private BigDecimal curBonus;
     private BigDecimal curIncrement;
@@ -27,6 +31,7 @@ public class HrAppraisalDtlRequest {
     private BigDecimal curOthAlw;
     private BigDecimal curAvgot;
     private BigDecimal curGrossPay;
+    @Size(max = 20, message = "New air entitlement must not exceed 20 characters.")
     private String newAirEntitle;
     private BigDecimal newBonus;
     private BigDecimal newIncrementPer;
@@ -39,6 +44,7 @@ public class HrAppraisalDtlRequest {
     private BigDecimal newOthAlw;
     private BigDecimal newAvgot;
     private BigDecimal newGrossPay;
+    @Size(max = 20, message = "Status must not exceed 20 characters.")
     private String status;
     private BigDecimal netIncrement;
     private LocalDate lastIncrementDate;
@@ -52,6 +58,7 @@ public class HrAppraisalDtlRequest {
     private BigDecimal arrears;
     private BigDecimal newBonusPer;
     private LocalDate letterEmailedOn;
+    @Size(max = 50, message = "Grid listing method must not exceed 50 characters.")
     private String gridListingMethod;
     private BigDecimal registeredSalary;
     private BigDecimal curMonthlyCtc;

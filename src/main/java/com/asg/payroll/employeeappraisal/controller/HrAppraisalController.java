@@ -100,7 +100,7 @@ public class HrAppraisalController {
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/recalculate-detail")
-    public ResponseEntity<?> recalculateDetail(@RequestBody HrAppraisalRecalculationRequest request) {
+    public ResponseEntity<?> recalculateDetail(@Valid @RequestBody HrAppraisalRecalculationRequest request) {
         return success("Appraisal detail recalculation completed", hrAppraisalService.recalculateDetail(request));
     }
 
