@@ -113,8 +113,7 @@ public final class HrAppraisalLegacyRecalculation {
 
     public static void applyFromNetDifference(HrAppraisalDtl row,
                                               BigDecimal netDiffAmount,
-                                              BigDecimal appraisalBasicPercent,
-                                              BigDecimal fixedPercent, LocalDate periodFromHeader,
+                                              BigDecimal appraisalBasicPercent, LocalDate periodFromHeader,
                                               LocalDate today) {
         if (row == null) {
             return;

@@ -241,7 +241,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
                 if (netDiffAmt.compareTo(BigDecimal.ZERO) <= 0) {
                     throw new ValidationException("Net difference amount must be greater than zero for autocalculation.");
                 }
-                HrAppraisalLegacyRecalculation.applyFromNetDifference(row, netDiffAmt, basicPercent, fixedPercent, request.getPeriodFrom(), today);
+                HrAppraisalLegacyRecalculation.applyFromNetDifference(row, netDiffAmt, basicPercent, request.getPeriodFrom(), today);
             }
             default ->
                     throw new ValidationException("Unsupported recalculation mode. Use AMOUNT_EDIT, PERCENT_EDIT, or NET_DIFF_EDIT.");

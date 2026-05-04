@@ -10,12 +10,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HrAppraisalLegacyRecalculationTest {
 
-    private HrAppraisalDtl dtlWithBasicAndFixed(double basic, double fixed) {
+    private HrAppraisalDtl dtlWithBasicAndFixed() {
         HrAppraisalDtl dtl = new HrAppraisalDtl();
-        dtl.setCurBasicSalary(BigDecimal.valueOf(basic));
-        dtl.setCurFaAlw(BigDecimal.valueOf(fixed));
-        dtl.setNewBasicSalary(BigDecimal.valueOf(basic + 500));
-        dtl.setNewFaAlw(BigDecimal.valueOf(fixed + 200));
+        dtl.setCurBasicSalary(BigDecimal.valueOf((double) 5000));
+        dtl.setCurFaAlw(BigDecimal.valueOf((double) 2000));
+        dtl.setNewBasicSalary(BigDecimal.valueOf((double) 5000 + 500));
+        dtl.setNewFaAlw(BigDecimal.valueOf((double) 2000 + 200));
         return dtl;
     }
 
@@ -87,7 +87,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_ZeroBonus_NoBonusPercent() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         dtl.setNewBonus(BigDecimal.ZERO);
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, LocalDate.now(), LocalDate.now());
         assertNull(dtl.getNewBonusPer());
@@ -95,7 +95,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_NullBonus_TreatedAsZero_NoBonusPercent() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         // newBonus left null — nz() returns ZERO, bonus branch skipped
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, LocalDate.now(), LocalDate.now());
         assertNull(dtl.getNewBonusPer());
@@ -112,7 +112,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_PeriodFromAfterToday_NoArrears() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         LocalDate future = LocalDate.now().plusMonths(3);
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, future, LocalDate.now());
         assertNull(dtl.getArrears());
@@ -120,7 +120,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_ZeroMonths_NoArrears() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         // periodFrom == today → monthsBetween == 0
         LocalDate same = LocalDate.of(2024, 3, 15);
         LocalDate today = LocalDate.of(2024, 3, 1); // before same, so isBefore is false
@@ -136,7 +136,7 @@ class HrAppraisalLegacyRecalculationTest {
 
         HrAppraisalLegacyRecalculation.applyFromNetDifference(
                 dtl, BigDecimal.valueOf(-100),
-                BigDecimal.valueOf(60), BigDecimal.valueOf(40),
+                BigDecimal.valueOf(60),
                 LocalDate.now(), LocalDate.now());
 
         // netDiff <= 0 branch: newBasic and newFaAlw stay as current
@@ -151,7 +151,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_ComputesNewGrossAndNetIncrement() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
 
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 1));
 
@@ -190,7 +190,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_SetsStatusChangedWhenNetDiffNonZero() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
 
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 1));
 
@@ -199,7 +199,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_ComputesIncrementPercent() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
 
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 1));
 
@@ -209,7 +209,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_ComputesArrears_WhenPeriodFromBeforeToday() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         LocalDate periodFrom = LocalDate.of(2024, 1, 1);
         LocalDate today = LocalDate.of(2024, 4, 1); // 3 months later
 
@@ -221,14 +221,14 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_NullPeriodFrom_NoArrears() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, null, LocalDate.now());
         assertNull(dtl.getArrears());
     }
 
     @Test
     void applyRecalculateGross_NullToday_NoArrears() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, LocalDate.of(2024, 1, 1), null);
         assertNull(dtl.getArrears());
     }
@@ -236,7 +236,7 @@ class HrAppraisalLegacyRecalculationTest {
     @Test
     void applyRecalculateGross_PeriodFromBeforeToday_ZeroMonths_NoArrears() {
         // periodFrom is before today but same month → monthsBetween == 0
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         LocalDate periodFrom = LocalDate.of(2024, 3, 1);
         LocalDate today = LocalDate.of(2024, 3, 31); // same month, isBefore=true but months=0
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, periodFrom, today);
@@ -260,7 +260,7 @@ class HrAppraisalLegacyRecalculationTest {
 
     @Test
     void applyRecalculateGross_ComputesBonusPercent_WhenBonusAndGrossNonZero() {
-        HrAppraisalDtl dtl = dtlWithBasicAndFixed(5000, 2000);
+        HrAppraisalDtl dtl = dtlWithBasicAndFixed();
         dtl.setNewBonus(BigDecimal.valueOf(700));
 
         HrAppraisalLegacyRecalculation.applyRecalculateGross(dtl, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 1));
@@ -330,7 +330,7 @@ class HrAppraisalLegacyRecalculationTest {
     @Test
     void applyFromNetDifference_NullRow_DoesNothing() {
         assertDoesNotThrow(() -> HrAppraisalLegacyRecalculation.applyFromNetDifference(
-                null, BigDecimal.valueOf(500), BigDecimal.valueOf(60), BigDecimal.valueOf(40),
+                null, BigDecimal.valueOf(500), BigDecimal.valueOf(60),
                 LocalDate.now(), LocalDate.now()));
     }
 
@@ -342,7 +342,7 @@ class HrAppraisalLegacyRecalculationTest {
 
         HrAppraisalLegacyRecalculation.applyFromNetDifference(
                 dtl, BigDecimal.valueOf(1000),
-                BigDecimal.valueOf(60), BigDecimal.valueOf(40),
+                BigDecimal.valueOf(60),
                 LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 1));
 
         // basicDiff = 1000 * 60/100 = 600 => newBasic = 5600
@@ -359,7 +359,7 @@ class HrAppraisalLegacyRecalculationTest {
 
         HrAppraisalLegacyRecalculation.applyFromNetDifference(
                 dtl, BigDecimal.valueOf(1000),
-                BigDecimal.valueOf(60), BigDecimal.valueOf(40),
+                BigDecimal.valueOf(60),
                 LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 1));
 
         // all goes to basic => newBasic = 6000
@@ -375,7 +375,7 @@ class HrAppraisalLegacyRecalculationTest {
 
         HrAppraisalLegacyRecalculation.applyFromNetDifference(
                 dtl, BigDecimal.ZERO,
-                BigDecimal.valueOf(60), BigDecimal.valueOf(40),
+                BigDecimal.valueOf(60),
                 LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 1));
 
         assertEquals(new BigDecimal("5000"), dtl.getNewBasicSalary());
