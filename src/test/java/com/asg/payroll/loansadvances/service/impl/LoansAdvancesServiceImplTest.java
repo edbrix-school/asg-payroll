@@ -16,6 +16,7 @@ import com.asg.payroll.loansadvances.dto.HrRecurringPayDeductResponse;
 import com.asg.payroll.loansadvances.entity.HrRecurringPayDeduct;
 import com.asg.payroll.loansadvances.repository.HrRecurringPayDeductRepository;
 import com.asg.payroll.loansadvances.repository.LoansAdvancesProcRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,9 @@ class LoansAdvancesServiceImplTest {
     @Mock
     private DocumentSearchService documentSearchService;
 
+    @Mock
+    private EntityManager entityManager;
+
     @InjectMocks
     private LoansAdvancesServiceImpl service;
 
@@ -91,7 +95,7 @@ class LoansAdvancesServiceImplTest {
     void testCreate_Success() {
         HrRecurringPayDeductRequest request = createValidRequest();
         when(loansAdvancesProcRepository.validateRecurring(any(), any(), any())).thenReturn("true");
-        when(repository.save(any(HrRecurringPayDeduct.class))).thenAnswer(invocation -> {
+        when(repository.saveAndFlush(any(HrRecurringPayDeduct.class))).thenAnswer(invocation -> {
             HrRecurringPayDeduct entity = invocation.getArgument(0);
             entity.setTransactionPoid(100L);
             return entity;
@@ -100,8 +104,8 @@ class LoansAdvancesServiceImplTest {
         Long id = service.create(request);
 
         assertEquals(100L, id);
-        verify(repository, times(1)).save(any(HrRecurringPayDeduct.class));
-        verify(loggingService, times(1)).createLogSummaryEntry(eq(LogDetailsEnum.CREATED), eq("DOC-123"), eq("100"));
+        verify(repository, times(1)).saveAndFlush(any(HrRecurringPayDeduct.class));
+        verify(loggingService, times(1)).createLogSummaryEntry(eq("DOC-123"), eq("100"), anyString());
     }
 
     @Test
@@ -151,7 +155,7 @@ class LoansAdvancesServiceImplTest {
         request.setReceiptDate(LocalDate.now());
 
         when(loansAdvancesProcRepository.validateRecurring(any(), any(), any())).thenReturn("true");
-        when(repository.save(any(HrRecurringPayDeduct.class))).thenAnswer(invocation -> {
+        when(repository.saveAndFlush(any(HrRecurringPayDeduct.class))).thenAnswer(invocation -> {
             HrRecurringPayDeduct entity = invocation.getArgument(0);
             entity.setTransactionPoid(100L);
             return entity;
@@ -167,7 +171,7 @@ class LoansAdvancesServiceImplTest {
         request.setTotalAmount(null); // Cover branch where totalAmount is null
 
         when(loansAdvancesProcRepository.validateRecurring(any(), any(), any())).thenReturn("true");
-        when(repository.save(any(HrRecurringPayDeduct.class))).thenAnswer(invocation -> {
+        when(repository.saveAndFlush(any(HrRecurringPayDeduct.class))).thenAnswer(invocation -> {
             HrRecurringPayDeduct entity = invocation.getArgument(0);
             entity.setTransactionPoid(101L);
             return entity;
@@ -214,8 +218,11 @@ class LoansAdvancesServiceImplTest {
 
         when(repository.findById(100L)).thenReturn(Optional.of(existingEntity));
         when(loansAdvancesProcRepository.validateRecurring(any(), any(), any())).thenReturn("true");
-        when(repository.save(any(HrRecurringPayDeduct.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
+        when(repository.save(any(HrRecurringPayDeduct.class))).thenAnswer(invocation -> {
+            HrRecurringPayDeduct entity = invocation.getArgument(0);
+            entity.setTransactionPoid(100L);
+            return entity;
+        });
         HrRecurringPayDeductResponse response = service.update(100L, request);
 
         assertNotNull(response);
