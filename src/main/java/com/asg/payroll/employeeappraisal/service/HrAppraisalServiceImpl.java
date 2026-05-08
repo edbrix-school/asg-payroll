@@ -127,7 +127,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         HrAppraisalHdr saved = hdrRepository.saveAndFlush(hdr);
         upsertDetails(saved.getTransactionPoid(), request.getDetails(), true);
         entityManager.refresh(saved);
-        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), saved.getTransactionPoid().toString(),String.format("%s %s", LogDetailsEnum.CREATED, saved.getDocRef()));
+        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), saved.getTransactionPoid().toString(),String.format("%s %s", LogDetailsEnum.CREATED.getDescription(), saved.getDocRef()));
         return self.getAppraisalById(saved.getTransactionPoid());
     }
 
