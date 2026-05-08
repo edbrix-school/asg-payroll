@@ -756,7 +756,8 @@ class HrAppraisalServiceImplTest {
         when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
         when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
         when(salaryMasterRepository.existsByEmployeePoid(100L)).thenReturn(false);
-        assertThrows(ValidationException.class, () -> service.updateMasterSp(1L, new HrAppraisalActionRequest()));
+        HrAppraisalActionRequest request = new HrAppraisalActionRequest();
+        assertThrows(ValidationException.class, () -> service.updateMasterSp(1L, request));
     }
 
     // line 279: netIncrement != null && compareTo != 0 — false branch: netIncrement is zero
@@ -778,7 +779,8 @@ class HrAppraisalServiceImplTest {
     @Test
     void updateMasterSp_NotFound_ThrowsException() {
         when(hdrRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> service.updateMasterSp(1L, new HrAppraisalActionRequest()));
+        HrAppraisalActionRequest request = new HrAppraisalActionRequest();
+        assertThrows(ResourceNotFoundException.class, () -> service.updateMasterSp(1L, request));
     }
 
     @Test
@@ -906,9 +908,10 @@ class HrAppraisalServiceImplTest {
         when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
         when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any()))
                 .thenReturn("ERROR: outside financial period");
+        DeleteReasonDto reason = new DeleteReasonDto();
         try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
-            assertThrows(ValidationException.class, () -> service.deleteAppraisal(1L, new DeleteReasonDto()));
+            assertThrows(ValidationException.class, () -> service.deleteAppraisal(1L, reason));
         }
     }
 
@@ -1119,15 +1122,15 @@ class HrAppraisalServiceImplTest {
 
     @Test
     void updateDataSp_NullEmployeePoid_ThrowsException() {
-        assertThrows(ValidationException.class,
-                () -> service.updateDataSp(1L, null, new HrAppraisalActionRequest()));
+        HrAppraisalActionRequest request = new HrAppraisalActionRequest();
+        assertThrows(ValidationException.class, () -> service.updateDataSp(1L, null, request));
     }
 
     @Test
     void updateDataSp_EmployeeNotInAppraisal_ThrowsException() {
         when(dtlRepository.findByTransactionPoidAndEmployeePoid(1L, 100L)).thenReturn(List.of());
-        assertThrows(ResourceNotFoundException.class,
-                () -> service.updateDataSp(1L, 100L, new HrAppraisalActionRequest()));
+        HrAppraisalActionRequest request = new HrAppraisalActionRequest();
+        assertThrows(ResourceNotFoundException.class, () -> service.updateDataSp(1L, 100L, request));
     }
 
     @Test
