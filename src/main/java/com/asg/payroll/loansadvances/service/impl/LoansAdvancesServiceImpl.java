@@ -19,6 +19,8 @@ import com.asg.payroll.loansadvances.repository.HrRecurringPayDeductRepository;
 import com.asg.payroll.loansadvances.repository.LoansAdvancesProcRepository;
 import com.asg.payroll.loansadvances.service.LoansAdvancesService;
 import com.asg.payroll.loansadvances.util.LoansAdvancesMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,9 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
     private static final String TRANSACTIONPOID = "transaction poid";
     private static final String LOANSADVANCES = "Loans/Advances";
 
+    @PersistenceContext
+    private final EntityManager entityManager;
+
     @Override
     @Transactional
     public Long create(HrRecurringPayDeductRequest request) {
@@ -60,13 +65,14 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
         entity.setCompanyPoid(companyPoid.toString());
         entity.setDeleted("N");
 
-        repository.save(entity);
+        HrRecurringPayDeduct hdr = repository.saveAndFlush(entity);
+        entityManager.refresh(hdr);
 
         log.info("Created Loan/Advance with ID: {}", entity.getTransactionPoid());
 
         // Log the creation
         String key = entity.getTransactionPoid().toString();
-        loggingService.createLogSummaryEntry(LogDetailsEnum.CREATED, UserContext.getDocumentId(), key);
+        loggingService.createLogSummaryEntry(UserContext.getDocumentId(),hdr.getTransactionPoid().toString(), String.format("%s %s", LogDetailsEnum.CREATED.getDescription(), hdr.getDocRef()));
 
         return entity.getTransactionPoid();
     }
