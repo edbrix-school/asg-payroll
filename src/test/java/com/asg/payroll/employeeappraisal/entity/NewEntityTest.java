@@ -1,6 +1,8 @@
 package com.asg.payroll.employeeappraisal.entity;
 
+import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryMaster;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class NewEntityTest {

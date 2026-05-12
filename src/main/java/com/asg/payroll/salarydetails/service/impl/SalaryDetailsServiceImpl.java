@@ -13,16 +13,16 @@ import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
+import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryMaster;
+import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryMasterRepository;
 import com.asg.payroll.exceptions.ValidationException;
 import com.asg.payroll.salarydetails.dto.SalaryAllowanceDto;
 import com.asg.payroll.salarydetails.dto.SalaryDetailRequest;
 import com.asg.payroll.salarydetails.dto.SalaryDetailResponse;
 import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryAlwDtl;
 import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryHist;
-import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryMaster;
 import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryAlwDtlRepository;
 import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryHistRepository;
-import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryMasterRepository;
 import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryProcRepository;
 import com.asg.payroll.salarydetails.service.SalaryDetailsService;
 import com.asg.payroll.salarydetails.util.AllowanceProcessingContext;
@@ -38,6 +38,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -230,16 +231,16 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
     }
 
     private void calculateTotals(HrEmployeeSalaryMaster entity, List<SalaryAllowanceDto> allowances) {
-        long basic = entity.getBasicSalary() != null ? entity.getBasicSalary() : 0L;
-        long totalAllowance = 0L;
+        BigDecimal basic = entity.getBasicSalary() != null ? entity.getBasicSalary() : BigDecimal.ZERO;
+        BigDecimal totalAllowance = BigDecimal.ZERO;
         if (allowances != null) {
             totalAllowance = allowances.stream()
                     .filter(a -> a.getActive() != null && a.getActive() == 1L)
-                    .mapToLong(a -> a.getAmount() != null ? a.getAmount().longValue() : 0L)
-                    .sum();
+                    .map(a -> a.getAmount() != null ? a.getAmount() : BigDecimal.ZERO)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
-        entity.setTotalAllowance(totalAllowance);
-        entity.setGrossSalary(basic + totalAllowance);
+        entity.setTotAllowance(totalAllowance);
+        entity.setGrossSalary(basic.add(totalAllowance));
         entity.setNetSalary(entity.getGrossSalary()); // Simplified, deductions not in SRS yet
     }
 

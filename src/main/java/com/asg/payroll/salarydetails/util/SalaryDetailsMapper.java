@@ -8,6 +8,7 @@ import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryAlwDtl;
 import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryHist;
 import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryMaster;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class SalaryDetailsMapper {
@@ -36,7 +37,7 @@ public class SalaryDetailsMapper {
         entity.setContractPrintType(request.getContractPrintType());
         entity.setIndemnityPaidAmt(request.getIndemnityPaidAmt());
         entity.setIndemnityPaidDet(request.getIndemnityPaidDet());
-        entity.setLoanDeductionAmt(request.getLoanDeductionAmt() != null ? request.getLoanDeductionAmt() : 0L);
+        entity.setLoanDeductionAmt(request.getLoanDeductionAmt() != null ? request.getLoanDeductionAmt() : BigDecimal.ZERO);
         entity.setAccommodationCost(request.getAccommodationCost());
         entity.setRemarks(request.getRemarks());
     }
@@ -55,7 +56,7 @@ public class SalaryDetailsMapper {
                 .gosiType(entity.getGosiType())
                 .grossSalary(entity.getGrossSalary())
                 .netSalary(entity.getNetSalary())
-                .totalAllowance(entity.getTotalAllowance())
+                .totAllowance(entity.getTotAllowance())
                 .paymentMethod(entity.getPaymentMethod())
                 .bankPoid(entity.getBankPoid())
                 .ibanAccountNo(entity.getIbanAccountNo())

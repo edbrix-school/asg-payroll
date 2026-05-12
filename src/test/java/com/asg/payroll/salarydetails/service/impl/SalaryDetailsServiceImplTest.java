@@ -1,7 +1,6 @@
 package com.asg.payroll.salarydetails.service.impl;
 
 import com.asg.common.lib.dto.DeleteReasonDto;
-import com.asg.common.lib.dto.FilterDto;
 import com.asg.common.lib.dto.FilterRequestDto;
 import com.asg.common.lib.dto.RawSearchResult;
 import com.asg.common.lib.enums.LogDetailsEnum;
@@ -12,16 +11,15 @@ import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.payroll.common.util.ActionType;
+import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryMaster;
+import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryMasterRepository;
 import com.asg.payroll.exceptions.ValidationException;
 import com.asg.payroll.salarydetails.dto.SalaryAllowanceDto;
 import com.asg.payroll.salarydetails.dto.SalaryDetailRequest;
 import com.asg.payroll.salarydetails.dto.SalaryDetailResponse;
 import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryAlwDtl;
-import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryHist;
-import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryMaster;
 import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryAlwDtlRepository;
 import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryHistRepository;
-import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryMasterRepository;
 import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryProcRepository;
 import net.sf.jasperreports.engine.JasperReport;
 import org.junit.jupiter.api.AfterEach;
@@ -98,7 +96,7 @@ class SalaryDetailsServiceImplTest {
         request.setEmployeePoid(100L);
         request.setPaymentMethod("CASH");
         request.setIbanAccountNo("1234567890123456789012"); // 22 chars
-        
+
         SalaryAllowanceDto alw1 = SalaryAllowanceDto.builder()
                 .actionType(ActionType.ISCREATED)
                 .amount(BigDecimal.valueOf(500L))
@@ -109,10 +107,10 @@ class SalaryDetailsServiceImplTest {
         HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
         entity.setSalaryPoid(id);
         entity.setEmployeePoid(100L);
-        
+
         when(repository.findById(id)).thenReturn(Optional.of(entity));
         when(alwDtlRepository.getMaxDetRowId(id)).thenReturn(10L);
-        
+
         HrEmployeeSalaryAlwDtl savedAlw = new HrEmployeeSalaryAlwDtl();
         savedAlw.setDetRowId(11L);
         when(alwDtlRepository.saveAll(any())).thenReturn(List.of(savedAlw));
@@ -159,10 +157,10 @@ class SalaryDetailsServiceImplTest {
     void testUpdate_ValidationFailures() {
         SalaryDetailRequest request = new SalaryDetailRequest();
         when(repository.findById(anyLong())).thenReturn(Optional.of(new HrEmployeeSalaryMaster()));
-        
+
         // Employee mandatory
         assertThrows(ValidationException.class, () -> service.update(1L, request));
-        
+
         request.setEmployeePoid(100L);
         // Payment method mandatory
         assertThrows(ValidationException.class, () -> service.update(1L, request));
@@ -201,7 +199,7 @@ class SalaryDetailsServiceImplTest {
         HrEmployeeSalaryAlwDtl existingAlw = new HrEmployeeSalaryAlwDtl();
         existingAlw.setDetRowId(20L);
         when(alwDtlRepository.findBySalaryPoidAndDetRowId(id, 20L)).thenReturn(Optional.of(existingAlw));
-        
+
         service.update(id, request);
 
         verify(alwDtlRepository, times(2)).saveAll(any());
@@ -218,9 +216,9 @@ class SalaryDetailsServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
 
         Map<String, Object> empDetails = Map.of(
-            "TICKET_DETAILS", "2 Tickets",
-            "DESIGNATION_NAME", "Developer",
-            "JOIN_DATE", Timestamp.valueOf(LocalDateTime.now())
+                "TICKET_DETAILS", "2 Tickets",
+                "DESIGNATION_NAME", "Developer",
+                "JOIN_DATE", Timestamp.valueOf(LocalDateTime.now())
         );
         when(procRepository.getEmployeeDetails(100L)).thenReturn(empDetails);
 
@@ -266,7 +264,7 @@ class SalaryDetailsServiceImplTest {
         when(documentSearchService.resolveOperator(any())).thenReturn("AND");
         when(documentSearchService.resolveIsDeleted(any())).thenReturn("N");
         when(documentSearchService.resolveFilters(any())).thenReturn(new ArrayList<>());
-        
+
         RawSearchResult raw = new RawSearchResult(List.of(Map.of("name", "John")), Map.of(), 1L);
         when(documentSearchService.search(any(), any(), any(), any(), any(), any(), any())).thenReturn(raw);
 
@@ -339,7 +337,7 @@ class SalaryDetailsServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
 
         Map<String, Object> empDetails = Map.of(
-            "JOIN_DATE", LocalDateTime.now()
+                "JOIN_DATE", LocalDateTime.now()
         );
         when(procRepository.getEmployeeDetails(100L)).thenReturn(empDetails);
 
@@ -384,24 +382,24 @@ class SalaryDetailsServiceImplTest {
         SalaryDetailRequest request = new SalaryDetailRequest();
         request.setEmployeePoid(100L);
         request.setPaymentMethod("CASH");
-        
+
         SalaryAllowanceDto alw1 = new SalaryAllowanceDto();
         SalaryAllowanceDto alw2 = new SalaryAllowanceDto();
         alw2.setActive(0L);
         alw2.setAmount(BigDecimal.valueOf(100));
-        
+
         request.setAllowances(List.of(alw1, alw2));
 
         HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
         entity.setSalaryPoid(1L);
         entity.setBasicSalary(null);
-        
+
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
         when(repository.save(any())).thenReturn(entity);
 
         service.update(1L, request);
-        assertEquals(0L, entity.getTotalAllowance());
-        assertEquals(0L, entity.getGrossSalary());
+        assertEquals(BigDecimal.ZERO, entity.getTotAllowance());
+        assertEquals(BigDecimal.ZERO, entity.getGrossSalary());
     }
 
     @Test
@@ -425,7 +423,7 @@ class SalaryDetailsServiceImplTest {
     @Test
     void testMaxDetRowId_NullFallback() {
         when(alwDtlRepository.getMaxDetRowId(1L)).thenReturn(null);
-        
+
         SalaryDetailRequest request = new SalaryDetailRequest();
         request.setEmployeePoid(100L);
         request.setPaymentMethod("CASH");

@@ -21,8 +21,8 @@ class SalaryDetailsMapperTest {
     void testMapToEntity_Success() {
         SalaryDetailRequest request = SalaryDetailRequest.builder()
                 .employeePoid(100L)
-                .basicSalary(1000L)
-                .loanDeductionAmt(50L)
+                .basicSalary(BigDecimal.valueOf(1000))
+                .loanDeductionAmt(BigDecimal.valueOf(50))
                 .paymentMethod("BANK")
                 .ibanAccountNo("IBAN123")
                 .lastIncrementDate(LocalDate.now())
@@ -32,8 +32,8 @@ class SalaryDetailsMapperTest {
         SalaryDetailsMapper.mapToEntity(request, entity);
 
         assertEquals(100L, entity.getEmployeePoid());
-        assertEquals(1000L, entity.getBasicSalary());
-        assertEquals(50L, entity.getLoanDeductionAmt());
+        assertEquals(BigDecimal.valueOf(1000), entity.getBasicSalary());
+        assertEquals(BigDecimal.valueOf(50), entity.getLoanDeductionAmt());
         assertEquals("BANK", entity.getPaymentMethod());
         assertEquals("IBAN123", entity.getIbanAccountNo());
         assertEquals(request.getLastIncrementDate(), entity.getLastIncrementDate());
@@ -55,7 +55,7 @@ class SalaryDetailsMapperTest {
         HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
         SalaryDetailsMapper.mapToEntity(request, entity);
 
-        assertEquals(0L, entity.getLoanDeductionAmt());
+        assertEquals(BigDecimal.ZERO, entity.getLoanDeductionAmt());
     }
 
     @Test
@@ -63,7 +63,7 @@ class SalaryDetailsMapperTest {
         HrEmployeeSalaryMaster entity = HrEmployeeSalaryMaster.builder()
                 .salaryPoid(1L)
                 .employeePoid(100L)
-                .basicSalary(1000L)
+                .basicSalary(BigDecimal.valueOf(1000))
                 .build();
 
         HrEmployeeSalaryAlwDtl alw = HrEmployeeSalaryAlwDtl.builder()

@@ -17,7 +17,7 @@ import com.asg.payroll.employeeappraisal.entity.HrAppraisalHdr;
 import com.asg.payroll.employeeappraisal.enums.ActionType;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalDtlRepository;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalHdrRepository;
-import com.asg.payroll.employeeappraisal.repository.HrEmployeeSalaryMasterRepository;
+import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryMasterRepository;
 import com.asg.payroll.employeeappraisal.repository.HrPayrollVarAlwdedDtlRepository;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
 import com.asg.payroll.exceptions.ValidationException;

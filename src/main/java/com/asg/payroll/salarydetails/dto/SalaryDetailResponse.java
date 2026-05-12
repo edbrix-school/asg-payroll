@@ -2,6 +2,7 @@ package com.asg.payroll.salarydetails.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,13 +27,13 @@ public class SalaryDetailResponse {
     private LocalDate nextIncrementDate;
     private LocalDate indemnityDueFrom;
     
-    private Long basicSalary;
-    private Long registeredSalary; // Gosi Salary
+    private BigDecimal basicSalary;
+    private BigDecimal registeredSalary; // Gosi Salary
     private String gosiType;
     
-    private Long grossSalary;
-    private Long netSalary;
-    private Long totalAllowance;
+    private BigDecimal grossSalary;
+    private BigDecimal netSalary;
+    private BigDecimal totAllowance;
     private String ctcAmount; // From FUNC_EMPLOYEE_RPT_CTC
 
     private String paymentMethod;
@@ -47,10 +48,10 @@ public class SalaryDetailResponse {
     private LocalDate bankGuaranteeDueDate;
 
     private String contractPrintType;
-    private Long indemnityPaidAmt;
+    private BigDecimal indemnityPaidAmt;
     private String indemnityPaidDet;
-    private Long loanDeductionAmt;
-    private Long accommodationCost;
+    private BigDecimal loanDeductionAmt;
+    private BigDecimal accommodationCost;
     private String remarks;
 
     private List<SalaryAllowanceDto> allowances;
