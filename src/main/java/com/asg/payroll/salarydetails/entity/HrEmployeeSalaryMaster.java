@@ -1,19 +1,24 @@
-package com.asg.payroll.employeeappraisal.entity;
+package com.asg.payroll.salarydetails.entity;
 
-import jakarta.persistence.*;
+
+import com.asg.common.lib.entity.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "HR_EMPLOYEE_SALARY_MASTER")
 @Getter
 @Setter
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
-public class HrEmployeeSalaryMaster {
+@AllArgsConstructor
+public class HrEmployeeSalaryMaster extends BaseEntity{
 
     @Id
     @Column(name = "SALARY_POID")
@@ -36,18 +41,6 @@ public class HrEmployeeSalaryMaster {
 
     @Column(name = "DELETED", length = 1)
     private String deleted;
-
-    @Column(name = "CREATED_BY", length = 20)
-    private String createdBy;
-
-    @Column(name = "CREATED_DATE")
-    private LocalDateTime createdDate;
-
-    @Column(name = "LASTMODIFIED_BY", length = 20)
-    private String lastmodifiedBy;
-
-    @Column(name = "LASTMODIFIED_DATE")
-    private LocalDateTime lastmodifiedDate;
 
     @Column(name = "REMARKS", length = 500)
     private String remarks;
