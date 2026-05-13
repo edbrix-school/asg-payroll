@@ -58,7 +58,11 @@ public class PayrollVariablesServiceImpl implements PayrollVariablesService {
             HrPayrollVariablesHdr entity = toEntity(request);
             HrPayrollVariablesHdr saved = repository.saveAndFlush(entity);
             entityManager.refresh(saved);
-            loggingService.createLogSummaryEntry(LogDetailsEnum.CREATED, UserContext.getDocumentId(), saved.getTransactionPoid().toString());
+            loggingService.createLogSummaryEntry(
+                    UserContext.getDocumentId(),
+                    saved.getTransactionPoid().toString(),
+                    String.format("%s %s", LogDetailsEnum.CREATED.getDescription(), saved.getDocRef())
+            );
             return toDto(saved);
         } catch (Exception ex) {
             throw new ValidationException(extractTriggerErrorMessage(ex));
