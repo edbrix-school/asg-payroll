@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Employee_Contract_Open_expat" language="groovy" pageWidth="595" pageHeight="842" columnWidth="551" leftMargin="22" rightMargin="22" topMargin="20" bottomMargin="20" uuid="51f26c1c-332c-43f0-beb9-5722768520c7">
+    <property name="ireport.zoom" value="1.6105100000000008"/>
+    <property name="ireport.x" value="0"/>
+    <property name="ireport.y" value="70"/>
+    <style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
+    <style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+    <style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true" pdfFontName="Helvetica-Bold"/>
+    <style name="Detail" fontName="Arial" fontSize="12"/>
+    <style name="Row" mode="Transparent">
+        <conditionalStyle>
+            <conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+            <style backcolor="#E6DAC3"/>
+        </conditionalStyle>
+    </style>
+    <parameter name="LOGIN_GROUP_POID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+    </parameter>
+    <parameter name="LOGIN_COMP_POID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+    </parameter>
+    <parameter name="LOGIN_USER_POID" class="java.lang.String" isForPrompting="false"/>
+    <parameter name="DOC_ID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA["000-000"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DOC_KEY_POID" class="java.lang.String"/>
+    <parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA["\\\\shippingbahrain.com\\data\\ERP_REPORTS\\Reports\\"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="SUB_HEADER" class="net.sf.jasperreports.engine.JasperReport"/>
+    <queryString>
+        <![CDATA[SELECT EMP.EMPLOYEE_POID, EMP.EMPLOYEE_CODE, EMP.EMPLOYEE_NAME || ' ' || EMP.EMPLOYEE_NAME2 as EMPLOYEE_NAME , TO_CHAR(NVL(EMP.CONTRACT_START, EMP.JOIN_DATE),'DD-MON-YYYY')  as CONTRACT_START, TO_CHAR(NVL(EMP.CONTRACT_END, ''),'DD-MON-YYYY') as CONTRACT_END,
+      GET_COMPANY_NAME(EMP.COMPANY_POID) COMPANY, DEP.DEPT_NAME,
+      DES.JOB_DESCRIPTION, DES.DESIGNATION_NAME, EMP.DISPLAY_NAME, EMP.PRESENT_ADDRESS, EMP.PERMANENT_ADDRESS, EMP.POSTAL_ADDRESS,
+      EMP.PASSPORT_NO,EMP.CPR_NO,EMP.NATIONALITY_POID, EMP.PRESENT_ADDRESS,CR.CR_NUMBER,CR.CR_NAME,NL.NATIONALITY_DESCRIPTION, SM.BASIC_SALARY, FN_AMOUNT_IN_WORDS_COMMON(SM.BASIC_SALARY, 'BHD') NET_SALARY_IN_WORDS,
+      EMP.TICKET_PERIOD, EMP.NO_OF_TICKETS
+FROM  HR_EMPLOYEE_MASTER EMP
+LEFT JOIN HR_DEPARTMENT_MASTER DEP  ON EMP.DEPARTMENT_POID =DEP.DEPT_POID
+LEFT JOIN HR_DESIGNATION_MASTER DES ON EMP.DESIGNATION_POID=DES.DESIG_POID
+LEFT JOIN ADMIN_CR_MASTER CR        ON CR.CR_POID          =EMP.CR_POID
+LEFT JOIN HR_NATIONALITY_MASTER NL  ON NL.NATION_POID      =EMP.NATIONALITY_POID
+LEFT JOIN HR_EMPLOYEE_SALARY_MASTER SM ON  EMP.EMPLOYEE_POID = SM.EMPLOYEE_POID
+WHERE EMP.EMPLOYEE_POID                                    = $P{DOC_KEY_POID}
+ORDER BY EMP.EMPLOYEE_POID]]>
+    </queryString>
+    <field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
+    <field name="EMPLOYEE_CODE" class="java.lang.String"/>
+    <field name="EMPLOYEE_NAME" class="java.lang.String"/>
+    <field name="CONTRACT_START" class="java.lang.String"/>
+    <field name="CONTRACT_END" class="java.lang.String"/>
+    <field name="COMPANY" class="java.lang.String"/>
+    <field name="DEPT_NAME" class="java.lang.String"/>
+    <field name="JOB_DESCRIPTION" class="java.lang.String"/>
+    <field name="DESIGNATION_NAME" class="java.lang.String"/>
+    <field name="DISPLAY_NAME" class="java.lang.String"/>
+    <field name="PRESENT_ADDRESS" class="java.lang.String"/>
+    <field name="PERMANENT_ADDRESS" class="java.lang.String"/>
+    <field name="POSTAL_ADDRESS" class="java.lang.String"/>
+    <field name="PASSPORT_NO" class="java.lang.String"/>
+    <field name="CPR_NO" class="java.lang.String"/>
+    <field name="NATIONALITY_POID" class="java.math.BigDecimal"/>
+    <field name="CR_NUMBER" class="java.lang.String"/>
+    <field name="CR_NAME" class="java.lang.String"/>
+    <field name="NATIONALITY_DESCRIPTION" class="java.lang.String"/>
+    <field name="BASIC_SALARY" class="java.math.BigDecimal"/>
+    <field name="NET_SALARY_IN_WORDS" class="java.lang.String"/>
+    <field name="TICKET_PERIOD" class="java.lang.String"/>
+    <field name="NO_OF_TICKETS" class="java.lang.String"/>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="360" splitType="Stretch">
+            <subreport>
+                <reportElement x="0" y="0" width="547" height="66" uuid="11dd97b8-4c92-45fe-85bb-3b9358474446"/>
+                <subreportParameter name="LOGIN_COMP_POID">
+                    <subreportParameterExpression><![CDATA[$P{LOGIN_COMP_POID}]]></subreportParameterExpression>
+                </subreportParameter>
+                <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                <subreportExpression><![CDATA[$P{SUB_HEADER}]]></subreportExpression>
+            </subreport>
+            <staticText>
+                <reportElement x="0" y="90" width="547" height="23" uuid="73e7afbe-fa1e-4481-b7b2-8ba9a66dccff"/>
+                <textElement textAlignment="Center" verticalAlignment="Bottom">
+                    <font fontName="Arial" size="14" isBold="false"/>
+                </textElement>
+                <text><![CDATA[EMPLOYMENT CONTRACT ]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="213" width="302" height="76" uuid="49f60a13-eebf-470f-a87e-351300a1bd14"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[PO.BOX-40,
+Al Ameera Commerical Building,
+Bldg. 767, Road 3629, Block 336,Manama Area,
+Al Adliyah,Capital Governorate,
+Kingdom of Bahrain.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="7" y="288" width="100" height="20" uuid="01250b63-47ba-4d28-8ee1-94c17b152dd5"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="false"/>
+                </textElement>
+                <text><![CDATA[And]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="76" y="308" width="249" height="15" uuid="1e0b0591-f2b1-44f3-8731-1eb93a6b9ece"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="30" y="308" width="50" height="15" uuid="72eb214a-55bb-4f7c-a80f-5431cebfe89c"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[Name :]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="352" y="308" width="198" height="40" uuid="00c30fd2-9721-4f48-a7b7-e8feaac952bf"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[Hereinafter referred to as the Second Party /Employee.]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="240" y="324" width="84" height="15" uuid="8359f2a5-f83e-4b4c-8889-5dca026f2357"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{PASSPORT_NO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="182" y="324" width="58" height="15" uuid="bd48c4f2-10bc-4291-8ad3-8caca433b5ce"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[Passport No:]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="342" width="50" height="15" uuid="2730bbd9-6c5d-4ec6-8c53-197bab440d30"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[CPR No:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="80" y="342" width="102" height="15" uuid="857a4419-1e5c-4ed5-a7aa-695251e35280"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{CPR_NO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="30" y="197" width="167" height="16" uuid="5ded04cd-049f-47ee-aa4b-452fc4c99514"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{CR_NUMBER}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="30" y="176" width="300" height="21" uuid="91b9cbc1-cd12-46c0-af20-f4e8f8b4e65b"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{CR_NAME}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="10" y="129" width="317" height="47" uuid="ce975fad-e668-49c2-a3d7-53336b4c2511"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[This contract is made on :
+
+Between parties:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="80" y="324" width="102" height="15" uuid="779967c2-fd20-487f-8cb2-2fe79bd886bb"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{NATIONALITY_DESCRIPTION}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="30" y="324" width="50" height="15" uuid="e23b01e1-a804-4ed7-b19e-0f622458733e"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[Nationality :]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="352" y="173" width="198" height="40" uuid="3568cadc-4fa2-4f77-a211-1849041d543c"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[Hereinafter referred to as the First Party /Employer]]></text>
+            </staticText>
+        </band>
+    </title>
+    <pageHeader>
+        <band splitType="Stretch"/>
+    </pageHeader>
+    <columnHeader>
+        <band splitType="Stretch"/>
+    </columnHeader>
+    <detail>
+        <band height="196" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="72" width="500" height="77" uuid="b5bf0482-5b55-4d48-8f92-006fbf4f0725"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[This contract has been concluded between the two parties hereto for the purpose of the performing the work specified below at the standard set by the First Party and shown in the attached description of the job to be filled by the Second Party.
+The Second Party therefore, declares that it is fully cognizant of this fact and accepts to enter into this contract on the understanding that it feels fully capable of performing this work at the standards required by the First Party and therefore, undertakes to fulfill the obligations contained herein.
+]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="152" width="279" height="20" uuid="c0b24bc8-6548-45ce-89f9-c20f2cd8455c"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Both parties hereto agree and covenant as follows :-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="172" width="317" height="20" uuid="616bb86e-a3c8-4996-a465-9873934c4c14"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[1. The above preamble forms an integral part of this contract.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="10" y="3" width="100" height="20" uuid="20f6f065-ac9d-4648-98ed-a62a635a92a9"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[Preamble]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="23" width="191" height="20" uuid="2080989d-d973-43b2-919e-a0ed2c389a08"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[The address of the 2nd Party:-]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="30" y="43" width="476" height="17" uuid="d398b605-9a2d-4e4e-b7fc-69317382f5d4"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{PRESENT_ADDRESS}]]></textFieldExpression>
+            </textField>
+        </band>
+        <band height="135" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="4" width="317" height="20" uuid="d89c4afc-9479-4541-8cad-2dda535dd8d0"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[2. Job Title & Job Description:-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="67" width="500" height="57" uuid="5df886bb-4532-4baa-b54f-851841e21a63"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10" isBold="false"/>
+                </textElement>
+                <text><![CDATA[The Employer shall have the right to assign to the employee any other work within the nature of the Second Party’s qualifications or which work he / she may become qualified for through experience and training by the First Party, and/or from time to time to carry out other duties in any place in Bahrain owned by the Employer or related directly or indirectly to the First Party as per the Labour Law of Bahrain.
+]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="30" y="24" width="500" height="33" uuid="b67f1331-c067-4722-b0df-fe6448331056"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["The Employee shall be employed in the position of " + $F{DESIGNATION_NAME}  + " in our " + $F{DEPT_NAME} + " department and the main duties of this position shall enclose in Annex No.(1) together with this contract."]]></textFieldExpression>
+            </textField>
+        </band>
+        <band height="384" splitType="Prevent">
+            <staticText>
+                <reportElement x="25" y="8" width="317" height="20" uuid="671552a5-e853-4615-8a75-d430221d6a60"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[3. Duties & Responsibilities :-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="28" width="500" height="120" uuid="ee2c10ae-afb8-4fed-8a3d-bac4e59470ca"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[a. The Second Party agrees to use his/her best endeavors to promote the interests of the First   Party and diligently discharge his/her duties.
+b. The Second Party shall abide by all Laws of the Kingdom of Bahrain under this Agreement and obey all lawful orders and inter-company policies given from time to time by the First Party.
+c. The Second Party shall devote the whole of his/her time and attention to the First   Party’s business during the working hours as specified in the Bahrain Labour Law for the private Sector. Also the Second Party hereby acknowledges that the First Party is at liberty to modify at any time the working hours which described in the employment contract or by its inter-company policies, provided that such modified hours shall not exceed maximum working hours stipulated by the law.
+d. Daily Working Hours:- From: 8 am to 1 pm and from 2 pm to 5:30 pm]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="159" width="298" height="20" uuid="06218ee5-0774-46ed-ab30-a72e578d3ec2"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[e. Weekly Working Days:-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="179" width="231" height="20" uuid="5d10658e-8044-48ab-9ceb-df6a62d97eff"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[	From Sunday to Thursday.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="209" width="500" height="74" uuid="bebb1cc5-707e-419f-9c40-87e9ac95e806"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[f. The Labour, GOSI and LMRA Laws and relevant executive orders & regulations along with the company’s inter-company policies, all shall be an integral part of this contract.
+g. The Second Party shall not, without written permission from the Employer, engage in any work for a third Party with or without remuneration even outside official working hours, or participate, directly or indirectly, in an activity or business indirect conflict with the Employer’s interest, or in any concern having transactions with the First   Party.
+]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="286" width="500" height="92" uuid="2f8fb93f-a82e-4fd9-9ef2-83aab48e1a13"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[h. The Second Party undertakes to observe all orders and instructions issued to him/her by the Company’s Management and shall accurately implement the Company’s regulations and always observe good conduct, behavior and reputation.
+i. The Second Party hereby declares that its covenants in the present contract are an integral part of its fundamental obligations, and that the accurate implementation thereof is one of the basic conditions of this employment Contract. Should the Second Party breach any of such obligations, the Employer shall have the right to terminate its services forthwith without indemnity in accordance with Article (107) of Labor Law NO. (36) of 2012.
+]]></text>
+            </staticText>
+        </band>
+        <band height="166" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="10" width="500" height="20" uuid="0b239bf4-f92c-4bab-89d5-641debdbab68"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[4. Contract Duration & Probationary Period:-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="73" width="500" height="87" uuid="7390c64a-3851-4284-8fb0-c0db598972d5"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[b. The Second Party shall be on probation for period of three (3) months starts from the date he/she commences employment, during which the First Party shall assess and review the work performance and suitability of the Second Party at its discretion.
+c. During the said probationary period either party shall have the right to terminate this employment contract by giving one day’s written notice to the other party.
+d. Subject to satisfactory completion of the probationary period, this contract shall be in force for a period as mentioned above.
+]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="30" y="30" width="500" height="43" uuid="9178bfd2-d4ec-441c-aeef-6f4d2f311ad6"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["a.The period of this contract shall be One (1) year, from " +  $F{CONTRACT_START} + " till " +  $F{CONTRACT_END} + " and this contract may be renewed for the same period upon the desire of both parties by signing a new contract."]]></textFieldExpression>
+            </textField>
+        </band>
+        <band height="85" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="7" width="500" height="20" uuid="795be84a-0d48-40ec-921b-d1fe1b602162"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[5. Monthly Remunerations :-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="60" width="500" height="20" uuid="b79431c7-d923-41a6-a580-0d60c41ce3a2"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[As other allowances if any are as per the annex No.(1).]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="30" y="27" width="500" height="30" uuid="02ef63cf-51f8-40cc-a94f-52b56ebf4395"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["a. The First Party agrees to pay the Second Party Basic Salary along with social allowance of BHD " +  $F{BASIC_SALARY} + "/- (" +  $F{NET_SALARY_IN_WORDS} + ")."]]></textFieldExpression>
+            </textField>
+        </band>
+        <band height="132" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="6" width="500" height="20" uuid="4af07000-6bdc-41f1-a93d-b9ac03507116"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[6. Leaves:]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="26" width="500" height="103" uuid="f31d3121-1487-4153-a275-203d0d9ea28e"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[a. The Second Party shall be entitled to a full paid annual leave of (30 days) after completing one full year of service with the First Party. And shall be entitled for the fraction of the year in proportion to the duration of employment, pursuant of Article (58) of the Labour Law.
+b. In accordance with Article (65) of the Bahrain Labour Law, the Second Party shall be entitled for a paid sick leave after completing three months of service with the First Party. The sick leave shall not be adjusted against the annual leave.
+c. The Second Party shall be entitled for a paid leave as per the mentioned situations in Article (63) of the Labour Law.
+]]></text>
+            </staticText>
+        </band>
+        <band height="3" splitType="Prevent"/>
+        <band height="123" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="2" width="500" height="20" uuid="3d88d09c-c1ee-41a1-b0b4-ec884a0aba80"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[7. Termination of the Employment contract:-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="20" width="500" height="93" uuid="0d3d335a-1de5-4ea3-9fa7-8e5768f6b2d1"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[a. Either party may notify the other party at least 30 days in advance for all matters affecting this contract. The contract of employment shall continue during the notice periods and both parties shall perform all the obligations there under.
+b. The First Party may dismiss the Second Party without notice and without payment of the end of service gratuity in few instances in accordance with Article No. (107) of the Bahraini Labour Law.
+c. If this Contract is terminated in cases other than those specified under Article No. )107( of the Labour Law, or if the provisions of the Social Insurance Law are not applicable to the Employee, the Employer shall pay the expat Employee leaving indemnity in accordance with the provisions of Article No. (116) of the Labour Law.
+]]></text>
+            </staticText>
+        </band>
+        <band height="115" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="4" width="500" height="20" uuid="e27b53eb-3f03-4203-9fbb-8e33d517fae7"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[8. Confidentiality Disclosure :-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="24" width="500" height="87" uuid="f7590092-8d04-4585-a8d8-b39e4e61ec40"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[a. The First Party regards the Second Party’s emoluments as strictly confidential matters. Any know-how, other information, contacts, advice or assistance made available during the course of the Second Party’s employment shall be retained in the strictest confidence and shall not, without prior written consent of the First Party, be disclosed to anyone or made use of or employed directly or indirectly in any respect or to any extent and whether before or after the termination of this contract hereof for whatsoever cause.
+b. Any disclosure or usage by the Second Party contrary to this will be considered a violation of confidentiality and liability to consequential damages.
+]]></text>
+            </staticText>
+        </band>
+        <band height="134" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="9" width="500" height="20" uuid="d049ca16-f3e9-4d7e-b23d-0c179f36a38f"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[9. Conflict of Interest:-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="28" width="500" height="102" uuid="3365a960-4aee-441b-942d-097cb6f789be"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[a. During the course of his/her employment the Second Party shall not introduce to any other individual, firm or company a business deal of any kind, major or minor with which the First Party is able to perform.
+b. The Second Party agrees not to have any financial interest or any other benefits from contracts to transactions made by the First Party with Third Party without first disclosing such interest and benefit to the First Party and second obtaining its prior written approval thereto.
+c. The Second Party agrees not to compete or engage with any of the First Party’s competitors in Bahrain which may jeopardize the legitimate interests of the First Party and for (2) consecutive years after the termination of this contract without obtaining its prior written approval thereto.
+]]></text>
+            </staticText>
+        </band>
+        <band height="126" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="8" width="500" height="20" uuid="c41ef4b2-ed47-4143-b4ab-a73874029ae2"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[10. Clients and customers:-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="28" width="500" height="87" uuid="ca929a34-2546-47b8-824a-dbc562d86485"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[a. During the course of his/her employment and for a period of Two (2) years thereafter the termination, the Second Party shall not solicit the interest, encourage or accept for whatsoever reasons any approach pertaining to an employment opportunity in any form or type, directly or indirectly, by any of the current clients and customers of the First Party.
+b. In this regard, current clients or customers are identified as those that were engaged in professional advice or service furnished by the First Party and those clients or customers, and the termination date of the Employment Contract therein by either Party does not exceed Two (2) consecutive years.
+]]></text>
+            </staticText>
+        </band>
+        <band height="192" splitType="Prevent">
+            <staticText>
+                <reportElement x="30" y="7" width="500" height="20" uuid="1159988f-09c5-44bb-9605-2c76d73349fd"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[11. General Provisions :-]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="27" width="500" height="163" uuid="b2dba929-1cf5-4827-b201-2e5479b2d4ca"/>
+                <textElement textAlignment="Justified">
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[a. In the event of the Second Party’s failure to report to work on the effective date of his/her engagement, the First Party reserves the right to consider the Employment Contract as withdrawn.
+b. In the course of this contract, the Second Party shall not have the right to work for others for or without a wage.
+c. The Second Party shall undertake to refrain from interfering in political or religious affairs and will have to respect the local customs and tradition.
+d. This contract is in conformity with the Labour Law No. (36) year 2012.
+e. The Bahraini Labour Law and its executing regulation shall be considered as the legal basis of the text of this contract. There shall be recourses to the Law in respect of any dispute between the two parties unless the terms of this contract provide better benefits for the Second Party.
+f. Without prejudice to the clauses of this contract, the First Party‘s internal policy and Procedures Manual with the Bahraini Labour Law, shall accentuate all other clauses regulating the relationship between both contracted parties.
+g. This contract is issued in Two (2) originals, one of which to be given to the Second Party.]]></text>
+            </staticText>
+        </band>
+        <band height="190">
+            <staticText>
+                <reportElement x="30" y="8" width="100" height="20" uuid="01639978-a955-4808-9220-4fc4865dad2a"/>
+                <textElement>
+                    <font fontName="Arial" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+                </textElement>
+                <text><![CDATA[Signatures]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="30" y="28" width="215" height="153" uuid="47627b71-4982-47c2-a254-5a71919071a9"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[For the First Party
+
+Company Name
+
+Name:
+
+Signature: ………………………………..
+
+Date:
+
+Stamp: …………………………………….]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="306" y="28" width="234" height="111" uuid="aabe7bf4-a4b4-4855-93f0-07f5caa8c33f"/>
+                <textElement>
+                    <font fontName="Arial" size="10"/>
+                </textElement>
+                <text><![CDATA[For the Second Party:-
+
+Name:
+
+Signature: ………………………………..
+
+Date:
+]]></text>
+            </staticText>
+        </band>
+    </detail>
+    <columnFooter>
+        <band splitType="Stretch"/>
+    </columnFooter>
+    <pageFooter>
+        <band splitType="Stretch"/>
+    </pageFooter>
+    <summary>
+        <band splitType="Stretch"/>
+    </summary>
+</jasperReport>
