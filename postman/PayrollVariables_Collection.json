@@ -1,0 +1,309 @@
+{
+  "info": {
+    "name": "Payroll Variables / Arrears Entry",
+    "_postman_id": "payroll-variables-collection",
+    "description": "CRUD APIs for HR_PAYROLL_VARIABLES_HDR - Payroll Variables and Arrears Entry",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "transactionPoid",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Payroll Variable",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"transactionDate\": \"2024-01-15\",\n  \"employeePoid\": 101,\n  \"amount\": 250.000,\n  \"payrollMonth\": \"2024-01-01\",\n  \"remarks\": \"Monthly allowance for January\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables"]
+        },
+        "description": "Creates a new Payroll Variable / Arrears Entry. Company POID and Group POID are automatically taken from the authenticated user context. Required fields: employeePoid, amount (negatives allowed), payrollMonth, remarks."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Payroll Variable created successfully\",\n  \"result\": {\n    \"data\": {\n      \"transactionPoid\": 1,\n      \"companyPoid\": 1,\n      \"groupPoid\": 1,\n      \"transactionDate\": \"2024-01-15\",\n      \"docRef\": \"VAR-000001\",\n      \"employeePoid\": 101,\n      \"employeeDet\": {\n        \"poid\": 101,\n        \"code\": \"EMP001\",\n        \"label\": \"John Doe\",\n        \"value\": 101,\n        \"description\": \"John Doe\"\n      },\n      \"amount\": 250.000,\n      \"payrollMonth\": \"2024-01-01\",\n      \"remarks\": \"Monthly allowance for January\",\n      \"createdBy\": \"admin\",\n      \"createdDate\": \"2024-01-15T10:00:00\"\n    }\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Payroll Variable",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"transactionDate\": \"2024-01-15\",\n  \"employeePoid\": 101,\n  \"amount\": 300.000,\n  \"payrollMonth\": \"2024-01-01\",\n  \"remarks\": \"Updated allowance for January\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables/{{transactionPoid}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables", "{{transactionPoid}}"]
+        },
+        "description": "Updates an existing Payroll Variable / Arrears Entry by Transaction POID."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Payroll Variable updated successfully\",\n  \"result\": {\n    \"data\": {\n      \"transactionPoid\": 1,\n      \"amount\": 300.000,\n      \"remarks\": \"Updated allowance for January\"\n    }\n  }\n}"
+        },
+        {
+          "name": "Not Found",
+          "status": "Not Found",
+          "code": 404,
+          "body": "{\n  \"status\": \"error\",\n  \"message\": \"Payroll Variables record not found with ID: 999\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Payroll Variable by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables/{{transactionPoid}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables", "{{transactionPoid}}"]
+        },
+        "description": "Retrieves a Payroll Variable / Arrears Entry by Transaction POID. Includes employee detail object."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Payroll Variable fetched successfully\",\n  \"result\": {\n    \"data\": {\n      \"transactionPoid\": 1,\n      \"companyPoid\": 1,\n      \"groupPoid\": 1,\n      \"transactionDate\": \"2024-01-15\",\n      \"docRef\": \"VAR-000001\",\n      \"employeePoid\": 101,\n      \"employeeDet\": {\n        \"poid\": 101,\n        \"code\": \"EMP001\",\n        \"label\": \"John Doe\",\n        \"value\": 101,\n        \"description\": \"John Doe\"\n      },\n      \"amount\": 250.000,\n      \"payrollMonth\": \"2024-01-01\",\n      \"remarks\": \"Monthly allowance for January\",\n      \"createdBy\": \"admin\",\n      \"createdDate\": \"2024-01-15T10:00:00\",\n      \"lastModifiedBy\": \"admin\",\n      \"lastModifiedDate\": \"2024-01-15T10:00:00\"\n    }\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Delete Payroll Variable (Soft Delete)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"deleteReason\": \"Entry created by mistake\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables/{{transactionPoid}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables", "{{transactionPoid}}"]
+        },
+        "description": "Soft deletes a Payroll Variable / Arrears Entry. The record is marked as deleted but not physically removed."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Payroll Variable deleted successfully\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "List Payroll Variables (No Filters)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables/list?page=0&size=10&sort=transactionDate,desc",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables", "list"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" },
+            { "key": "sort", "value": "transactionDate,desc" }
+          ]
+        },
+        "description": "Lists all Payroll Variables with pagination. No filters applied."
+      }
+    },
+    {
+      "name": "List Payroll Variables (With Date Range)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables/list?page=0&size=10&periodFrom=2024-01-01&periodTo=2024-12-31",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables", "list"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" },
+            { "key": "periodFrom", "value": "2024-01-01" },
+            { "key": "periodTo", "value": "2024-12-31" }
+          ]
+        },
+        "description": "Lists Payroll Variables filtered by transaction date range."
+      }
+    },
+    {
+      "name": "List Payroll Variables (With Search Filters)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"operator\": \"AND\",\n  \"isDeleted\": \"N\",\n  \"filters\": [\n    {\n      \"searchField\": \"DOC_REF\",\n      \"searchValue\": \"VAR-\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables/list?page=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables", "list"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        },
+        "description": "Lists Payroll Variables with field-level search filters."
+      }
+    },
+    {
+      "name": "List Payroll Variables (Global Search)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"operator\": \"OR\",\n  \"isDeleted\": \"N\",\n  \"filters\": [\n    {\n      \"searchField\": \"GLOBALSEARCH\",\n      \"searchValue\": \"John\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables/list?page=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables", "list"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        },
+        "description": "Lists Payroll Variables using global search across all fields."
+      }
+    },
+    {
+      "name": "List Deleted Payroll Variables",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"operator\": \"AND\",\n  \"isDeleted\": \"Y\",\n  \"filters\": []\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/payroll-variables/list?page=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "payroll-variables", "list"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        },
+        "description": "Lists soft-deleted Payroll Variables."
+      }
+    }
+  ]
+}
