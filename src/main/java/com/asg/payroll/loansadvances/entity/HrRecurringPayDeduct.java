@@ -79,6 +79,7 @@ public class HrRecurringPayDeduct extends BaseEntity {
     private LocalDate receiptDate;
 
     @Column(name = "DELETED", length = 1)
-    private String deleted;
+    @Builder.Default
+    private String deleted = "N";
 
 }

@@ -98,13 +98,6 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         return buildSalaryResponse(entity);
     }
 
-    @Override
-    public SalaryDetailResponse getByEmployeeId(Long employeePoid) {
-        HrEmployeeSalaryMaster entity = repository.findByEmployeePoid(employeePoid)
-                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, EMPLOYEE_POID, employeePoid));
-
-        return buildSalaryResponse(entity);
-    }
 
     @Override
     @Transactional
