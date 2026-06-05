@@ -16,5 +16,4 @@ public interface HrPayrollRecurringDtlRepository extends JpaRepository<HrPayroll
     @Query("select coalesce(max(d.detRowId), 0) from HrPayrollRecurringDtl d where d.transactionPoid = :transactionPoid")
     Long findMaxDetRowIdByTransactionPoid(Long transactionPoid);
 
-    void deleteByTransactionPoid(Long transactionPoid);
 }

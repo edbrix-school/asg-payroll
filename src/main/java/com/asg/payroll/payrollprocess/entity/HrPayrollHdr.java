@@ -102,6 +102,12 @@ public class HrPayrollHdr extends BaseEntity {
     @Column(name = "SUPPRESS_ARREARS_VALIDATION", length = 1)
     private String suppressArrearsValidation;
 
-    @Column(name = "TOTAL_NET_SAL")
-    private BigDecimal totalNetSal;
+//    @Column(name = "REMARKS", length = 500)
+//    private String remarks;
+
+//    @Column(name = "TOTAL_NET_SAL", precision = 15, scale = 3)
+//    private BigDecimal totalNetSal;
+
+//    @Column(name = "HSBC_API_TRANSFER", length = 1)
+//    private String hsbcApiTransfer;
 }

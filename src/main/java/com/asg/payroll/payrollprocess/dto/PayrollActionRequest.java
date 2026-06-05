@@ -2,6 +2,7 @@ package com.asg.payroll.payrollprocess.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -20,4 +21,10 @@ public class PayrollActionRequest {
     private LocalDateTime scheduleOn;
 
     private String resend;
+
+    private Long settlementTranPoid;
+
+    private Long empPoid;
+
+    private BigDecimal loanDedAmt;
 }

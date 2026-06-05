@@ -13,6 +13,4 @@ public interface HrPayrollDtlRepository extends JpaRepository<HrPayrollDtl, HrPa
 
     List<HrPayrollDtl> findByTransactionPoid(Long transactionPoid);
 
-    @Query("select coalesce(max(d.detRowId), 0) from HrPayrollDtl d where d.transactionPoid = :transactionPoid")
-    Long findMaxDetRowIdByTransactionPoid(Long transactionPoid);
 }

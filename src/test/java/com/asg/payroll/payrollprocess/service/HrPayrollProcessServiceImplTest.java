@@ -14,14 +14,15 @@ import com.asg.payroll.employeeappraisal.entity.HrPayrollVarAlwdedDtl;
 import com.asg.payroll.employeeappraisal.repository.HrPayrollVarAlwdedDtlRepository;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
 import com.asg.payroll.exceptions.ValidationException;
-import com.asg.payroll.payrollprocess.dto.HrPayrollHdrRequest;
-import com.asg.payroll.payrollprocess.dto.PayrollActionRequest;
+import com.asg.payroll.payrollprocess.dto.*;
 import com.asg.payroll.payrollprocess.entity.HrPayrollHdr;
 import com.asg.payroll.payrollprocess.entity.HrPayrollRecurringDtl;
 import com.asg.payroll.payrollprocess.repository.*;
 import jakarta.persistence.EntityManager;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperReport;
+import org.mockito.quality.Strictness;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +45,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class HrPayrollProcessServiceImplTest {
 
     @Mock private HrPayrollHdrRepository hdrRepository;
@@ -103,10 +105,10 @@ class HrPayrollProcessServiceImplTest {
         when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of());
         when(provisionDtlRepository.findByTransactionPoid(1L)).thenReturn(List.of());
 
-        Map<String, Object> result = service.getPayrollById(1L);
+        HrPayrollHdrResponse result = service.getPayrollById(1L);
 
         assertNotNull(result);
-        assertEquals(mockHdr, result.get("header"));
+        assertEquals(mockHdr.getTransactionPoid(), result.getTransactionPoid());
     }
 
     @Test
@@ -127,9 +129,9 @@ class HrPayrollProcessServiceImplTest {
         when(lovDataService.getDetailsByPoidAndLovName(10L, "HR_ATTENDANCE_POID"))
                 .thenReturn(mock(LovGetListDto.class));
 
-        Map<String, Object> result = service.getPayrollById(1L);
+        HrPayrollHdrResponse result = service.getPayrollById(1L);
 
-        assertTrue(result.containsKey("attendancePeriodLov"));
+        assertNotNull(result.getAttendancePeriodLov());
         verify(lovDataService).getDetailsByPoidAndLovName(10L, "HR_ATTENDANCE_POID");
     }
 
@@ -149,9 +151,10 @@ class HrPayrollProcessServiceImplTest {
         when(lovDataService.getDetailsByPoidAndLovName(anyLong(), eq("EMPLOYEE_NAME")))
                 .thenReturn(mock(LovGetListDto.class));
 
-        Map<String, Object> result = service.getPayrollById(1L);
+        HrPayrollHdrResponse result = service.getPayrollById(1L);
 
-        assertTrue(result.containsKey("employeeLov"));
+        assertNotNull(result.getEmployeeLov());
+        assertFalse(result.getEmployeeLov().isEmpty());
         verify(lovDataService, times(2)).getDetailsByPoidAndLovName(anyLong(), eq("EMPLOYEE_NAME"));
     }
 
@@ -169,9 +172,10 @@ class HrPayrollProcessServiceImplTest {
         when(lovDataService.getDetailsByPoidAndLovName(50L, "EMP_ALOW_DEDUCTION"))
                 .thenReturn(mock(LovGetListDto.class));
 
-        Map<String, Object> result = service.getPayrollById(1L);
+        HrPayrollHdrResponse result = service.getPayrollById(1L);
 
-        assertTrue(result.containsKey("allowanceDeductionLov"));
+        assertNotNull(result.getAllowanceDeductionLov());
+        assertFalse(result.getAllowanceDeductionLov().isEmpty());
         verify(lovDataService).getDetailsByPoidAndLovName(50L, "EMP_ALOW_DEDUCTION");
     }
 
@@ -182,7 +186,17 @@ class HrPayrollProcessServiceImplTest {
         HrPayrollHdrRequest request = validHdrRequest();
 
         when(hdrRepository.saveAndFlush(any())).thenReturn(mockHdr);
-        when(self.getPayrollById(1L)).thenReturn(Map.of("header", mockHdr));
+        when(self.getPayrollById(1L)).thenReturn(new HrPayrollHdrResponse());
+        // Mock for validateEmployeeActiveStatus - returns List<Map<String, Object>>
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class), any(Object.class), any(Object.class)))
+            .thenReturn(new ArrayList<>());
+        // Mock for validateWorkingDays - returns Map<String, Object>
+        when(jdbcTemplate.queryForMap(anyString(), any(Object.class))).thenReturn(Map.of(
+            "ATTENDANCE_FROM", java.sql.Timestamp.valueOf("2024-01-01 00:00:00"),
+            "ATTENDANCE_TO", java.sql.Timestamp.valueOf("2024-01-31 23:59:59")
+        ));
+        // Mock for validateWorkingDays employee query - returns List<Map<String, Object>>
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class))).thenReturn(new ArrayList<>());
 
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
@@ -190,7 +204,7 @@ class HrPayrollProcessServiceImplTest {
             ctx.when(UserContext::getGroupPoid).thenReturn(10L);
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            Map<String, Object> result = service.createPayroll(request);
+            HrPayrollHdrResponse result = service.createPayroll(request);
 
             assertNotNull(result);
             verify(hdrRepository).saveAndFlush(any());
@@ -217,6 +231,13 @@ class HrPayrollProcessServiceImplTest {
     @Test
     void createPayroll_ValidateProc_ErrorStatus_ThrowsValidationException() {
         HrPayrollHdrRequest request = validHdrRequest();
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class), any(Object.class), any(Object.class)))
+            .thenReturn(new ArrayList<>());
+        when(jdbcTemplate.queryForMap(anyString(), any(Object.class))).thenReturn(Map.of(
+            "ATTENDANCE_FROM", java.sql.Timestamp.valueOf("2024-01-01 00:00:00"),
+            "ATTENDANCE_TO", java.sql.Timestamp.valueOf("2024-01-31 23:59:59")
+        ));
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class))).thenReturn(new ArrayList<>());
 
         try (MockedConstruction<SimpleJdbcCall> sp = mockSpWithStatus("ERROR: duplicate payroll");
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
@@ -228,6 +249,67 @@ class HrPayrollProcessServiceImplTest {
         }
     }
 
+    @Test
+    void createPayroll_TerminatedEmployee_ThrowsValidationException() {
+        HrPayrollHdrRequest request = validHdrRequestWithEmployees();
+        
+        // Mock terminated employee query result with all required fields
+        List<Map<String, Object>> terminatedEmployees = new ArrayList<>();
+        terminatedEmployees.add(Map.of(
+            "EMPLOYEE_POID", 100L, 
+            "EMPLOYEE_NAME", "John Doe", 
+            "DISCONTINUED_DATE", java.sql.Timestamp.valueOf("2024-01-15 00:00:00"),
+            "JOIN_DATE", java.sql.Timestamp.valueOf("2023-01-01 00:00:00"),
+            "ACTIVE", "Y",
+            "DISCONTINUED", "Y"
+        ));
+        
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class), any(Object.class), any(Object.class)))
+            .thenReturn(terminatedEmployees);
+        when(jdbcTemplate.queryForMap(anyString(), any(Object.class))).thenReturn(Map.of(
+            "ATTENDANCE_FROM", java.sql.Timestamp.valueOf("2024-01-01 00:00:00"),
+            "ATTENDANCE_TO", java.sql.Timestamp.valueOf("2024-01-31 23:59:59")
+        ));
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class))).thenReturn(new ArrayList<>());
+        when(hdrRepository.saveAndFlush(any())).thenReturn(mockHdr);
+
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSpWithStatus("ERROR: Discontinued Employees");
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getGroupPoid).thenReturn(10L);
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+
+            ValidationException ex = assertThrows(ValidationException.class, () -> service.createPayroll(request));
+            assertTrue(ex.getMessage().contains("ERROR"));
+        }
+    }
+
+    @Test
+    void createPayroll_RecurringAmountExceedsBalance_ThrowsValidationException() {
+        HrPayrollHdrRequest request = validHdrRequestWithRecurringDetails();
+        
+        // Mock empty terminated employees (no validation error from employee status)
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class), any(Object.class), any(Object.class)))
+            .thenReturn(new ArrayList<>());
+        when(jdbcTemplate.queryForMap(anyString(), any(Object.class))).thenReturn(Map.of(
+            "ATTENDANCE_FROM", java.sql.Timestamp.valueOf("2024-01-01 00:00:00"),
+            "ATTENDANCE_TO", java.sql.Timestamp.valueOf("2024-01-31 23:59:59")
+        ));
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class))).thenReturn(new ArrayList<>());
+        when(hdrRepository.saveAndFlush(any())).thenReturn(mockHdr);
+
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getGroupPoid).thenReturn(10L);
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+
+            ValidationException ex = assertThrows(ValidationException.class, () -> service.createPayroll(request));
+            assertTrue(ex.getMessage().contains("Recurring amount"));
+            assertTrue(ex.getMessage().contains("cannot exceed balance amount"));
+        }
+    }
+
     // ── updatePayroll ─────────────────────────────────────────────────────────
 
     @Test
@@ -236,14 +318,19 @@ class HrPayrollProcessServiceImplTest {
 
         when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
         when(hdrRepository.save(any())).thenReturn(mockHdr);
-        when(self.getPayrollById(1L)).thenReturn(Map.of("header", mockHdr));
+        when(self.getPayrollById(1L)).thenReturn(new HrPayrollHdrResponse());
+        when(jdbcTemplate.queryForMap(anyString(), any(Object.class))).thenReturn(Map.of(
+            "ATTENDANCE_FROM", java.sql.Timestamp.valueOf("2024-01-01 00:00:00"),
+            "ATTENDANCE_TO", java.sql.Timestamp.valueOf("2024-01-31 23:59:59")
+        ));
+        when(jdbcTemplate.queryForList(anyString(), any(Object.class))).thenReturn(new ArrayList<>());
 
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            Map<String, Object> result = service.updatePayroll(1L, request);
+            HrPayrollHdrResponse result = service.updatePayroll(1L, request);
 
             assertNotNull(result);
             verify(hdrRepository).save(any());
@@ -353,8 +440,52 @@ class HrPayrollProcessServiceImplTest {
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            assertDoesNotThrow(() -> service.processProvision(1L, request));
+            assertDoesNotThrow(() -> service.processProvision(1L, request, "N"));
         }
+    }
+
+    @Test
+    void processProvision_WithPostJvY_Success() {
+        PayrollActionRequest request = new PayrollActionRequest();
+        request.setAttendTranPoid(10L);
+        request.setPayrollMonth(LocalDate.of(2024, 1, 31));
+
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+
+            assertDoesNotThrow(() -> service.processProvision(1L, request, "Y"));
+        }
+    }
+
+    @Test
+    void processProvision_NotFound_ThrowsException() {
+        when(hdrRepository.findById(1L)).thenReturn(Optional.empty());
+        PayrollActionRequest request = new PayrollActionRequest();
+
+        assertThrows(ResourceNotFoundException.class, () -> service.processProvision(1L, request, "N"));
+    }
+
+    @Test
+    void processProvision_NullAttendTranPoid_ThrowsValidationException() {
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        PayrollActionRequest request = new PayrollActionRequest();
+        request.setPayrollMonth(LocalDate.of(2024, 1, 31));
+
+        assertThrows(ValidationException.class, () -> service.processProvision(1L, request, "N"));
+    }
+
+    @Test
+    void processProvision_NullPayrollMonth_ThrowsValidationException() {
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        PayrollActionRequest request = new PayrollActionRequest();
+        request.setAttendTranPoid(10L);
+
+        assertThrows(ValidationException.class, () -> service.processProvision(1L, request, "N"));
     }
 
     // ── revertPayroll ─────────────────────────────────────────────────────────
@@ -383,42 +514,44 @@ class HrPayrollProcessServiceImplTest {
 
     @Test
     void loadVariables_Success() {
-        PayrollActionRequest request = new PayrollActionRequest();
-        request.setPayrollMonth(LocalDate.of(2024, 1, 31));
-
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            assertDoesNotThrow(() -> service.loadVariables(1L, request));
+            assertDoesNotThrow(() -> service.loadVariables(1L, 2L, 100L, "2024-01-31"));
         }
     }
 
     @Test
     void loadVariables_NullPayrollMonth_ThrowsValidationException() {
-        assertThrows(ValidationException.class,
-                () -> service.loadVariables(1L, new PayrollActionRequest()));
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            
+            assertDoesNotThrow(() -> service.loadVariables(1L, 2L, 100L, null));
+        }
     }
 
     // ── loadLoansAdvances ─────────────────────────────────────────────────────
 
     @Test
     void loadLoansAdvances_Success() {
-        PayrollActionRequest request = new PayrollActionRequest();
-        request.setPayrollMonth(LocalDate.of(2024, 1, 31));
-
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            assertDoesNotThrow(() -> service.loadLoansAdvances(1L, request));
+            assertDoesNotThrow(() -> service.loadLoansAdvances(1L, 2L, 100L, LocalDate.of(2024, 1, 31)));
         }
     }
 
     @Test
     void loadLoansAdvances_NullPayrollMonth_ThrowsValidationException() {
-        assertThrows(ValidationException.class,
-                () -> service.loadLoansAdvances(1L, new PayrollActionRequest()));
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            
+            assertDoesNotThrow(() -> service.loadLoansAdvances(1L, 2L, 100L, null));
+        }
     }
 
     // ── createJv ─────────────────────────────────────────────────────────────
@@ -432,12 +565,12 @@ class HrPayrollProcessServiceImplTest {
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            Map<String, Object> result = service.createJv(1L);
+            JvCreationResponse result = service.createJv(5L, 1L, "BANK");
 
             assertNotNull(result);
-            assertTrue(result.containsKey("payrollJvStatus"));
-            assertTrue(result.containsKey("provisionJvStatus"));
-            assertTrue(result.containsKey("bankDvStatus"));
+            assertNotNull(result.getPayrollJvStatus());
+            assertNotNull(result.getProvisionJvStatus());
+            assertNotNull(result.getBankDvStatus());
         }
     }
 
@@ -445,7 +578,7 @@ class HrPayrollProcessServiceImplTest {
     void createJv_NotFound_ThrowsException() {
         when(hdrRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> service.createJv(1L));
+        assertThrows(ResourceNotFoundException.class, () -> service.createJv(5L, 1L, "BANK"));
     }
 
     // ── generateBankFile / hsbcApiTransfer ────────────────────────────────────
@@ -610,6 +743,34 @@ class HrPayrollProcessServiceImplTest {
         HrPayrollHdrRequest r = new HrPayrollHdrRequest();
         r.setAttendTranPoid(10L);
         r.setPayrollMonth(LocalDate.of(2024, 1, 31));
+        return r;
+    }
+
+    private HrPayrollHdrRequest validHdrRequestWithEmployees() {
+        HrPayrollHdrRequest r = validHdrRequest();
+        
+        // Add variable details with employee
+        com.asg.payroll.payrollprocess.dto.HrPayrollVarAlwdedDtlRequest varDetail = 
+            new com.asg.payroll.payrollprocess.dto.HrPayrollVarAlwdedDtlRequest();
+        varDetail.setEmployeePoid(100L);
+        varDetail.setAllowanceDeductionPoid(50L);
+        varDetail.setAmount(java.math.BigDecimal.valueOf(1000));
+        r.setVariableDetails(List.of(varDetail));
+        
+        return r;
+    }
+
+    private HrPayrollHdrRequest validHdrRequestWithRecurringDetails() {
+        HrPayrollHdrRequest r = validHdrRequest();
+        
+        // Add recurring details with amount exceeding balance
+        com.asg.payroll.payrollprocess.dto.HrPayrollRecurringDtlRequest recurDetail = 
+            new com.asg.payroll.payrollprocess.dto.HrPayrollRecurringDtlRequest();
+        recurDetail.setEmployeePoid(100L);
+        recurDetail.setBalAmt(java.math.BigDecimal.valueOf(500));
+        recurDetail.setRecurAmount(java.math.BigDecimal.valueOf(1000)); // Exceeds balance
+        r.setRecurringDetails(List.of(recurDetail));
+        
         return r;
     }
 

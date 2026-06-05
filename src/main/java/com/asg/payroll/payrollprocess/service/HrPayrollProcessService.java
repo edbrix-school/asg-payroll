@@ -2,8 +2,7 @@ package com.asg.payroll.payrollprocess.service;
 
 import com.asg.common.lib.dto.DeleteReasonDto;
 import com.asg.common.lib.dto.FilterRequestDto;
-import com.asg.payroll.payrollprocess.dto.HrPayrollHdrRequest;
-import com.asg.payroll.payrollprocess.dto.PayrollActionRequest;
+import com.asg.payroll.payrollprocess.dto.*;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.data.domain.Pageable;
 
@@ -14,33 +13,33 @@ public interface HrPayrollProcessService {
 
     Map<String, Object> listPayrolls(String documentId, FilterRequestDto filters, Pageable pageable, LocalDate periodFrom, LocalDate periodTo);
 
-    Map<String, Object> getPayrollById(Long transactionPoid);
+    HrPayrollHdrResponse getPayrollById(Long transactionPoid);
 
-    Map<String, Object> createPayroll(HrPayrollHdrRequest request);
+    HrPayrollHdrResponse createPayroll(HrPayrollHdrRequest request);
 
-    Map<String, Object> updatePayroll(Long transactionPoid, HrPayrollHdrRequest request);
+    HrPayrollHdrResponse updatePayroll(Long transactionPoid, HrPayrollHdrRequest request);
 
     void deletePayroll(Long transactionPoid, DeleteReasonDto deleteReasonDto);
 
-    Map<String, Object> processPayroll(Long transactionPoid, PayrollActionRequest request);
+    PayrollActionResponse processPayroll(Long transactionPoid, PayrollActionRequest request);
 
-    Map<String, Object> processProvision(Long transactionPoid, PayrollActionRequest request);
+    PayrollActionResponse processProvision(Long transactionPoid, PayrollActionRequest request, String postJv);
 
-    Map<String, Object> revertPayroll(Long transactionPoid);
+    PayrollActionResponse revertPayroll(Long transactionPoid);
 
-    Map<String, Object> loadVariables(Long transactionPoid, PayrollActionRequest request);
+    VariableLoadResponse loadVariables(Long transactionPoid, Long settlementPoid, Long empPoid, String payrollDate);
 
-    Map<String, Object> loadLoansAdvances(Long transactionPoid, PayrollActionRequest request);
+    LoansAdvancesResponse loadLoansAdvances(Long transactionPoid, Long settlementPoid, Long empPoid, LocalDate payrollDate);
 
-    Map<String, Object> createJv(Long transactionPoid);
+    JvCreationResponse createJv(Long userPoid, Long transactionPoid, String bankCash);
 
-    Map<String, Object> generateBankFile(Long transactionPoid);
+    BankFileResponse generateBankFile(Long transactionPoid);
 
-    Map<String, Object> hsbcApiTransfer(Long transactionPoid);
+    BankFileResponse hsbcApiTransfer(Long transactionPoid);
 
-    Map<String, Object> syncHrData();
+    PayrollActionResponse syncHrData();
 
-    Map<String, Object> sendEmail(Long transactionPoid, PayrollActionRequest request);
+    PayrollActionResponse sendEmail(Long transactionPoid, PayrollActionRequest request);
 
     byte[] printPayslip(Long transactionPoid) throws JRException;
 

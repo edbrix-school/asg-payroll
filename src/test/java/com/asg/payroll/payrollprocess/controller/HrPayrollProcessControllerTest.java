@@ -5,8 +5,7 @@ import com.asg.common.lib.dto.FilterRequestDto;
 import com.asg.common.lib.enums.LogDetailsEnum;
 import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.LoggingService;
-import com.asg.payroll.payrollprocess.dto.HrPayrollHdrRequest;
-import com.asg.payroll.payrollprocess.dto.PayrollActionRequest;
+import com.asg.payroll.payrollprocess.dto.*;
 import com.asg.payroll.payrollprocess.service.HrPayrollProcessService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,13 +37,13 @@ class HrPayrollProcessControllerTest {
     @InjectMocks
     private HrPayrollProcessController controller;
 
-    private Map<String, Object> emptyResponse() {
-        return new HashMap<>();
+    private HrPayrollHdrResponse mockResponse() {
+        return new HrPayrollHdrResponse();
     }
 
     @Test
     void listPayrolls_Success() {
-        when(hrPayrollProcessService.listPayrolls(any(), any(), any(), any(), any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.listPayrolls(any(), any(), any(), any(), any())).thenReturn(new HashMap<>());
 
         try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
@@ -59,7 +58,7 @@ class HrPayrollProcessControllerTest {
     @Test
     void getPayrollById_Success() {
         Long id = 1L;
-        when(hrPayrollProcessService.getPayrollById(id)).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.getPayrollById(id)).thenReturn(mockResponse());
 
         try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
@@ -77,7 +76,7 @@ class HrPayrollProcessControllerTest {
         request.setAttendTranPoid(10L);
         request.setPayrollMonth(LocalDate.of(2024, 1, 31));
 
-        when(hrPayrollProcessService.createPayroll(any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.createPayroll(any())).thenReturn(mockResponse());
 
         ResponseEntity<?> response = controller.createPayroll(request);
 
@@ -91,7 +90,7 @@ class HrPayrollProcessControllerTest {
         request.setAttendTranPoid(10L);
         request.setPayrollMonth(LocalDate.of(2024, 1, 31));
 
-        when(hrPayrollProcessService.updatePayroll(eq(id), any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.updatePayroll(eq(id), any())).thenReturn(mockResponse());
 
         ResponseEntity<?> response = controller.updatePayroll(id, request);
 
@@ -113,7 +112,7 @@ class HrPayrollProcessControllerTest {
         Long id = 1L;
         PayrollActionRequest request = new PayrollActionRequest();
 
-        when(hrPayrollProcessService.processPayroll(eq(id), any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.processPayroll(eq(id), any(PayrollActionRequest.class))).thenReturn(new PayrollActionResponse());
 
         ResponseEntity<?> response = controller.processPayroll(id, request);
 
@@ -124,9 +123,32 @@ class HrPayrollProcessControllerTest {
     void processProvision_Success() {
         Long id = 1L;
 
-        when(hrPayrollProcessService.processProvision(eq(id), any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.processProvision(eq(id), any(PayrollActionRequest.class), eq("N"))).thenReturn(new PayrollActionResponse());
 
-        ResponseEntity<?> response = controller.processProvision(id, new PayrollActionRequest());
+        ResponseEntity<?> response = controller.processProvision(id, new PayrollActionRequest(), "N");
+
+        assertEquals(200, response.getStatusCode().value());
+    }
+
+    @Test
+    void processProvision_WithPostJvY_Success() {
+        Long id = 1L;
+
+        when(hrPayrollProcessService.processProvision(eq(id), any(PayrollActionRequest.class), eq("Y"))).thenReturn(new PayrollActionResponse());
+
+        ResponseEntity<?> response = controller.processProvision(id, new PayrollActionRequest(), "Y");
+
+        assertEquals(200, response.getStatusCode().value());
+    }
+
+    @Test
+    void processProvision_DefaultPostJv_Success() {
+        Long id = 1L;
+
+        when(hrPayrollProcessService.processProvision(eq(id), any(PayrollActionRequest.class), isNull())).thenReturn(new PayrollActionResponse());
+
+        // This would be how it's called from HTTP request without postJv parameter
+        ResponseEntity<?> response = controller.processProvision(id, new PayrollActionRequest(), null);
 
         assertEquals(200, response.getStatusCode().value());
     }
@@ -134,7 +156,7 @@ class HrPayrollProcessControllerTest {
     @Test
     void revertPayroll_Success() {
         Long id = 1L;
-        when(hrPayrollProcessService.revertPayroll(id)).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.revertPayroll(id)).thenReturn(new PayrollActionResponse());
 
         ResponseEntity<?> response = controller.revertPayroll(id);
 
@@ -144,10 +166,14 @@ class HrPayrollProcessControllerTest {
     @Test
     void loadVariables_Success() {
         Long id = 1L;
+        LoadVariablesRequest request = new LoadVariablesRequest();
+        request.setSettlementPoid(2L);
+        request.setEmpPoid(100L);
+        request.setPayrollDate("2024-01-31");
 
-        when(hrPayrollProcessService.loadVariables(eq(id), any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.loadVariables(eq(id), eq(2L), eq(100L), eq("2024-01-31"))).thenReturn(new VariableLoadResponse());
 
-        ResponseEntity<?> response = controller.loadVariables(id, new PayrollActionRequest());
+        ResponseEntity<?> response = controller.loadVariables(id, request);
 
         assertEquals(200, response.getStatusCode().value());
     }
@@ -155,10 +181,14 @@ class HrPayrollProcessControllerTest {
     @Test
     void loadLoansAdvances_Success() {
         Long id = 1L;
+        LoadLoansAdvancesRequest request = new LoadLoansAdvancesRequest();
+        request.setSettlementPoid(2L);
+        request.setEmpPoid(100L);
+        request.setPayrollDate(LocalDate.of(2024, 1, 31));
 
-        when(hrPayrollProcessService.loadLoansAdvances(eq(id), any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.loadLoansAdvances(eq(id), eq(2L), eq(100L), eq(LocalDate.of(2024, 1, 31)))).thenReturn(new LoansAdvancesResponse());
 
-        ResponseEntity<?> response = controller.loadLoansAdvances(id, new PayrollActionRequest());
+        ResponseEntity<?> response = controller.loadLoansAdvances(id, request);
 
         assertEquals(200, response.getStatusCode().value());
     }
@@ -166,17 +196,22 @@ class HrPayrollProcessControllerTest {
     @Test
     void createJv_Success() {
         Long id = 1L;
-        when(hrPayrollProcessService.createJv(id)).thenReturn(emptyResponse());
+        
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            
+            when(hrPayrollProcessService.createJv(eq(5L), eq(id), eq("BANK"))).thenReturn(new JvCreationResponse());
 
-        ResponseEntity<?> response = controller.createJv(id);
+            ResponseEntity<?> response = controller.createJv(id, "BANK");
 
-        assertEquals(200, response.getStatusCode().value());
+            assertEquals(200, response.getStatusCode().value());
+        }
     }
 
     @Test
     void generateBankFile_Success() {
         Long id = 1L;
-        when(hrPayrollProcessService.generateBankFile(id)).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.generateBankFile(id)).thenReturn(new BankFileResponse());
 
         ResponseEntity<?> response = controller.generateBankFile(id);
 
@@ -186,7 +221,7 @@ class HrPayrollProcessControllerTest {
     @Test
     void hsbcApiTransfer_Success() {
         Long id = 1L;
-        when(hrPayrollProcessService.hsbcApiTransfer(id)).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.hsbcApiTransfer(id)).thenReturn(new BankFileResponse());
 
         ResponseEntity<?> response = controller.hsbcApiTransfer(id);
 
@@ -195,7 +230,7 @@ class HrPayrollProcessControllerTest {
 
     @Test
     void syncHrData_Success() {
-        when(hrPayrollProcessService.syncHrData()).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.syncHrData()).thenReturn(new PayrollActionResponse());
 
         ResponseEntity<?> response = controller.syncHrData();
 
@@ -205,7 +240,7 @@ class HrPayrollProcessControllerTest {
     @Test
     void sendEmail_WithRequest_Success() {
         Long id = 1L;
-        when(hrPayrollProcessService.sendEmail(eq(id), any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.sendEmail(eq(id), any())).thenReturn(new PayrollActionResponse());
 
         ResponseEntity<?> response = controller.sendEmail(id, new PayrollActionRequest());
 
@@ -215,7 +250,7 @@ class HrPayrollProcessControllerTest {
     @Test
     void sendEmail_NullRequest_DefaultsToEmptyRequest() {
         Long id = 1L;
-        when(hrPayrollProcessService.sendEmail(eq(id), any())).thenReturn(emptyResponse());
+        when(hrPayrollProcessService.sendEmail(eq(id), any())).thenReturn(new PayrollActionResponse());
 
         ResponseEntity<?> response = controller.sendEmail(id, null);
 

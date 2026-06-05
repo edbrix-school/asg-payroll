@@ -8,6 +8,8 @@ import com.asg.common.lib.enums.UserRolesRightsEnum;
 import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.payroll.payrollprocess.dto.HrPayrollHdrRequest;
+import com.asg.payroll.payrollprocess.dto.LoadLoansAdvancesRequest;
+import com.asg.payroll.payrollprocess.dto.LoadVariablesRequest;
 import com.asg.payroll.payrollprocess.dto.PayrollActionRequest;
 import com.asg.payroll.payrollprocess.service.HrPayrollProcessService;
 import jakarta.validation.Valid;
@@ -83,8 +85,9 @@ public class HrPayrollProcessController {
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/{transactionPoid}/process-provision")
     public ResponseEntity<?> processProvision(@PathVariable Long transactionPoid,
-                                              @RequestBody PayrollActionRequest request) {
-        return success("Provision processed successfully", hrPayrollProcessService.processProvision(transactionPoid, request));
+                                              @RequestBody PayrollActionRequest request,
+                                              @RequestParam(required = false, defaultValue = "N") String postJv) {
+        return success("Provision processed successfully", hrPayrollProcessService.processProvision(transactionPoid, request, postJv));
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
@@ -96,21 +99,27 @@ public class HrPayrollProcessController {
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/{transactionPoid}/load-variables")
     public ResponseEntity<?> loadVariables(@PathVariable Long transactionPoid,
-                                           @RequestBody PayrollActionRequest request) {
-        return success("Payroll variables loaded successfully", hrPayrollProcessService.loadVariables(transactionPoid, request));
+                                           @RequestBody LoadVariablesRequest request) {
+        return success("Payroll variables loaded successfully", 
+                hrPayrollProcessService.loadVariables(transactionPoid, request.getSettlementPoid(), 
+                        request.getEmpPoid(), request.getPayrollDate()));
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/{transactionPoid}/load-loans-advances")
     public ResponseEntity<?> loadLoansAdvances(@PathVariable Long transactionPoid,
-                                               @RequestBody PayrollActionRequest request) {
-        return success("Loans and advances loaded successfully", hrPayrollProcessService.loadLoansAdvances(transactionPoid, request));
+                                               @RequestBody LoadLoansAdvancesRequest request) {
+        return success("Loans and advances loaded successfully", 
+                hrPayrollProcessService.loadLoansAdvances(transactionPoid, request.getSettlementPoid(), 
+                        request.getEmpPoid(), request.getPayrollDate()));
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/{transactionPoid}/create-jv")
-    public ResponseEntity<?> createJv(@PathVariable Long transactionPoid) {
-        return success("JV and Bank DV created successfully", hrPayrollProcessService.createJv(transactionPoid));
+    public ResponseEntity<?> createJv(@PathVariable Long transactionPoid,
+                                      @RequestParam(required = false) String bankCash) {
+        return success("JV and Bank DV created successfully", 
+                hrPayrollProcessService.createJv(UserContext.getUserPoid(), transactionPoid, bankCash));
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
