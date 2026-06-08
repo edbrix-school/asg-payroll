@@ -16,6 +16,7 @@ import javax.sql.DataSource;
 
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalActionRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalDtlRequest;
+import com.asg.payroll.employeeappraisal.dto.HrAppraisalDtlResponse;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRecalculationRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRequest;
 import com.asg.payroll.employeeappraisal.entity.HrAppraisalDtl;
@@ -31,6 +32,7 @@ import com.asg.payroll.exceptions.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import oracle.jdbc.OracleTypes;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -42,8 +44,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -108,7 +113,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     @Transactional(readOnly = true)
     public Map<String, Object> getAppraisalById(Long transactionPoid) {
         HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
-        List<HrAppraisalDtl> details = dtlRepository.findByTransactionPoid(transactionPoid);
+        List<HrAppraisalDtlResponse> details = fetchDetailsWithEmployeeData(transactionPoid, null, null, null, null);
         Map<String, Object> out = new HashMap<>();
         out.put("header", hdr);
         out.put("details", details);
@@ -116,9 +121,21 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> getFilteredDetails(Long transactionPoid, Long departmentPoid, Long designationPoid, String listingMethod, String employeeName) {
+        List<HrAppraisalDtlResponse> details = fetchDetailsWithEmployeeData(transactionPoid, departmentPoid, designationPoid, listingMethod, employeeName);
+        Map<String, Object> out = new HashMap<>();
+        out.put("details", details);
+        out.put("totalRecords", details.size());
+        return out;
+    }
+
+    @Override
     public Map<String, Object> createAppraisal(HrAppraisalRequest request) {
         validateHeaderForLegacySave(request);
-        validateFinancialYear(request.getTransactionDate(), null);
+        if (request.getTransactionDate() != null) {
+            validateFinancialYear(request.getTransactionDate(), null);
+        }
         HrAppraisalHdr hdr = new HrAppraisalHdr();
         mapHeader(request, hdr);
         hdr.setGroupPoid(UserContext.getGroupPoid());
@@ -135,7 +152,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> updateAppraisal(Long transactionPoid, HrAppraisalRequest request) {
         validateHeaderForLegacySave(request);
         HrAppraisalHdr existing = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
-        validateFinancialYear(request.getTransactionDate(), existing.getTransactionDate());
+        if (request.getTransactionDate() != null) {
+            validateFinancialYear(request.getTransactionDate(), existing.getTransactionDate());
+        }
         HrAppraisalHdr oldEntity = new HrAppraisalHdr();
         BeanUtils.copyProperties(existing, oldEntity);
         mapHeader(request, existing);
@@ -238,10 +257,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
                     throw new ValidationException("Some of Basic and Fixed percentages should be 100 for autocalculation of basic and fixed allowances..");
                 }
                 BigDecimal netDiffAmt = nz(request.getNetDiffAmount());
-                if (netDiffAmt.compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new ValidationException("Net difference amount must be greater than zero for autocalculation.");
+                if (netDiffAmt.compareTo(BigDecimal.ZERO) > 0) {
+                    HrAppraisalLegacyRecalculation.applyFromNetDifference(row, netDiffAmt, basicPercent, request.getPeriodFrom(), today);
                 }
-                HrAppraisalLegacyRecalculation.applyFromNetDifference(row, netDiffAmt, basicPercent, request.getPeriodFrom(), today);
             }
             default ->
                     throw new ValidationException("Unsupported recalculation mode. Use AMOUNT_EDIT, PERCENT_EDIT, or NET_DIFF_EDIT.");
@@ -390,9 +408,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public byte[] printLetter(Long transactionPoid, Long employeePoid) throws JRException {
-        if (employeePoid == null) {
-            throw new ValidationException("Select any employee from the below list to print individual letter.");
-        }
+        // employeePoid == null → print letters for all employees (legacy PrintLetterForEmployees)
+        // employeePoid != null → print single employee letter (legacy PrintLetterForSingleEmployee)
         return generatePdf("HrAppraisalLetter.jrxml", transactionPoid, employeePoid);
     }
 
@@ -467,6 +484,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (request.getEmployeePoid() != null && !dtlRepository.findByTransactionPoidAndEmployeePoid(transactionPoid, request.getEmployeePoid()).isEmpty()) {
             throw new ValidationException("Employee already exists in this appraisal.");
         }
+        validateActiveEmployee(request.getEmployeePoid());
+        validateEffectiveDateAfterLastIncrement(hdr.getPeriodFrom(), request.getLastIncrementDate(), request.getEmployeePoid());
+        validateProposedSalaryNotLessThanCurrent(request);
         HrAppraisalDtl entity = new HrAppraisalDtl();
         entity.setTransactionPoid(transactionPoid);
         entity.setDetRowId(dtlRepository.findMaxDetRowIdByTransactionPoid(transactionPoid) + 1);
@@ -488,6 +508,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private void updateDetail(Long transactionPoid, HrAppraisalDtlRequest request, HrAppraisalHdr hdr, LocalDate today) {
         HrAppraisalDtlId id = buildDtlId(transactionPoid, request.getDetRowId());
         HrAppraisalDtl existing = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appraisal detail not found for detRowId: " + request.getDetRowId()));
+        validateEffectiveDateAfterLastIncrement(hdr.getPeriodFrom(), request.getLastIncrementDate(), request.getEmployeePoid());
+        validateProposedSalaryNotLessThanCurrent(request);
         HrAppraisalDtl oldEntity = new HrAppraisalDtl();
         BeanUtils.copyProperties(existing, oldEntity);
         mapDetail(request, existing);
@@ -553,6 +575,166 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         entity.setNewYearlyCtc(request.getNewYearlyCtc());
         entity.setLastDesignationPoid(request.getLastDesignationPoid());
         entity.setLastPromotionDate(request.getLastPromotionDate());
+    }
+
+    private void validateActiveEmployee(Long employeePoid) {
+        if (employeePoid == null) return;
+        try {
+            String active = jdbcTemplate.queryForObject(
+                    "SELECT ACTIVE FROM HR_EMPLOYEE_MASTER WHERE EMPLOYEE_POID = ?",
+                    String.class, employeePoid);
+            if (!"Y".equalsIgnoreCase(active)) {
+                throw new ValidationException("Only active employees can be added to an appraisal. Employee ID: " + employeePoid);
+            }
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException("Employee not found with ID: " + employeePoid);
+        }
+    }
+
+    private void validateEffectiveDateAfterLastIncrement(LocalDate periodFrom, LocalDate lastIncrementDate, Long employeePoid) {
+        if (periodFrom == null || lastIncrementDate == null) return;
+        if (!periodFrom.isAfter(lastIncrementDate)) {
+            throw new ValidationException(String.format(
+                    "Appraisal effective date (%s) must be after the last increment date (%s)%s.",
+                    periodFrom, lastIncrementDate,
+                    employeePoid != null ? " for employee ID: " + employeePoid : ""));
+        }
+    }
+
+    private void validateProposedSalaryNotLessThanCurrent(HrAppraisalDtlRequest request) {
+        BigDecimal curBasic = nz(request.getCurBasicSalary());
+        BigDecimal newBasic = nz(request.getNewBasicSalary());
+        if (curBasic.compareTo(BigDecimal.ZERO) > 0 && newBasic.compareTo(BigDecimal.ZERO) > 0
+                && newBasic.compareTo(curBasic) < 0) {
+            throw new ValidationException("Proposed basic salary must be >= current basic salary.");
+        }
+        BigDecimal curGross = nz(request.getCurGrossPay());
+        BigDecimal newGross = nz(request.getNewGrossPay());
+        if (curGross.compareTo(BigDecimal.ZERO) > 0 && newGross.compareTo(BigDecimal.ZERO) > 0
+                && newGross.compareTo(curGross) < 0) {
+            throw new ValidationException("Proposed gross salary must be >= current gross salary.");
+        }
+    }
+
+    private List<HrAppraisalDtlResponse> fetchDetailsWithEmployeeData(Long transactionPoid, Long departmentPoid, Long designationPoid, String listingMethod, String employeeName) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT d.TRANSACTION_POID, d.DET_ROW_ID, d.EMPLOYEE_POID, d.DESIGNATION_POID, d.JOIN_DATE, " +
+                "d.CUR_AIR_ENTITLE, d.CUR_BONUS, d.CUR_INCREMENT, d.CUR_BASIC_SALARY, d.CUR_FA_ALW, " +
+                "d.CUR_TA_ALW, d.CUR_HRA_ALW, d.CUR_FIXOT_ALW, d.CUR_SPL_ALW, d.CUR_OTH_ALW, d.CUR_AVGOT, d.CUR_GROSS_PAY, " +
+                "d.NEW_AIR_ENTITLE, d.NEW_BONUS, d.NEW_INCREMENT_PER, d.NEW_BASIC_SALARY, d.NEW_FA_ALW, " +
+                "d.NEW_TA_ALW, d.NEW_HRA_ALW, d.NEW_FIXOT_ALW, d.NEW_SPL_ALW, d.NEW_OTH_ALW, d.NEW_AVGOT, d.NEW_GROSS_PAY, " +
+                "d.STATUS, d.NET_INCREMENT, d.LAST_INCREMENT_DATE, d.LAST_INCREMENT_AMT, d.LAST_BONUS, " +
+                "d.CUR_TICKET_PERIOD, d.CUR_NO_OF_TICKETS, d.NEW_TICKET_PERIOD, d.NEW_NO_OF_TICKETS, " +
+                "d.NEW_DESIGNATION_POID, d.ARREARS, d.NEW_BONUS_PER, d.LETTER_EMAILED_ON, d.GRID_LISTING_METHOD, " +
+                "d.REGISTERED_SALARY, d.CUR_MONTHLY_CTC, d.CUR_YEARLY_CTC, d.NEW_MONTHLY_CTC, d.NEW_YEARLY_CTC, " +
+                "d.LAST_DESIGNATION_POID, d.LAST_PROMOTION_DATE, d.CREATED_BY, d.CREATED_DATE, d.LASTMODIFIED_BY, d.LASTMODIFIED_DATE, " +
+                "e.EMPLOYEE_CODE, e.EMPLOYEE_NAME, e.EMPLOYEE_NAME2 " +
+                "FROM HR_APPRAISAL_DTL d " +
+                "LEFT JOIN HR_EMPLOYEE_MASTER e ON d.EMPLOYEE_POID = e.EMPLOYEE_POID " +
+                "WHERE d.TRANSACTION_POID = ? AND (d.DELETED IS NULL OR d.DELETED = 'N')");
+
+        List<Object> params = new ArrayList<>();
+        params.add(transactionPoid);
+
+        if (departmentPoid != null) {
+            sql.append(" AND e.DEPARTMENT_POID = ?");
+            params.add(departmentPoid);
+        }
+        if (designationPoid != null) {
+            sql.append(" AND d.DESIGNATION_POID = ?");
+            params.add(designationPoid);
+        }
+        if (listingMethod != null && !listingMethod.isBlank()) {
+            if ("UPDATED".equalsIgnoreCase(listingMethod)) {
+                sql.append(" AND d.STATUS = 'Updated'");
+            } else if ("PENDING".equalsIgnoreCase(listingMethod)) {
+                sql.append(" AND (d.STATUS IS NULL OR d.STATUS != 'Updated')");
+            }
+        }
+        if (employeeName != null && !employeeName.isBlank()) {
+            sql.append(" AND UPPER(e.EMPLOYEE_NAME) LIKE UPPER(?)");
+            params.add("%" + employeeName.trim() + "%");
+        }
+        sql.append(" ORDER BY d.DET_ROW_ID");
+
+        return jdbcTemplate.query(sql.toString(), this::mapDtlRow, params.toArray());
+    }
+
+    private HrAppraisalDtlResponse mapDtlRow(ResultSet rs, int rowNum) throws SQLException {
+        HrAppraisalDtlResponse r = new HrAppraisalDtlResponse();
+        r.setTransactionPoid(getLong(rs, "TRANSACTION_POID"));
+        r.setDetRowId(getLong(rs, "DET_ROW_ID"));
+        r.setEmployeePoid(getLong(rs, "EMPLOYEE_POID"));
+        r.setDesignationPoid(getLong(rs, "DESIGNATION_POID"));
+        r.setJoinDate(toLocalDate(rs, "JOIN_DATE"));
+        r.setCurAirEntitle(rs.getString("CUR_AIR_ENTITLE"));
+        r.setCurBonus(rs.getBigDecimal("CUR_BONUS"));
+        r.setCurIncrement(rs.getBigDecimal("CUR_INCREMENT"));
+        r.setCurBasicSalary(rs.getBigDecimal("CUR_BASIC_SALARY"));
+        r.setCurFaAlw(rs.getBigDecimal("CUR_FA_ALW"));
+        r.setCurTaAlw(rs.getBigDecimal("CUR_TA_ALW"));
+        r.setCurHraAlw(rs.getBigDecimal("CUR_HRA_ALW"));
+        r.setCurFixotAlw(rs.getBigDecimal("CUR_FIXOT_ALW"));
+        r.setCurSplAlw(rs.getBigDecimal("CUR_SPL_ALW"));
+        r.setCurOthAlw(rs.getBigDecimal("CUR_OTH_ALW"));
+        r.setCurAvgot(rs.getBigDecimal("CUR_AVGOT"));
+        r.setCurGrossPay(rs.getBigDecimal("CUR_GROSS_PAY"));
+        r.setNewAirEntitle(rs.getString("NEW_AIR_ENTITLE"));
+        r.setNewBonus(rs.getBigDecimal("NEW_BONUS"));
+        r.setNewIncrementPer(rs.getBigDecimal("NEW_INCREMENT_PER"));
+        r.setNewBasicSalary(rs.getBigDecimal("NEW_BASIC_SALARY"));
+        r.setNewFaAlw(rs.getBigDecimal("NEW_FA_ALW"));
+        r.setNewTaAlw(rs.getBigDecimal("NEW_TA_ALW"));
+        r.setNewHraAlw(rs.getBigDecimal("NEW_HRA_ALW"));
+        r.setNewFixotAlw(rs.getBigDecimal("NEW_FIXOT_ALW"));
+        r.setNewSplAlw(rs.getBigDecimal("NEW_SPL_ALW"));
+        r.setNewOthAlw(rs.getBigDecimal("NEW_OTH_ALW"));
+        r.setNewAvgot(rs.getBigDecimal("NEW_AVGOT"));
+        r.setNewGrossPay(rs.getBigDecimal("NEW_GROSS_PAY"));
+        r.setStatus(rs.getString("STATUS"));
+        r.setNetIncrement(rs.getBigDecimal("NET_INCREMENT"));
+        r.setLastIncrementDate(toLocalDate(rs, "LAST_INCREMENT_DATE"));
+        r.setLastIncrementAmt(rs.getBigDecimal("LAST_INCREMENT_AMT"));
+        r.setLastBonus(rs.getBigDecimal("LAST_BONUS"));
+        r.setCurTicketPeriod(rs.getBigDecimal("CUR_TICKET_PERIOD"));
+        r.setCurNoOfTickets(rs.getBigDecimal("CUR_NO_OF_TICKETS"));
+        r.setNewTicketPeriod(rs.getBigDecimal("NEW_TICKET_PERIOD"));
+        r.setNewNoOfTickets(rs.getBigDecimal("NEW_NO_OF_TICKETS"));
+        r.setNewDesignationPoid(getLong(rs, "NEW_DESIGNATION_POID"));
+        r.setArrears(rs.getBigDecimal("ARREARS"));
+        r.setNewBonusPer(rs.getBigDecimal("NEW_BONUS_PER"));
+        r.setLetterEmailedOn(toLocalDate(rs, "LETTER_EMAILED_ON"));
+        r.setGridListingMethod(rs.getString("GRID_LISTING_METHOD"));
+        r.setRegisteredSalary(rs.getBigDecimal("REGISTERED_SALARY"));
+        r.setCurMonthlyCtc(rs.getBigDecimal("CUR_MONTHLY_CTC"));
+        r.setCurYearlyCtc(rs.getBigDecimal("CUR_YEARLY_CTC"));
+        r.setNewMonthlyCtc(rs.getBigDecimal("NEW_MONTHLY_CTC"));
+        r.setNewYearlyCtc(rs.getBigDecimal("NEW_YEARLY_CTC"));
+        r.setLastDesignationPoid(getLong(rs, "LAST_DESIGNATION_POID"));
+        r.setLastPromotionDate(toLocalDate(rs, "LAST_PROMOTION_DATE"));
+        r.setCreatedBy(rs.getString("CREATED_BY"));
+        r.setCreatedDate(toLocalDateTime(rs, "CREATED_DATE"));
+        r.setLastmodifiedBy(rs.getString("LASTMODIFIED_BY"));
+        r.setLastmodifiedDate(toLocalDateTime(rs, "LASTMODIFIED_DATE"));
+        r.setEmployeeCode(rs.getString("EMPLOYEE_CODE"));
+        r.setEmployeeName(rs.getString("EMPLOYEE_NAME"));
+        r.setEmployeeName2(rs.getString("EMPLOYEE_NAME2"));
+        return r;
+    }
+
+    private static Long getLong(ResultSet rs, String col) throws SQLException {
+        long v = rs.getLong(col);
+        return rs.wasNull() ? null : v;
+    }
+
+    private static LocalDate toLocalDate(ResultSet rs, String col) throws SQLException {
+        java.sql.Date d = rs.getDate(col);
+        return d != null ? d.toLocalDate() : null;
+    }
+
+    private static LocalDateTime toLocalDateTime(ResultSet rs, String col) throws SQLException {
+        java.sql.Timestamp ts = rs.getTimestamp(col);
+        return ts != null ? ts.toLocalDateTime() : null;
     }
 
     private Map<String, Object> params(Object... values) {
