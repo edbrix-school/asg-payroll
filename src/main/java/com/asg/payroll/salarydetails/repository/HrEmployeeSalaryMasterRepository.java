@@ -11,5 +11,4 @@ public interface HrEmployeeSalaryMasterRepository extends JpaRepository<HrEmploy
 
     boolean existsByEmployeePoid(Long employeePoid);
 
-    Optional<HrEmployeeSalaryMaster> findByEmployeePoid(Long employeePoid);
 }

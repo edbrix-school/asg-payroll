@@ -236,22 +236,6 @@ class SalaryDetailsServiceImplTest {
     }
 
     @Test
-    void testGetByEmployeeId_Success() {
-        HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
-        entity.setEmployeePoid(100L);
-        when(repository.findByEmployeePoid(100L)).thenReturn(Optional.of(entity));
-
-        SalaryDetailResponse response = service.getByEmployeeId(100L);
-        assertNotNull(response);
-    }
-
-    @Test
-    void testGetByEmployeeId_NotFound() {
-        when(repository.findByEmployeePoid(100L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> service.getByEmployeeId(100L));
-    }
-
-    @Test
     void testDelete_Success() {
         when(repository.findById(1L)).thenReturn(Optional.of(new HrEmployeeSalaryMaster()));
         service.delete(1L, new DeleteReasonDto());
