@@ -41,6 +41,7 @@ import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -154,11 +155,13 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
     @Override
     public byte[] printContract(Long id, String contractPrintType) throws Exception {
+        if (contractPrintType == null || contractPrintType.isBlank()) {
+            throw new ValidationException("Contract print type is required");
+        }
         String docId = UserContext.getDocumentId();
         Map<String, Object> params = printService.buildBaseParams(id, docId);
-        String printOption = contractPrintType.toUpperCase();
-        String reportFileName = "HR/Employee_Contract_Annex_one.jrxml";
-        switch (printOption) {
+        String reportFileName;
+        switch (contractPrintType.toUpperCase(Locale.ROOT)) {
             case "EXPAT_OPEN":
                 reportFileName = "HR/Employee_Contract_Open_expat.jrxml";
                 break;
@@ -172,10 +175,40 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
                 reportFileName = "HR/Employee_Contract_Limited_bahraini.jrxml";
                 break;
             default:
-                break;
+                throw new ValidationException("Unknown contract print type: " + contractPrintType);
         }
         JasperReport mainReport = printService.load(reportFileName);
         return printService.fillReportToPdf(mainReport, params, dataSource);
+    }
+
+    @Override
+    public byte[] printAnnex(Long id) throws Exception {
+        Map<String, Object> params = printService.buildBaseParams(id, UserContext.getDocumentId());
+        JasperReport report = printService.load("HR/Employee_Contract_Annex_one.jrxml");
+        return printService.fillReportToPdf(report, params, dataSource);
+    }
+
+    @Override
+    public byte[] printEmployeeDetails(Long id, boolean preview) throws Exception {
+        Map<String, Object> params = printService.buildBaseParams(id, UserContext.getDocumentId());
+        params.put("PRINTED_FROM_MASTER", "FALSE");
+        params.put("PREVIEW", preview ? "TRUE" : "FALSE");
+        JasperReport report = printService.load("HR/EmployeeDetailsReportWithSalary.jrxml");
+        return printService.fillReportToPdf(report, params, dataSource);
+    }
+
+    @Override
+    public Map<String, Object> getSalaryRevisions(Long salaryPoid) {
+        HrEmployeeSalaryMaster entity = repository.findById(salaryPoid)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, SALARY_POID, salaryPoid));
+        List<HrEmployeeSalaryHist> history = histRepository.findBySalaryPoid(salaryPoid);
+        return Map.of(EMPLOYEE_POID, entity.getEmployeePoid(), "revisions", history);
+    }
+
+    @Override
+    public void enableSalaryEdit(Long id) {
+        loggingService.createLogSummaryEntry(LogDetailsEnum.MODIFIED, UserContext.getDocumentId(),
+                "Edit Salary For Other Reasons clicked for salary id: " + id);
     }
 
     private SalaryDetailResponse buildSalaryResponse(HrEmployeeSalaryMaster entity) {
@@ -234,7 +267,9 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         }
         entity.setTotAllowance(totalAllowance);
         entity.setGrossSalary(basic.add(totalAllowance));
-        entity.setNetSalary(entity.getGrossSalary()); // Simplified, deductions not in SRS yet
+        BigDecimal totalDeduction = BigDecimal.ZERO;
+        // TODO: include deductions once HrEmployeeSalaryDedDtl repository is available
+        entity.setNetSalary(entity.getGrossSalary().subtract(totalDeduction));
     }
 
     private void saveAllowances(Long salaryPoid, List<SalaryAllowanceDto> allowanceDtos) {

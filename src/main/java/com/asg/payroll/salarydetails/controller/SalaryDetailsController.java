@@ -28,7 +28,7 @@ import static com.asg.common.lib.dto.response.ApiResponse.error;
 import static com.asg.common.lib.dto.response.ApiResponse.success;
 
 @RestController
-@RequestMapping("v1/salary-details")
+@RequestMapping("/v1/salary-details")
 @Tag(name = "Salary Details", description = "APIs for managing employee salary details and history")
 @RequiredArgsConstructor
 @Slf4j
@@ -165,17 +165,50 @@ public class SalaryDetailsController {
     @AllowedAction(UserRolesRightsEnum.PRINT)
     @GetMapping("/{id}/print-annex")
     public ResponseEntity<?> printAnnex(@PathVariable Long id) {
-
         try {
-            byte[] res = service.printContract(id, null);
+            byte[] res = service.printAnnex(id);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=contract-" + id + ".pdf")
+                            "attachment; filename=annex-" + id + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF).body(res);
         } catch (Exception e) {
-            log.error("Failed to generate contract: {}", id, e);
-            return error(FAILEDTOGENERATECONTRACTPDF + e.getMessage(), 500);
+            log.error("Failed to generate annex: {}", id, e);
+            return error("Failed to generate annex PDF: " + e.getMessage(), 500);
         }
+    }
+
+    @Operation(summary = "Print Employee Details with Salary")
+    @AllowedAction(UserRolesRightsEnum.PRINT)
+    @GetMapping("/{id}/print-employee-details")
+    public ResponseEntity<?> printEmployeeDetails(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean preview) {
+        try {
+            byte[] res = service.printEmployeeDetails(id, preview);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=employee-details-" + id + ".pdf")
+                    .contentType(MediaType.APPLICATION_PDF).body(res);
+        } catch (Exception e) {
+            log.error("Failed to generate employee details report: {}", id, e);
+            return error("Failed to generate employee details PDF: " + e.getMessage(), 500);
+        }
+    }
+
+    @Operation(summary = "View Salary Revisions for Employee")
+    @AllowedAction(UserRolesRightsEnum.VIEW)
+    @GetMapping("/{id}/salary-revisions")
+    public ResponseEntity<?> viewSalaryRevisions(@PathVariable Long id) {
+        Map<String, Object> result = service.getSalaryRevisions(id);
+        return success("Salary revisions fetched successfully", result);
+    }
+
+    @Operation(summary = "Enable Salary Edit Mode")
+    @AllowedAction(UserRolesRightsEnum.EDIT)
+    @PostMapping("/{id}/enable-edit")
+    public ResponseEntity<?> enableSalaryEdit(@PathVariable Long id) {
+        service.enableSalaryEdit(id);
+        return success("Salary edit mode enabled. Please refresh the salary table to apply changes.");
     }
 
 }

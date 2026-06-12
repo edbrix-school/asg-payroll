@@ -306,11 +306,115 @@ class SalaryDetailsServiceImplTest {
         when(printService.load(any())).thenReturn(mock(JasperReport.class));
         when(printService.fillReportToPdf(any(), any(), any())).thenReturn(new byte[]{1, 2});
 
-        String[] types = {"EXPAT_OPEN", "EXPAT_LTD", "BAHRAINI_OPEN", "BAHRAINI_LTD", "DEFAULT"};
+        String[] types = {"EXPAT_OPEN", "EXPAT_LTD", "BAHRAINI_OPEN", "BAHRAINI_LTD"};
         for (String type : types) {
             byte[] result = service.printContract(1L, type);
             assertArrayEquals(new byte[]{1, 2}, result);
         }
+    }
+
+    @Test
+    void testPrintContract_NullType_ThrowsValidationException() {
+        assertThrows(ValidationException.class, () -> service.printContract(1L, null));
+    }
+
+    @Test
+    void testPrintContract_BlankType_ThrowsValidationException() {
+        assertThrows(ValidationException.class, () -> service.printContract(1L, "  "));
+    }
+
+    @Test
+    void testPrintContract_UnknownType_ThrowsValidationException() throws Exception {
+        when(printService.buildBaseParams(any(), any())).thenReturn(Map.of());
+        assertThrows(ValidationException.class, () -> service.printContract(1L, "UNKNOWN_TYPE"));
+    }
+
+    @Test
+    void testPrintAnnex() throws Exception {
+        when(printService.buildBaseParams(any(), any())).thenReturn(Map.of());
+        when(printService.load("HR/Employee_Contract_Annex_one.jrxml")).thenReturn(mock(JasperReport.class));
+        when(printService.fillReportToPdf(any(), any(), any())).thenReturn(new byte[]{3, 4});
+
+        byte[] result = service.printAnnex(1L);
+
+        assertArrayEquals(new byte[]{3, 4}, result);
+        verify(printService).load("HR/Employee_Contract_Annex_one.jrxml");
+    }
+
+    @Test
+    void testPrintEmployeeDetails_PreviewTrue() throws Exception {
+        when(printService.buildBaseParams(any(), any())).thenReturn(new java.util.HashMap<>());
+        when(printService.load("HR/EmployeeDetailsReportWithSalary.jrxml")).thenReturn(mock(JasperReport.class));
+        when(printService.fillReportToPdf(any(), any(), any())).thenReturn(new byte[]{5, 6});
+
+        byte[] result = service.printEmployeeDetails(1L, true);
+
+        assertArrayEquals(new byte[]{5, 6}, result);
+        verify(printService).load("HR/EmployeeDetailsReportWithSalary.jrxml");
+    }
+
+    @Test
+    void testPrintEmployeeDetails_PreviewFalse() throws Exception {
+        when(printService.buildBaseParams(any(), any())).thenReturn(new java.util.HashMap<>());
+        when(printService.load("HR/EmployeeDetailsReportWithSalary.jrxml")).thenReturn(mock(JasperReport.class));
+        when(printService.fillReportToPdf(any(), any(), any())).thenReturn(new byte[]{7, 8});
+
+        byte[] result = service.printEmployeeDetails(1L, false);
+
+        assertArrayEquals(new byte[]{7, 8}, result);
+    }
+
+    @Test
+    void testGetSalaryRevisions_Success() {
+        HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
+        entity.setSalaryPoid(1L);
+        entity.setEmployeePoid(100L);
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(histRepository.findBySalaryPoid(1L)).thenReturn(new ArrayList<>());
+
+        Map<String, Object> result = service.getSalaryRevisions(1L);
+
+        assertNotNull(result);
+        assertEquals(100L, result.get("EMPLOYEE_POID"));
+        assertTrue(result.containsKey("revisions"));
+        verify(histRepository).findBySalaryPoid(1L);
+    }
+
+    @Test
+    void testGetSalaryRevisions_NotFound() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.getSalaryRevisions(99L));
+    }
+
+    @Test
+    void testEnableSalaryEdit_LogsEntry() {
+        service.enableSalaryEdit(1L);
+        verify(loggingService).createLogSummaryEntry(eq(LogDetailsEnum.MODIFIED), eq("DOC-123"), contains("1"));
+    }
+
+    @Test
+    void testCalculateTotals_NetSalaryEqualsGrossWhenNoDeductions() {
+        SalaryDetailRequest request = new SalaryDetailRequest();
+        request.setEmployeePoid(100L);
+        request.setPaymentMethod("CASH");
+        request.setBasicSalary(BigDecimal.valueOf(1000));
+        SalaryAllowanceDto alw = SalaryAllowanceDto.builder()
+                .actionType(ActionType.ISCREATED)
+                .amount(BigDecimal.valueOf(300))
+                .active(1L)
+                .build();
+        request.setAllowances(List.of(alw));
+
+        HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
+        entity.setSalaryPoid(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(repository.save(any())).thenReturn(entity);
+
+        service.update(1L, request);
+
+        // gross = 1000 + 300 = 1300, net = gross - 0 deductions = 1300
+        assertEquals(new BigDecimal("1300"), entity.getGrossSalary());
+        assertEquals(new BigDecimal("1300"), entity.getNetSalary());
     }
 
     @Test
