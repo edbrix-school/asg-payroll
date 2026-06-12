@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Payslip_two" language="groovy" pageWidth="595" pageHeight="842" columnWidth="523" leftMargin="36" rightMargin="36" topMargin="20" bottomMargin="20" uuid="cd087ede-7625-403d-8e36-e9ccd9a29c45">
+    <property name="ireport.zoom" value="1.0"/>
+    <property name="ireport.x" value="0"/>
+    <property name="ireport.y" value="0"/>
+    <style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
+    <style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+    <style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+    <style name="Detail" fontName="Arial" fontSize="12"/>
+    <style name="Row" mode="Transparent">
+        <conditionalStyle>
+            <conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+            <style backcolor="#E6DAC3"/>
+        </conditionalStyle>
+    </style>
+    <subDataset name="LoanBreakup" uuid="6251cf2b-f1d9-4031-a6b3-8b7f484d38a5">
+        <parameter name="EMPLOYEE_POID" class="java.math.BigDecimal">
+            <defaultValueExpression><![CDATA[]]></defaultValueExpression>
+        </parameter>
+        <parameter name="TRANSACTION_POID" class="java.lang.String">
+            <defaultValueExpression><![CDATA[]]></defaultValueExpression>
+        </parameter>
+        <queryString>
+            <![CDATA[SELECT REF_NO, RECUR_AMOUNT
+FROM HR_PAYROLL_RECURRING_DTL
+WHERE TRANSACTION_POID = $P{TRANSACTION_POID}
+AND EMPLOYEE_POID = $P{EMPLOYEE_POID}]]>
+        </queryString>
+        <field name="REF_NO" class="java.lang.String"/>
+        <field name="RECUR_AMOUNT" class="java.math.BigDecimal"/>
+    </subDataset>
+    <parameter name="LOGIN_GROUP_POID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+    </parameter>
+    <parameter name="LOGIN_COMP_POID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+    </parameter>
+    <parameter name="LOGIN_USER_POID" class="java.lang.String" isForPrompting="false"/>
+    <parameter name="DOC_ID" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA["000-000"]]></defaultValueExpression>
+    </parameter>
+    <parameter name="DOC_KEY_POID" class="java.lang.String"/>
+    <parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA["\\\\shippingbahrain.com\\data\\ERP_REPORTS\\Reports\\"]]></defaultValueExpression>
+    </parameter>
+    <queryString>
+        <![CDATA[SELECT DTL.EMPLOYEE_POID, EM.EMPLOYEE_CODE, EMPLOYEE_NAME || ' ' || EMPLOYEE_NAME2 AS EMPLOYEE_NAME, DTL.BASIC_SALARY, DTL.BASIC_SALARY_PAYABLE,
+      DTL.WORKED_DAYS, DTL.ABSENT_AMOUNT, DTL.OT1_HRS, DTL.OT1_AMT, DTL.OT2_HRS, DTL.OT2_AMT, DTL.SHORT_HRS, DTL.SHORT_HRS_AMOUNT, DTL.MEDICAL_DAYS,
+      DTL.FIXED_ALLOWANCE, DTL.FIXED_OT, DTL.HRA_ALLOWANCE, DTL.TRAVEL_ALLOWANCE, DTL.COMMUNICATION_ALLOWANCE, DTL.TRANSPORT_ALLOWANCE,
+      DTL.SPECIAL_ALLOWANCE, DTL.GOSI_DEDUCTION * -1 as GOSI_DEDUCTION, DTL.LOAN_DEDUCTION * -1 as LOAN_DEDUCTION,
+      DTL.PHONE_DEDUCTION, DTL.MEDICAL_INSURANCE, DTL.ARREARS,
+      DTL.RECURRING_DEDUCTION, DTL.TOT_ALLOWANCE, DTL.GROSS_SALARY, DTL.TOT_DEDUCTIONS, DTL.NET_SALARY, BM.BANK_CODE, DTL.ACCOUNT_NO,
+      HDR.PAYROLL_MONTH,FN_AMOUNT_IN_WORDS_COMMON(DTL.NET_SALARY, 'BHD') AMOUNT_IN_WORDS,
+      CASE
+            WHEN DTL.WORKED_DAYS = 30 THEN NULL
+            ELSE CAST(TO_CHAR(LAST_DAY(PAYROLL_MONTH),'dd') AS INT) - DTL.WORKED_DAYS
+      END AS ABSENT_DAYS,
+      CASE
+            WHEN PAYROLL_JV_DOC_POID IS NULL THEN PRODUCTION.FUNC_GL_LEDGER_BALANCE(NULL, EMP_GL_POID, NULL) - LOAN_DEDUCTION
+            ELSE PRODUCTION.FUNC_GL_LEDGER_BALANCE(NULL, EMP_GL_POID, NULL)
+      END AS LOAN_BALANCE
+FROM  HR_PAYROLL_DTL DTL
+INNER JOIN HR_PAYROLL_HDR HDR    ON DTL.TRANSACTION_POID = HDR.TRANSACTION_POID
+INNER JOIN HR_EMPLOYEE_MASTER EM ON DTL.EMPLOYEE_POID    = EM.EMPLOYEE_POID
+LEFT JOIN PRODUCTION.GLOBAL_CUSTOMER_BANK_MASTER BM ON DTL.BANK_POID = BM.BANK_POID
+WHERE HDR.TRANSACTION_POID = $P{DOC_KEY_POID}
+AND DTL.NET_SALARY > 0
+AND ( NVL(EM.PERSONAL_EMAIL, EM.BUSINESS_EMAIL) IS NULL OR EM.DATE_OF_BIRTH IS NULL)]]>
+    </queryString>
+    <field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
+    <field name="EMPLOYEE_CODE" class="java.lang.String"/>
+    <field name="EMPLOYEE_NAME" class="java.lang.String"/>
+    <field name="BASIC_SALARY" class="java.math.BigDecimal"/>
+    <field name="BASIC_SALARY_PAYABLE" class="java.math.BigDecimal"/>
+    <field name="WORKED_DAYS" class="java.math.BigDecimal"/>
+    <field name="ABSENT_AMOUNT" class="java.math.BigDecimal"/>
+    <field name="OT1_HRS" class="java.math.BigDecimal"/>
+    <field name="OT1_AMT" class="java.math.BigDecimal"/>
+    <field name="OT2_HRS" class="java.math.BigDecimal"/>
+    <field name="OT2_AMT" class="java.math.BigDecimal"/>
+    <field name="SHORT_HRS" class="java.math.BigDecimal"/>
+    <field name="SHORT_HRS_AMOUNT" class="java.math.BigDecimal"/>
+    <field name="MEDICAL_DAYS" class="java.math.BigDecimal"/>
+    <field name="FIXED_ALLOWANCE" class="java.math.BigDecimal"/>
+    <field name="FIXED_OT" class="java.math.BigDecimal"/>
+    <field name="HRA_ALLOWANCE" class="java.math.BigDecimal"/>
+    <field name="TRAVEL_ALLOWANCE" class="java.math.BigDecimal"/>
+    <field name="COMMUNICATION_ALLOWANCE" class="java.math.BigDecimal"/>
+    <field name="TRANSPORT_ALLOWANCE" class="java.math.BigDecimal"/>
+    <field name="SPECIAL_ALLOWANCE" class="java.math.BigDecimal"/>
+    <field name="GOSI_DEDUCTION" class="java.math.BigDecimal"/>
+    <field name="LOAN_DEDUCTION" class="java.math.BigDecimal"/>
+    <field name="PHONE_DEDUCTION" class="java.math.BigDecimal"/>
+    <field name="MEDICAL_INSURANCE" class="java.math.BigDecimal"/>
+    <field name="ARREARS" class="java.math.BigDecimal"/>
+    <field name="RECURRING_DEDUCTION" class="java.math.BigDecimal"/>
+    <field name="TOT_ALLOWANCE" class="java.math.BigDecimal"/>
+    <field name="GROSS_SALARY" class="java.math.BigDecimal"/>
+    <field name="TOT_DEDUCTIONS" class="java.math.BigDecimal"/>
+    <field name="NET_SALARY" class="java.math.BigDecimal"/>
+    <field name="BANK_CODE" class="java.lang.String"/>
+    <field name="ACCOUNT_NO" class="java.lang.String"/>
+    <field name="PAYROLL_MONTH" class="java.sql.Timestamp"/>
+    <field name="AMOUNT_IN_WORDS" class="java.lang.String"/>
+    <field name="ABSENT_DAYS" class="java.math.BigDecimal"/>
+    <field name="LOAN_BALANCE" class="java.math.BigDecimal"/>
+    <group name="EMPLOYEE_POID" isStartNewPage="true">
+        <groupExpression><![CDATA[$F{EMPLOYEE_POID}]]></groupExpression>
+        <groupHeader>
+            <band height="58">
+                <frame>
+                    <reportElement isPrintRepeatedValues="false" mode="Opaque" x="2" y="7" width="521" height="51" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" printWhenGroupChanges="EMPLOYEE_POID" forecolor="#B89F7D" backcolor="#F2EBDF" uuid="4330ed07-15b6-4e81-966b-9474814473c9"/>
+                    <textField isStretchWithOverflow="true">
+                        <reportElement style="Detail" x="2" y="31" width="516" height="19" uuid="aa35f3a8-cca8-47ad-9cf6-eba2f6f1d48d"/>
+                        <textElement textAlignment="Center">
+                            <font size="14" isBold="false"/>
+                        </textElement>
+                        <textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
+                    </textField>
+                    <textField isStretchWithOverflow="true">
+                        <reportElement style="Detail" x="2" y="5" width="516" height="19" uuid="eb044db3-c1d1-4b5a-bdad-abe5b4a2a716"/>
+                        <textElement textAlignment="Center">
+                            <font size="14" isBold="false"/>
+                        </textElement>
+                        <textFieldExpression><![CDATA["Employee Id : " + $F{EMPLOYEE_POID}]]></textFieldExpression>
+                    </textField>
+                </frame>
+            </band>
+        </groupHeader>
+        <groupFooter>
+            <band height="21">
+                <staticText>
+                    <reportElement style="Column header" mode="Transparent" x="2" y="0" width="516" height="12" forecolor="#736343" backcolor="#CCCCCC" uuid="2ab750a9-1dd4-4378-a273-7e4549d63f4c"/>
+                    <textElement textAlignment="Center">
+                        <font size="10" isBold="false" isItalic="true"/>
+                    </textElement>
+                    <text><![CDATA[THIS IS A COMPUTER-GENERATED DOCUMENT AND IT DOES NOT REQUIRE A SIGNATURE]]></text>
+                </staticText>
+            </band>
+        </groupFooter>
+    </group>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <pageHeader>
+        <band splitType="Stretch"/>
+    </pageHeader>
+    <columnHeader>
+        <band height="128" splitType="Stretch">
+            <staticText>
+                <reportElement x="3" y="78" width="521" height="26" uuid="afeaa87a-7663-43f2-b138-4e3c54672e05"/>
+                <textElement textAlignment="Center">
+                    <font size="20" isBold="true"/>
+                </textElement>
+                <text><![CDATA[PaySlip]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true" pattern="MMMMM, yyyy">
+                <reportElement style="Detail" x="3" y="104" width="521" height="17" uuid="0775f074-8a37-48e5-a4fd-ebd4a8b9227a"/>
+                <textElement textAlignment="Center">
+                    <font isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{PAYROLL_MONTH}]]></textFieldExpression>
+            </textField>
+            <subreport>
+                <reportElement x="2" y="0" width="522" height="67" uuid="5f29a68e-0114-41f3-83c3-e7d3d68cf356"/>
+                <subreportParameter name="LOGIN_COMP_POID">
+                    <subreportParameterExpression><![CDATA[$P{LOGIN_COMP_POID}]]></subreportParameterExpression>
+                </subreportParameter>
+                <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                <subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Templates\\DocHeaderSubReport.jasper"]]></subreportExpression>
+            </subreport>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="411" splitType="Stretch">
+            <frame>
+                <reportElement style="Detail" mode="Transparent" x="-2" y="0" width="521" height="411" uuid="1f8d60cf-4536-46ba-aead-45101364eba1"/>
+                <staticText>
+                    <reportElement style="Column header" mode="Opaque" x="90" y="177" width="80" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="e02089c6-e5ae-4a08-9a74-4e2785807598"/>
+                    <textElement>
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <text><![CDATA[GOSI]]></text>
+                </staticText>
+                <staticText>
+                    <reportElement style="Column header" mode="Opaque" x="90" y="193" width="80" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="ac8482a8-caeb-4bbc-b237-7bd9db48be39"/>
+                    <textElement>
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <text><![CDATA[LOAN & ADV]]></text>
+                </staticText>
+                <staticText>
+                    <reportElement style="Column header" mode="Opaque" x="90" y="299" width="118" height="20" forecolor="#736343" backcolor="#CCCCCC" uuid="859d0a70-321c-40af-a9e8-919f5dd2a493"/>
+                    <text><![CDATA[NET SALARY]]></text>
+                </staticText>
+                <textField isStretchWithOverflow="true" pattern="#,##0.000;(#,##0.000)">
+                    <reportElement style="Detail" x="351" y="26" width="95" height="16" uuid="150a3e39-7404-4717-85a8-689722568a5d"/>
+                    <textElement textAlignment="Right">
+                        <font size="12" isBold="false"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{BASIC_SALARY_PAYABLE}]]></textFieldExpression>
+                </textField>
+                <textField pattern="#,##0.000;(#,##0.000)">
+                    <reportElement x="351" y="124" width="95" height="20" uuid="8622e8d9-6dca-4204-bf8b-bf5a08afb817"/>
+                    <textElement textAlignment="Right">
+                        <font fontName="Arial" size="12" isBold="true"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{GROSS_SALARY}]]></textFieldExpression>
+                </textField>
+                <textField isStretchWithOverflow="true" pattern="#,##0.000;(#,##0.000)" isBlankWhenNull="true">
+                    <reportElement style="Detail" x="350" y="198" width="95" height="15" uuid="39c45b47-5dfe-45d8-a36b-c8c7c945a8c6"/>
+                    <textElement textAlignment="Right">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{LOAN_DEDUCTION}]]></textFieldExpression>
+                </textField>
+                <textField isStretchWithOverflow="true" pattern="#,##0.000;(#,##0.000)" isBlankWhenNull="true">
+                    <reportElement style="Detail" x="350" y="182" width="95" height="15" uuid="df609314-7e7b-43ee-9534-5ee776dbc067"/>
+                    <textElement textAlignment="Right">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{GOSI_DEDUCTION}]]></textFieldExpression>
+                </textField>
+                <textField isStretchWithOverflow="true" pattern="#,##0.000" isBlankWhenNull="true">
+                    <reportElement style="Detail" x="351" y="44" width="95" height="15" uuid="e4814ca7-0f48-4d93-9eaf-f4c55f510d18"/>
+                    <textElement textAlignment="Right">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{FIXED_ALLOWANCE}]]></textFieldExpression>
+                </textField>
+                <textField isStretchWithOverflow="true" pattern="#,##0.000;(#,##0.000)" isBlankWhenNull="true">
+                    <reportElement style="Detail" x="351" y="61" width="95" height="15" uuid="49c12c5d-b360-4f8a-a1ad-b05137ab93c3"/>
+                    <textElement textAlignment="Right">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{HRA_ALLOWANCE}]]></textFieldExpression>
+                </textField>
+                <textField isStretchWithOverflow="true" pattern="#,##0.000;(#,##0.000)" isBlankWhenNull="true">
+                    <reportElement style="Detail" x="351" y="97" width="95" height="15" uuid="1a2e8fae-2f4f-4c32-b6d2-01d127bc4642"/>
+                    <textElement textAlignment="Right">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{TRANSPORT_ALLOWANCE}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement mode="Opaque" x="91" y="124" width="118" height="17" forecolor="#726343" backcolor="#CCCCCC" uuid="ee6b5a88-bfa1-4318-9c4c-01d610fb9a28"/>
+                    <textElement>
+                        <font size="12" isBold="true"/>
+                    </textElement>
+                    <text><![CDATA[GROSS SALARY]]></text>
+                </staticText>
+                <textField isStretchWithOverflow="true" pattern="#,##0.000;(#,##0.000)" isBlankWhenNull="true">
+                    <reportElement style="Detail" x="351" y="78" width="95" height="15" uuid="e6a2af6b-121d-43b8-92e7-9fc9e11444fd"/>
+                    <textElement textAlignment="Right">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{FIXED_OT}]]></textFieldExpression>
+                </textField>
+                <textField isStretchWithOverflow="true" pattern="#,##0.000;(#,##0.000)" isBlankWhenNull="true">
+                    <reportElement style="Detail" mode="Opaque" x="299" y="299" width="146" height="19" backcolor="#CCCCCC" uuid="38f173f1-4cb1-48c1-84bf-0c375b98c0c7"/>
+                    <textElement textAlignment="Right">
+                        <font size="14" isBold="true"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{NET_SALARY}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement style="Column header" mode="Opaque" x="91" y="25" width="118" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="b04a906c-df3b-4cf1-b2bc-3d7df409005a"/>
+                    <textElement>
+                        <font size="12" isBold="true"/>
+                    </textElement>
+                    <text><![CDATA[BASIC PAYABLE]]></text>
+                </staticText>
+                <componentElement>
+                    <reportElement x="101" y="212" width="183" height="12" uuid="19577c5e-65b9-41fb-84d9-779dacb3a780"/>
+                    <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+                        <datasetRun subDataset="LoanBreakup" uuid="8c94e72e-222e-4e2f-b0ae-ae36b0597055">
+                            <datasetParameter name="EMPLOYEE_POID">
+                                <datasetParameterExpression><![CDATA[$F{EMPLOYEE_POID}]]></datasetParameterExpression>
+                            </datasetParameter>
+                            <datasetParameter name="TRANSACTION_POID">
+                                <datasetParameterExpression><![CDATA[$P{DOC_KEY_POID}]]></datasetParameterExpression>
+                            </datasetParameter>
+                            <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                        </datasetRun>
+                        <jr:column width="152" uuid="e2392d83-1bce-4fa6-a071-a5b99a1a5bfc">
+                            <jr:detailCell height="14" rowSpan="1">
+                                <textField>
+                                    <reportElement x="0" y="0" width="152" height="12" uuid="3c69458f-7497-4826-a73d-ac19815b9ba4"/>
+                                    <textElement>
+                                        <font size="8" isItalic="true"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{REF_NO}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                        <jr:column width="67" uuid="52e95f26-7799-432f-9f67-1fda488b20e9">
+                            <jr:detailCell height="14" rowSpan="1">
+                                <textField pattern="#,##0.000;(#,##0.000)">
+                                    <reportElement x="0" y="0" width="60" height="12" uuid="0e09fb74-8a9c-4187-8669-9e7d2495c216"/>
+                                    <textElement textAlignment="Right">
+                                        <font size="8" isItalic="true"/>
+                                    </textElement>
+                                    <textFieldExpression><![CDATA[$F{RECUR_AMOUNT}]]></textFieldExpression>
+                                </textField>
+                            </jr:detailCell>
+                        </jr:column>
+                    </jr:table>
+                </componentElement>
+                <frame>
+                    <reportElement isPrintRepeatedValues="false" mode="Opaque" x="5" y="348" width="515" height="50" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" printWhenGroupChanges="EMPLOYEE_POID" forecolor="#B89F7D" backcolor="#F2EBDF" uuid="d3378ee6-1f75-45c0-b3e7-4fef1a4bb230"/>
+                    <staticText>
+                        <reportElement style="Column header" mode="Transparent" x="3" y="2" width="93" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="d695b0ea-e1c8-4043-85c9-8fa00f1574b5"/>
+                        <textElement>
+                            <font size="10" isBold="false" isItalic="true"/>
+                        </textElement>
+                        <text><![CDATA[BANK A/C]]></text>
+                    </staticText>
+                    <textField isStretchWithOverflow="true" pattern="#,##0.00;(#,##0.00)" isBlankWhenNull="true">
+                        <reportElement style="Detail" x="112" y="0" width="233" height="15" forecolor="#736343" uuid="ae866def-dc38-4bd8-afc6-690b3545955b"/>
+                        <textElement>
+                            <font size="10" isItalic="true"/>
+                        </textElement>
+                        <textFieldExpression><![CDATA[$F{BANK_CODE}  + " - " + $F{ACCOUNT_NO}]]></textFieldExpression>
+                    </textField>
+                    <staticText>
+                        <reportElement style="Column header" mode="Transparent" x="3" y="33" width="93" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="1a1b467a-3877-4417-b377-3ac31f035b5e"/>
+                        <textElement>
+                            <font size="10" isBold="false" isItalic="true"/>
+                        </textElement>
+                        <text><![CDATA[LOAN BALANCE]]></text>
+                    </staticText>
+                    <textField pattern="#,##0.000;(#,##0.000)" isBlankWhenNull="true">
+                        <reportElement mode="Transparent" x="112" y="30" width="100" height="20" forecolor="#736343" uuid="fdd210bf-b73e-488a-ae87-6fdb2eddd739"/>
+                        <textElement verticalAlignment="Middle"/>
+                        <textFieldExpression><![CDATA[$F{LOAN_BALANCE}]]></textFieldExpression>
+                    </textField>
+                </frame>
+                <staticText>
+                    <reportElement style="Column header" mode="Transparent" x="418" y="10" width="28" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="0fd6d3aa-cb44-4880-b139-afbe130f331d"/>
+                    <textElement>
+                        <font size="12" isBold="false" isItalic="false" isUnderline="false"/>
+                    </textElement>
+                    <text><![CDATA[BHD]]></text>
+                </staticText>
+                <textField isStretchWithOverflow="true">
+                    <reportElement x="90" y="319" width="356" height="29" forecolor="#736343" uuid="33bb33b4-231b-4bc1-acbf-5930105da0bf"/>
+                    <textElement textAlignment="Right">
+                        <font size="8" isItalic="true"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA["BHD " + $F{AMOUNT_IN_WORDS}]]></textFieldExpression>
+                </textField>
+                <textField isStretchWithOverflow="true" pattern="###0;(###0)" isBlankWhenNull="true">
+                    <reportElement style="Detail" x="198" y="10" width="39" height="15" forecolor="#736343" uuid="c6f8684d-c2fb-4afd-a772-4e4139191aff">
+                        <printWhenExpression><![CDATA[( $F{ABSENT_DAYS}== null ? false : true )]]></printWhenExpression>
+                    </reportElement>
+                    <textElement>
+                        <font size="10" isItalic="true"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$F{ABSENT_DAYS}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement style="Column header" mode="Transparent" x="89" y="10" width="93" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="25d52cb1-1663-43fa-9fe2-4ceabdf57909">
+                        <printWhenExpression><![CDATA[( $F{ABSENT_DAYS}== null ? false : true )]]></printWhenExpression>
+                    </reportElement>
+                    <textElement>
+                        <font size="10" isBold="false" isItalic="true"/>
+                    </textElement>
+                    <text><![CDATA[ABSENT DAYS]]></text>
+                </staticText>
+                <line>
+                    <reportElement x="90" y="144" width="355" height="1" forecolor="#736343" uuid="1ba7cfde-dc5e-4fd1-a064-3f000a855a59"/>
+                </line>
+                <staticText>
+                    <reportElement style="Column header" mode="Transparent" x="91" y="157" width="93" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="d6b1dace-2fc2-4229-9680-9e1c9c42a578"/>
+                    <textElement>
+                        <font size="10" isBold="false" isItalic="true"/>
+                    </textElement>
+                    <text><![CDATA[DEDUCTIONS]]></text>
+                </staticText>
+                <staticText>
+                    <reportElement style="Column header" mode="Opaque" x="91" y="42" width="80" height="15" isRemoveLineWhenBlank="true" forecolor="#736343" backcolor="#CCCCCC" uuid="4171b54a-117f-4b83-bdc4-979c0e116833"/>
+                    <textElement>
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <text><![CDATA[FIX. ALW]]></text>
+                </staticText>
+                <staticText>
+                    <reportElement style="Column header" mode="Opaque" x="91" y="76" width="80" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="22ae56db-e5dd-4550-9ce7-b0e8a1c76354">
+                        <printWhenExpression><![CDATA[( $F{FIXED_OT}== null ? false : true )
+]]></printWhenExpression>
+                    </reportElement>
+                    <textElement>
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <text><![CDATA[FIX OT]]></text>
+                </staticText>
+                <staticText>
+                    <reportElement style="Column header" mode="Opaque" x="91" y="93" width="80" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="5cb08aac-e62f-4f56-bd82-d66e95bb0243">
+                        <printWhenExpression><![CDATA[( $F{TRANSPORT_ALLOWANCE} == null ? false : true )
+
+]]></printWhenExpression>
+                    </reportElement>
+                    <textElement>
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <text><![CDATA[TRANSPORT]]></text>
+                </staticText>
+                <staticText>
+                    <reportElement style="Column header" mode="Opaque" x="91" y="59" width="80" height="15" forecolor="#736343" backcolor="#CCCCCC" uuid="5d2847a5-ef40-44a8-bb8b-40bb1cf2c141">
+                        <printWhenExpression><![CDATA[( $F{HRA_ALLOWANCE}== null ? false : true )
+
+]]></printWhenExpression>
+                    </reportElement>
+                    <textElement>
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <text><![CDATA[HRA]]></text>
+                </staticText>
+            </frame>
+        </band>
+    </detail>
+    <columnFooter>
+        <band height="17" splitType="Stretch">
+            <line>
+                <reportElement positionType="FixRelativeToBottom" x="0" y="3" width="555" height="1" uuid="7202e1a3-ebfb-4012-bb84-b676aa89a18f"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#999999"/>
+                </graphicElement>
+            </line>
+            <break>
+                <reportElement x="0" y="9" width="100" height="1" uuid="de028ac2-ec3b-491c-9a21-9a2be12b5cd0"/>
+            </break>
+        </band>
+    </columnFooter>
+    <pageFooter>
+        <band height="25" splitType="Stretch">
+            <frame>
+                <reportElement mode="Opaque" x="2" y="1" width="521" height="24" forecolor="#D0B48E" backcolor="#F2EBDF" uuid="c690b6aa-d5ff-4287-984c-822b20b73e0c"/>
+                <textField pattern="EEEEE dd MMMMM yyyy">
+                    <reportElement style="Column header" x="22" y="1" width="197" height="20" forecolor="#736343" uuid="682537d7-74e2-4e4a-96de-7e6ba099da12"/>
+                    <textElement verticalAlignment="Middle">
+                        <font size="10" isBold="false"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+                </textField>
+            </frame>
+            <textField evaluationTime="Report">
+                <reportElement style="Column header" x="479" y="0" width="40" height="20" forecolor="#736343" uuid="18da8884-ea6a-4ef0-af96-b5a90111667d"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="10" isBold="false"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement style="Column header" x="399" y="0" width="80" height="20" forecolor="#736343" uuid="1cd7bb6e-49ee-4e0e-b5c6-55e34bab3b1e"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="10" isBold="false"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+    <summary>
+        <band splitType="Stretch"/>
+    </summary>
+</jasperReport>
