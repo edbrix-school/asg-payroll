@@ -102,14 +102,6 @@ public class SalaryDetailsController {
         }
     }
 
-    @Operation(summary = "Get Employee Details (Tickets, Designation)")
-    @AllowedAction(UserRolesRightsEnum.VIEW)
-    @GetMapping("/employee/{empPoid}")
-    public ResponseEntity<?> getEmployeeDetails(@PathVariable Long empPoid) {
-        SalaryDetailResponse details = service.getByEmployeeId(empPoid);
-        return success("Employee details fetched successfully", details);
-    }
-
     @Operation(summary = "Calculate CTC for Employee")
     @AllowedAction(UserRolesRightsEnum.VIEW)
     @GetMapping("/employee/{empPoid}/ctc")

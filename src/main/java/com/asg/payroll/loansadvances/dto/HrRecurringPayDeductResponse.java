@@ -16,8 +16,8 @@ public class HrRecurringPayDeductResponse {
     private LocalDate transactionDate;
     private String docRef;
 
-    private String recurType;
-    private String glCode;
+//    private String recurType;
+//    private String glCode;
 
     private Long employeePoid;
     private String refNo;
