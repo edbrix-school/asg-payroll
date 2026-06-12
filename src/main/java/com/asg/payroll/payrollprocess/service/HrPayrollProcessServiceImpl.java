@@ -543,12 +543,12 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
 
     @Override
     public byte[] printPayslip(Long transactionPoid) throws JRException {
-        return generatePdf("HR/Payslip_without_email.jrxml", transactionPoid);
+        return generatePdf("Payroll/Payslip_without_email.jrxml", transactionPoid);
     }
 
     @Override
     public byte[] printPreview(Long transactionPoid) throws JRException {
-        return generatePdf("HR/Payslip.jrxml", transactionPoid);
+        return generatePdf("Payroll/Payslip.jrxml", transactionPoid);
     }
 
     private byte[] generatePdf(String reportFile, Long transactionPoid) throws JRException {
