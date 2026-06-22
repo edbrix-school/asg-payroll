@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +54,7 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
 
     @Override
     @Transactional
-    public Long create(HrRecurringPayDeductRequest request) {
+    public HrRecurringPayDeductResponse create(HrRecurringPayDeductRequest request) {
 
         validate(request);
 
@@ -68,13 +69,11 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
         HrRecurringPayDeduct hdr = repository.saveAndFlush(entity);
         entityManager.refresh(hdr);
 
-        log.info("Created Loan/Advance with ID: {}", entity.getTransactionPoid());
+        log.info("Created Loan/Advance with ID: {}", hdr.getTransactionPoid());
 
-        // Log the creation
-        String key = entity.getTransactionPoid().toString();
-        loggingService.createLogSummaryEntry(UserContext.getDocumentId(),hdr.getTransactionPoid().toString(), String.format("%s %s", LogDetailsEnum.CREATED.getDescription(), hdr.getDocRef()));
+        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), hdr.getTransactionPoid().toString(), String.format("%s %s", LogDetailsEnum.CREATED.getDescription(), hdr.getDocRef()));
 
-        return entity.getTransactionPoid();
+        return LoansAdvancesMapper.mapToResponse(hdr);
     }
 
     @Override
@@ -128,10 +127,10 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
     }
 
     @Override
-    public Map<String, Object> list(FilterRequestDto filterRequest, Pageable pageable) {
+    public Map<String, Object> list(FilterRequestDto filterRequest, Pageable pageable, LocalDate periodFrom, LocalDate periodTo) {
         String operator = documentSearchService.resolveOperator(filterRequest);
         String isDeleted = documentSearchService.resolveIsDeleted(filterRequest);
-        List<FilterDto> filterList = documentSearchService.resolveFilters(filterRequest);
+        List<FilterDto> filterList = documentSearchService.resolveDateFilters(filterRequest, "TRANSACTION_DATE", periodFrom, periodTo);
 
         RawSearchResult raw = documentSearchService.search(UserContext.getDocumentId(), filterList, operator, pageable,
                 isDeleted, "DESCRIPTION", TRANSACTION_POID);

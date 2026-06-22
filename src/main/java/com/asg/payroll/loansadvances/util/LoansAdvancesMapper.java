@@ -11,7 +11,6 @@ public class LoansAdvancesMapper {
 
     public static void mapToEntity(HrRecurringPayDeductRequest request, HrRecurringPayDeduct entity) {
 
-        entity.setDocRef(request.getDocRef());
         entity.setTransactionDate(request.getTransactionDate() == null ? DateUtil.getCurrentDateInUserTimeZone() : request.getTransactionDate());
         entity.setEmployeePoid(request.getEmployeePoid());
         entity.setRefNo(request.getRefNo());
