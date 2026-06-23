@@ -152,17 +152,6 @@ class SalaryDetailsControllerTest {
         verify(service).syncHRData();
     }
 
-    @Test
-    void testGetEmployeeDetails() {
-        SalaryDetailResponse response = new SalaryDetailResponse();
-        when(service.getByEmployeeId(100L)).thenReturn(response);
-
-        ResponseEntity<?> responseEntity = controller.getEmployeeDetails(100L);
-
-        assertNotNull(responseEntity);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        verify(service).getByEmployeeId(100L);
-    }
 
     @Test
     void testCalculateCTC() {

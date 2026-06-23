@@ -14,8 +14,6 @@ public interface SalaryDetailsService {
 
     SalaryDetailResponse getById(Long id);
 
-    SalaryDetailResponse getByEmployeeId(Long employeePoid);
-
     void delete(Long id, DeleteReasonDto deleteReasonDto);
 
     Map<String, Object> list(FilterRequestDto filterRequest, Pageable pageable);
