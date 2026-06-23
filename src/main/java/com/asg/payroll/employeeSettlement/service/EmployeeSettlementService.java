@@ -39,4 +39,10 @@ public interface EmployeeSettlementService {
     Map<String, Object> getRecurringToPayroll(Long payrollPoid, Long settlementPoid, Long empPoid, LocalDate payrollDate);
 
     Map<String, Object> processLeavePayroll(Long companyPoid, Long settlementTranPoid, Long attendTrnsPoid, Long attend2TrnsPoid, Long empPoid, LocalDate finalDateOfWork, LocalDate leaveEndDate, Long loanDedAmt);
+
+    byte[] printSettlement(Long id) throws Exception;
+
+    byte[] printSettlementAmtDetailsForBank(Long id) throws Exception;
+
+    byte[] printSettlementRetirementLetterForBank(Long id) throws Exception;
 }

@@ -3,10 +3,7 @@ package com.asg.payroll.employeeSettlement.service.impl;
 import com.asg.common.lib.dto.*;
 import com.asg.common.lib.enums.LogDetailsEnum;
 import com.asg.common.lib.security.util.UserContext;
-import com.asg.common.lib.service.DocumentDeleteService;
-import com.asg.common.lib.service.DocumentSearchService;
-import com.asg.common.lib.service.LoggingService;
-import com.asg.common.lib.service.LovDataService;
+import com.asg.common.lib.service.*;
 import com.asg.common.lib.utility.PaginationUtil;
 import com.asg.payroll.employeeSettlement.dto.EmployeeSettlementDto;
 import com.asg.payroll.employeeSettlement.entity.EmployeeSettlementDtl;
@@ -14,6 +11,8 @@ import com.asg.payroll.employeeSettlement.entity.LoanDeductionDtl;
 import com.asg.payroll.exceptions.ValidationException;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.StoredProcedureQuery;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperReport;
 import oracle.jdbc.OracleTypes;
 import org.springframework.jdbc.core.*;
 import com.asg.payroll.employeeSettlement.repository.EmployeeSettlementDtlRepository;
@@ -31,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -51,6 +51,8 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
     private final LovDataService lovDataService;
     private final JdbcTemplate jdbcTemplate;
     private final DocumentSearchService documentService;
+    private final PrintService printService;
+    private final DataSource dataSource;
 
     @PersistenceContext
     private final EntityManager entityManager;
@@ -498,5 +500,63 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
                     );
             loanDeductionDtlRepository.saveAll(loanDetails);
         }
+    }
+
+    @Override
+    public byte[] printSettlement(Long transactionPoid) throws JRException {
+        return generateSettlementPdf("HR/HrSettlement.jrxml", transactionPoid);
+    }
+
+    @Override
+    public byte[] printSettlementAmtDetailsForBank(Long transactionPoid) throws JRException {
+        return generateSettlementPdf("HR/HrSettlement_AmtDetailsForBank.jrxml", transactionPoid);
+    }
+
+    @Override
+    public byte[] printSettlementRetirementLetterForBank(Long transactionPoid) throws JRException {
+        return generateSettlementPdf("HR/HrSettlement_RetirementLetterForBank.jrxml", transactionPoid);
+    }
+
+    private byte[] generateSettlementPdf(String reportFile, Long transactionPoid) throws JRException {
+        Map<String, Object> params = printService.buildBaseParams(transactionPoid, UserContext.getDocumentId());
+        params.put("SUBREPORT_DIR", getCompiledSubreportDir());
+        JasperReport mainReport = printService.load(reportFile);
+        try {
+            return printService.fillReportToPdf(mainReport, params, dataSource);
+        } catch (JRException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JRException(e);
+        }
+    }
+
+    private static volatile String compiledSubreportDir;
+
+    private String getCompiledSubreportDir() throws JRException {
+        if (compiledSubreportDir != null) return compiledSubreportDir;
+        synchronized (EmployeeSettlementServiceImpl.class) {
+            if (compiledSubreportDir != null) return compiledSubreportDir;
+            try {
+                java.nio.file.Path tempDir = java.nio.file.Files.createTempDirectory("jasper_root");
+                java.nio.file.Path templatesDir = tempDir.resolve("Templates");
+                java.nio.file.Files.createDirectories(templatesDir);
+                String[] subreports = {"DocHeaderSubReport", "DocFooterSubReport", "DocFooterSubReport-ISO"};
+                for (String name : subreports) {
+                    try (java.io.InputStream in = getClass().getClassLoader()
+                            .getResourceAsStream("jasper/Templates/" + name + ".jrxml")) {
+                        if (in != null) {
+                            net.sf.jasperreports.engine.JasperReport compiled =
+                                    net.sf.jasperreports.engine.JasperCompileManager.compileReport(in);
+                            net.sf.jasperreports.engine.util.JRSaver.saveObject(compiled,
+                                    templatesDir.resolve(name + ".jasper").toFile());
+                        }
+                    }
+                }
+                compiledSubreportDir = tempDir.toAbsolutePath() + java.io.File.separator;
+            } catch (Exception e) {
+                throw new JRException("Failed to compile subreports: " + e.getMessage(), e);
+            }
+        }
+        return compiledSubreportDir;
     }
 }

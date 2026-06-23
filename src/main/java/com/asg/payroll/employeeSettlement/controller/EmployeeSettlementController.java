@@ -20,14 +20,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Map;
 
-import static com.asg.common.lib.dto.response.ApiResponse.badRequest;
-import static com.asg.common.lib.dto.response.ApiResponse.success;
+import static com.asg.common.lib.dto.response.ApiResponse.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -256,6 +257,54 @@ public class EmployeeSettlementController {
     ) {
         Map<String, Object> response = service.processLeavePayroll(companyPoid, settlementTranPoid, attendTrnsPoid, attend2TrnsPoid, empPoid, finalDateOfWork, leaveEndDate, loanDedAmt);
         return success("Payroll Processed Successfully", response);
+    }
+
+    @GetMapping("/printSettlement/{transactionPoid}")
+    public ResponseEntity<?> printSettlement(
+            @Parameter(description = "Transaction POID", example = "71031")
+            @PathVariable Long transactionPoid) {
+        try {
+            byte[] pdf = service.printSettlement(transactionPoid);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        } catch (Exception e) {
+            return internalServerError("Failed to generate PDF: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/printSettleAmtDtlBnk/{transactionPoid}")
+    public ResponseEntity<?> printSettlementAmtDetailsForBank(
+            @Parameter(description = "Transaction POID", example = "71031")
+            @PathVariable Long transactionPoid) {
+        try {
+            byte[] pdf = service.printSettlementAmtDetailsForBank(transactionPoid);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        } catch (Exception e) {
+            return internalServerError("Failed to generate PDF: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/printSettleRetirtLtrBnk/{transactionPoid}")
+    public ResponseEntity<?> printSettlementRetirementLetterForBank(
+            @Parameter(description = "Transaction POID", example = "71031")
+            @PathVariable Long transactionPoid) {
+        try {
+            byte[] pdf = service.printSettlementRetirementLetterForBank(transactionPoid);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+        } catch (Exception e) {
+            return internalServerError("Failed to generate PDF: " + e.getMessage());
+        }
     }
 
 }
