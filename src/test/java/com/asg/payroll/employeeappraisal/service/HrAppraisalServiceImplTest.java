@@ -841,6 +841,7 @@ class HrAppraisalServiceImplTest {
         mockDtl.setArrears(BigDecimal.ZERO);
         when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
         when(payrollVarDtlRepository.findMaxDetRowIdByTransactionPoid(200L)).thenReturn(1L);
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
@@ -1178,7 +1179,9 @@ class HrAppraisalServiceImplTest {
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
-            assertDoesNotThrow(() -> service.updateMasterSp(1L, request));
+            // SP sets COMPLETED='Y' on HDR — response must carry updated header
+            Map<String, Object> result = service.updateMasterSp(1L, request);
+            assertNotNull(result.get("header"));
         }
     }
 
@@ -1187,19 +1190,27 @@ class HrAppraisalServiceImplTest {
         HrAppraisalDtl dtlWithBonus = new HrAppraisalDtl();
         dtlWithBonus.setNewBonus(BigDecimal.valueOf(500));
         when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(dtlWithBonus));
+        // SP writes JV_DOC_REF/JV_DOC_POID to HDR — re-fetch after clear
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
-            assertDoesNotThrow(() -> service.createJvSp(1L));
+            Map<String, Object> result = service.createJvSp(1L);
+            assertNotNull(result.get("header"));
         }
     }
 
     @Test
     void sendEmailSp_Success() {
+        // SP updates LETTER_EMAILED_ON on DTL rows and HDR — service re-fetches both
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
-            assertDoesNotThrow(() -> service.sendEmailSp(1L, "N"));
+            Map<String, Object> result = service.sendEmailSp(1L, "N");
+            assertNotNull(result.get("details"));
+            assertNotNull(result.get("totals"));
+            assertNotNull(result.get("header"));
         }
     }
 
@@ -1220,11 +1231,14 @@ class HrAppraisalServiceImplTest {
     void arrearsSp_Success() {
         when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of());
         when(payrollVarDtlRepository.findMaxDetRowIdByTransactionPoid(200L)).thenReturn(0L);
+        // SP stores ARREARS_PAYROLL_POID on HDR — service re-fetches header after SP
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
-            assertDoesNotThrow(() -> service.arrearsSp(1L, 200L));
+            Map<String, Object> result = service.arrearsSp(1L, 200L);
+            assertNotNull(result.get("header"));
         }
     }
 
@@ -1385,6 +1399,7 @@ class HrAppraisalServiceImplTest {
         // mockDtl has arrears=null → filter predicate short-circuits on null check → arrearsCount stays 0
         when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
         when(payrollVarDtlRepository.findMaxDetRowIdByTransactionPoid(200L)).thenReturn(0L);
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);

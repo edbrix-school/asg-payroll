@@ -364,11 +364,15 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (!employeesWithoutSalary.isEmpty()) {
             throw new ValidationException("Some employees in this appraisal do not have salary records.");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_UPDATE_MAST",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter(P_BASIC_INCREMENT_PERCENT, Types.NUMERIC), new SqlParameter(P_BONUS_PERCENT, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), P_BASIC_INCREMENT_PERCENT, request.getBasicIncrementPercent(), P_BONUS_PERCENT, request.getBonusPercent())
         );
+        // SP sets COMPLETED='Y' and COMPLETED_ON on HDR — React FE needs updated header to lock the screen
+        entityManager.clear();
+        result.put("header", hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid)));
+        return result;
     }
 
     @Override
@@ -380,20 +384,29 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             throw new ValidationException("No bonus amounts found in appraisal details. Cannot create JV.");
         }
 
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_CREATE_JV",
                 List.of(new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_APPRAISAL_POID", Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_APPRAISAL_POID", transactionPoid)
         );
+        // SP writes JV_DOC_REF and JV_DOC_POID to HDR — React FE needs updated header to display the new JV reference
+        entityManager.clear();
+        result.put("header", hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid)));
+        return result;
     }
 
     @Override
     public Map<String, Object> sendEmailSp(Long transactionPoid, String resend) {
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_APPRAISAL_SEND_EMAIL",
                 List.of(new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter("P_RESEND", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_LOGIN_USER_POID, UserContext.getUserPoid(), P_TRANSACTION_POID, transactionPoid, "P_RESEND", resend)
         );
+        // SP stamps LETTER_EMAILED_ON on each DTL row and on HDR — FE needs refreshed details + header
+        appendRefreshedData(result, transactionPoid);
+        entityManager.clear();
+        result.put("header", hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid)));
+        return result;
     }
 
     @Override
@@ -424,11 +437,15 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (maxExistingRowId > 0 && arrearsCount > 0) {
             throw new ValidationException("Payroll already has variable allowance entries. Please remove existing arrears entries before re-adding.");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_ARREARS",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_PAYROLL_POID", Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_PAYROLL_POID", payrollPoid)
         );
+        // SP stores ARREARS_PAYROLL_POID on HDR — React FE needs updated header to know which payroll received the arrears
+        entityManager.clear();
+        result.put("header", hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid)));
+        return result;
     }
 
     @Override
