@@ -5,6 +5,7 @@ import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.DocumentDeleteService;
 import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
+import com.asg.common.lib.service.LovDataService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
 import jakarta.persistence.EntityManager;
@@ -44,12 +45,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -59,7 +65,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     private final EntityManager entityManager;
 
-    public HrAppraisalServiceImpl(EntityManager entityManager, @Lazy HrAppraisalService self, HrAppraisalHdrRepository hdrRepository, HrAppraisalDtlRepository dtlRepository, HrEmployeeSalaryMasterRepository salaryMasterRepository, HrPayrollVarAlwdedDtlRepository payrollVarDtlRepository, DocumentSearchService documentSearchService, DocumentDeleteService documentDeleteService, LoggingService loggingService, PrintService printService, DataSource dataSource, JdbcTemplate jdbcTemplate) {
+    public HrAppraisalServiceImpl(EntityManager entityManager, @Lazy HrAppraisalService self, HrAppraisalHdrRepository hdrRepository, HrAppraisalDtlRepository dtlRepository, HrEmployeeSalaryMasterRepository salaryMasterRepository, HrPayrollVarAlwdedDtlRepository payrollVarDtlRepository, DocumentSearchService documentSearchService, DocumentDeleteService documentDeleteService, LoggingService loggingService, PrintService printService, DataSource dataSource, JdbcTemplate jdbcTemplate, LovDataService lovDataService) {
         this.entityManager = entityManager;
         this.self = self;
         this.hdrRepository = hdrRepository;
@@ -72,6 +78,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         this.printService = printService;
         this.dataSource = dataSource;
         this.jdbcTemplate = jdbcTemplate;
+        this.lovDataService = lovDataService;
     }
     private final HrAppraisalService self;
     private final HrAppraisalHdrRepository hdrRepository;
@@ -84,6 +91,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private final PrintService printService;
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
+    private final LovDataService lovDataService;
 
 
     private static final String P_TRANS_POID = "P_TRANS_POID";
@@ -97,6 +105,21 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private static final String TRANSACTION_POID = "TRANSACTION_POID";
     private static final String APPRAISAL_NOT_FOUND = "Employee appraisal not found with ID: ";
     private static final String P_STATUS = "P_STATUS";
+    private static final String BASE_DETAIL_SQL =
+            "SELECT d.TRANSACTION_POID, d.DET_ROW_ID, d.EMPLOYEE_POID, d.DESIGNATION_POID, d.JOIN_DATE, " +
+            "d.CUR_AIR_ENTITLE, d.CUR_BONUS, d.CUR_INCREMENT, d.CUR_BASIC_SALARY, d.CUR_FA_ALW, " +
+            "d.CUR_TA_ALW, d.CUR_HRA_ALW, d.CUR_FIXOT_ALW, d.CUR_SPL_ALW, d.CUR_OTH_ALW, d.CUR_AVGOT, d.CUR_GROSS_PAY, " +
+            "d.NEW_AIR_ENTITLE, d.NEW_BONUS, d.NEW_INCREMENT_PER, d.NEW_BASIC_SALARY, d.NEW_FA_ALW, " +
+            "d.NEW_TA_ALW, d.NEW_HRA_ALW, d.NEW_FIXOT_ALW, d.NEW_SPL_ALW, d.NEW_OTH_ALW, d.NEW_AVGOT, d.NEW_GROSS_PAY, " +
+            "d.STATUS, d.NET_INCREMENT, d.LAST_INCREMENT_DATE, d.LAST_INCREMENT_AMT, d.LAST_BONUS, " +
+            "d.CUR_TICKET_PERIOD, d.CUR_NO_OF_TICKETS, d.NEW_TICKET_PERIOD, d.NEW_NO_OF_TICKETS, " +
+            "d.NEW_DESIGNATION_POID, d.ARREARS, d.NEW_BONUS_PER, d.LETTER_EMAILED_ON, d.GRID_LISTING_METHOD, " +
+            "d.REGISTERED_SALARY, d.CUR_MONTHLY_CTC, d.CUR_YEARLY_CTC, d.NEW_MONTHLY_CTC, d.NEW_YEARLY_CTC, " +
+            "d.LAST_DESIGNATION_POID, d.LAST_PROMOTION_DATE, d.CREATED_BY, d.CREATED_DATE, d.LASTMODIFIED_BY, d.LASTMODIFIED_DATE, " +
+            "e.EMPLOYEE_CODE, e.EMPLOYEE_NAME, e.EMPLOYEE_NAME2 " +
+            "FROM HR_APPRAISAL_DTL d " +
+            "LEFT JOIN HR_EMPLOYEE_MASTER e ON d.EMPLOYEE_POID = e.EMPLOYEE_POID " +
+            "WHERE d.TRANSACTION_POID = ?";
 
     @Override
     @Transactional(readOnly = true)
@@ -117,6 +140,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         Map<String, Object> out = new HashMap<>();
         out.put("header", hdr);
         out.put("details", details);
+        out.put("totals", computeTotals(details));
         return out;
     }
 
@@ -126,6 +150,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         List<HrAppraisalDtlResponse> details = fetchDetailsWithEmployeeData(transactionPoid, departmentPoid, designationPoid, listingMethod, employeeName);
         Map<String, Object> out = new HashMap<>();
         out.put("details", details);
+        out.put("totals", computeTotals(details));
         out.put("totalRecords", details.size());
         return out;
     }
@@ -179,12 +204,37 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> getDetailsSp(Long transactionPoid, Long employeePoid) {
-        return execute(
-                "PROC_HR_APPRAISAL_GET_DETAILS",
-                List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter("P_EMP_POID", Types.NUMERIC), new SqlOutParameter("OUTDATA", OracleTypes.CURSOR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
-                params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, "P_EMP_POID", employeePoid)
-        );
+        Map<String, Object> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             CallableStatement cs = conn.prepareCall("BEGIN PROC_HR_APPRAISAL_GET_DETAILS(?,?,?,?,?); END;")) {
+
+            cs.setObject(1, UserContext.getCompanyPoid(), Types.NUMERIC);
+            cs.setObject(2, transactionPoid, Types.NUMERIC);
+            cs.setObject(3, employeePoid, Types.NUMERIC);
+            cs.registerOutParameter(4, OracleTypes.CURSOR);
+            cs.registerOutParameter(5, Types.VARCHAR);
+            cs.execute();
+
+            result.put("status", cs.getString(5));
+
+            try (ResultSet rs = (ResultSet) cs.getObject(4)) {
+                if (rs != null && rs.next()) {
+                    result.put("serviceYears", rs.getBigDecimal("SERVICE_YEARS"));
+                    result.put("empCode",       rs.getString("EMP_CODE"));
+                    result.put("empName",        rs.getString("EMP_NAME"));
+                    String salesmanName = rs.getString("SALESMAN_NAME");
+                    result.put("salesmanName",   salesmanName);
+                    result.put("showSalesmanRpt", salesmanName != null && !salesmanName.isBlank());
+                }
+            }
+        } catch (SQLException e) {
+            log.warn("PROC_HR_APPRAISAL_GET_DETAILS not available: {}", e.getMessage());
+        }
+
+        result.put("detail", fetchDetailByEmployeePoid(transactionPoid, employeePoid));
+        return result;
     }
 
     @Override
@@ -192,20 +242,24 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (actionType == null || actionType.isBlank()) {
             throw new ValidationException("Appraisal load action type is required (legacy: LOAD_EMPLOYEES_BLANK_DATA or LOAD_EMPLOYEES_WITH_CURRENT_DATA).");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_LOAD_APPRAISAL_DATA",
                 List.of(new SqlParameter(P_TRANS_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER, Types.VARCHAR), new SqlParameter(P_LOGIN_COMPANY_POID, Types.NUMERIC), new SqlParameter("P_ACTION_TYPE", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_TRANS_POID, transactionPoid, P_LOGIN_USER, UserContext.getUserId(), P_LOGIN_COMPANY_POID, UserContext.getCompanyPoid(), "P_ACTION_TYPE", actionType)
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
     public Map<String, Object> clearAppraisalDataSp(Long transactionPoid) {
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_CLEAR_APPRAISAL_DATA",
                 List.of(new SqlParameter(P_TRANS_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER, Types.VARCHAR), new SqlParameter(P_LOGIN_COMPANY_POID, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_TRANS_POID, transactionPoid, P_LOGIN_USER, UserContext.getUserId(), P_LOGIN_COMPANY_POID, UserContext.getCompanyPoid())
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
@@ -215,11 +269,13 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (basic.compareTo(BigDecimal.ZERO) == 0 && bonus.compareTo(BigDecimal.ZERO) == 0) {
             throw new ValidationException("Both Basic and Bonus Percentages are zero...");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_BATCH_UPDATE",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_BASIC_INCREMENT_PERCENT, Types.NUMERIC), new SqlParameter(P_BONUS_PERCENT, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_BASIC_INCREMENT_PERCENT, request.getBasicIncrementPercent(), P_BONUS_PERCENT, request.getBonusPercent())
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
@@ -276,14 +332,20 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (employeePoid == null) {
             throw new ValidationException("No Employee record is selected.");
         }
-        if (dtlRepository.findByTransactionPoidAndEmployeePoid(transactionPoid, employeePoid).isEmpty()) {
+        List<HrAppraisalDtl> dtls = dtlRepository.findByTransactionPoidAndEmployeePoid(transactionPoid, employeePoid);
+        if (dtls.isEmpty()) {
             throw new ResourceNotFoundException("Employee not found in appraisal.");
         }
-        return execute(
+        // Match legacy: ADF committed STATUS='Updated' before calling PROC_HR_APPRAISAL_UPDATE_DATA
+        dtls.forEach(dtl -> dtl.setStatus("Updated"));
+        dtlRepository.saveAll(dtls);
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_UPDATE_DATA",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_EMPLOYEE_POID", Types.NUMERIC), new SqlParameter("P_ADDITIONAL_DATA", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_EMPLOYEE_POID", employeePoid, "P_ADDITIONAL_DATA", request.getAdditionalData())
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
@@ -384,11 +446,13 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             throw new ValidationException("No employees with a positive net increment found. Arrears calculation requires at least one employee with an increment.");
         }
 
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_ARREARS_CALC",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid)
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
@@ -408,8 +472,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public byte[] printLetter(Long transactionPoid, Long employeePoid) throws JRException {
-        // employeePoid == null → print letters for all employees (legacy PrintLetterForEmployees)
-        // employeePoid != null → print single employee letter (legacy PrintLetterForSingleEmployee)
+        // employeePoid null → print letters for all employees (legacy PrintLetterForEmployees)
+        // employeePoid set  → print single employee letter (legacy PrintLetterForSingleEmployee)
         return generatePdf("HrAppraisalLetter.jrxml", transactionPoid, employeePoid);
     }
 
@@ -437,7 +501,16 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
                 .withProcedureName(procedureName)
                 .declareParameters(parameters.toArray(new org.springframework.jdbc.core.SqlParameter[0]));
-        return call.execute(inParams);
+        Map<String, Object> result = new HashMap<>(call.execute(inParams));
+        parameters.stream()
+                .filter(p -> p instanceof SqlOutParameter)
+                .map(p -> result.get(p.getName()))
+                .filter(v -> v instanceof String)
+                .map(v -> (String) v)
+                .filter(s -> s.toUpperCase(Locale.ROOT).startsWith("ERROR"))
+                .findFirst()
+                .ifPresent(s -> { throw new ValidationException(s); });
+        return result;
     }
 
     private void mapHeader(HrAppraisalRequest request, HrAppraisalHdr entity) {
@@ -616,22 +689,26 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         }
     }
 
+    private HrAppraisalDtlResponse fetchDetailByEmployeePoid(Long transactionPoid, Long employeePoid) {
+        List<HrAppraisalDtlResponse> rows = jdbcTemplate.query(
+                BASE_DETAIL_SQL + " AND d.EMPLOYEE_POID = ? AND (d.DELETED IS NULL OR d.DELETED = 'N') ORDER BY d.DET_ROW_ID",
+                this::mapDtlRow, transactionPoid, employeePoid);
+        if (rows.isEmpty()) return null;
+        HrAppraisalDtlResponse row = rows.get(0);
+        row.setEmployeeDet(lovDataService.getDetailsByPoidAndLovNameFast(employeePoid, "EMPLOYEE_NAME_WITH_SHORT"));
+        List<Long> desPoids = Stream.of(row.getDesignationPoid(), row.getNewDesignationPoid(), row.getLastDesignationPoid())
+                .filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        if (!desPoids.isEmpty()) {
+            Map<Long, LovGetListDto> desMap = lovDataService.getDetailsByPoidsAndLovName(desPoids, "DESIGNATION");
+            row.setDesignationDet(desMap.get(row.getDesignationPoid()));
+            row.setNewDesignationDet(desMap.get(row.getNewDesignationPoid()));
+            row.setLastDesignationDet(desMap.get(row.getLastDesignationPoid()));
+        }
+        return row;
+    }
+
     private List<HrAppraisalDtlResponse> fetchDetailsWithEmployeeData(Long transactionPoid, Long departmentPoid, Long designationPoid, String listingMethod, String employeeName) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT d.TRANSACTION_POID, d.DET_ROW_ID, d.EMPLOYEE_POID, d.DESIGNATION_POID, d.JOIN_DATE, " +
-                "d.CUR_AIR_ENTITLE, d.CUR_BONUS, d.CUR_INCREMENT, d.CUR_BASIC_SALARY, d.CUR_FA_ALW, " +
-                "d.CUR_TA_ALW, d.CUR_HRA_ALW, d.CUR_FIXOT_ALW, d.CUR_SPL_ALW, d.CUR_OTH_ALW, d.CUR_AVGOT, d.CUR_GROSS_PAY, " +
-                "d.NEW_AIR_ENTITLE, d.NEW_BONUS, d.NEW_INCREMENT_PER, d.NEW_BASIC_SALARY, d.NEW_FA_ALW, " +
-                "d.NEW_TA_ALW, d.NEW_HRA_ALW, d.NEW_FIXOT_ALW, d.NEW_SPL_ALW, d.NEW_OTH_ALW, d.NEW_AVGOT, d.NEW_GROSS_PAY, " +
-                "d.STATUS, d.NET_INCREMENT, d.LAST_INCREMENT_DATE, d.LAST_INCREMENT_AMT, d.LAST_BONUS, " +
-                "d.CUR_TICKET_PERIOD, d.CUR_NO_OF_TICKETS, d.NEW_TICKET_PERIOD, d.NEW_NO_OF_TICKETS, " +
-                "d.NEW_DESIGNATION_POID, d.ARREARS, d.NEW_BONUS_PER, d.LETTER_EMAILED_ON, d.GRID_LISTING_METHOD, " +
-                "d.REGISTERED_SALARY, d.CUR_MONTHLY_CTC, d.CUR_YEARLY_CTC, d.NEW_MONTHLY_CTC, d.NEW_YEARLY_CTC, " +
-                "d.LAST_DESIGNATION_POID, d.LAST_PROMOTION_DATE, d.CREATED_BY, d.CREATED_DATE, d.LASTMODIFIED_BY, d.LASTMODIFIED_DATE, " +
-                "e.EMPLOYEE_CODE, e.EMPLOYEE_NAME, e.EMPLOYEE_NAME2 " +
-                "FROM HR_APPRAISAL_DTL d " +
-                "LEFT JOIN HR_EMPLOYEE_MASTER e ON d.EMPLOYEE_POID = e.EMPLOYEE_POID " +
-                "WHERE d.TRANSACTION_POID = ? AND (d.DELETED IS NULL OR d.DELETED = 'N')");
+        StringBuilder sql = new StringBuilder(BASE_DETAIL_SQL + " AND (d.DELETED IS NULL OR d.DELETED = 'N')");
 
         List<Object> params = new ArrayList<>();
         params.add(transactionPoid);
@@ -657,7 +734,17 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         }
         sql.append(" ORDER BY d.DET_ROW_ID");
 
-        return jdbcTemplate.query(sql.toString(), this::mapDtlRow, params.toArray());
+        List<HrAppraisalDtlResponse> details = jdbcTemplate.query(sql.toString(), this::mapDtlRow, params.toArray());
+        List<Long> empPoids = details.stream()
+                .map(HrAppraisalDtlResponse::getEmployeePoid)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, LovGetListDto> empLovMap = lovDataService.getDetailsByPoidsAndLovName(empPoids, "EMPLOYEE_NAME_WITH_SHORT");
+        details.forEach(d -> {
+            if (d.getEmployeePoid() != null) d.setEmployeeDet(empLovMap.get(d.getEmployeePoid()));
+        });
+        return details;
     }
 
     private HrAppraisalDtlResponse mapDtlRow(ResultSet rs, int rowNum) throws SQLException {
@@ -668,48 +755,48 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         r.setDesignationPoid(getLong(rs, "DESIGNATION_POID"));
         r.setJoinDate(toLocalDate(rs, "JOIN_DATE"));
         r.setCurAirEntitle(rs.getString("CUR_AIR_ENTITLE"));
-        r.setCurBonus(rs.getBigDecimal("CUR_BONUS"));
-        r.setCurIncrement(rs.getBigDecimal("CUR_INCREMENT"));
-        r.setCurBasicSalary(rs.getBigDecimal("CUR_BASIC_SALARY"));
-        r.setCurFaAlw(rs.getBigDecimal("CUR_FA_ALW"));
-        r.setCurTaAlw(rs.getBigDecimal("CUR_TA_ALW"));
-        r.setCurHraAlw(rs.getBigDecimal("CUR_HRA_ALW"));
-        r.setCurFixotAlw(rs.getBigDecimal("CUR_FIXOT_ALW"));
-        r.setCurSplAlw(rs.getBigDecimal("CUR_SPL_ALW"));
-        r.setCurOthAlw(rs.getBigDecimal("CUR_OTH_ALW"));
-        r.setCurAvgot(rs.getBigDecimal("CUR_AVGOT"));
-        r.setCurGrossPay(rs.getBigDecimal("CUR_GROSS_PAY"));
+        r.setCurBonus(getBd(rs, "CUR_BONUS"));
+        r.setCurIncrement(getBd(rs, "CUR_INCREMENT"));
+        r.setCurBasicSalary(getBd(rs, "CUR_BASIC_SALARY"));
+        r.setCurFaAlw(getBd(rs, "CUR_FA_ALW"));
+        r.setCurTaAlw(getBd(rs, "CUR_TA_ALW"));
+        r.setCurHraAlw(getBd(rs, "CUR_HRA_ALW"));
+        r.setCurFixotAlw(getBd(rs, "CUR_FIXOT_ALW"));
+        r.setCurSplAlw(getBd(rs, "CUR_SPL_ALW"));
+        r.setCurOthAlw(getBd(rs, "CUR_OTH_ALW"));
+        r.setCurAvgot(getBd(rs, "CUR_AVGOT"));
+        r.setCurGrossPay(getBd(rs, "CUR_GROSS_PAY"));
         r.setNewAirEntitle(rs.getString("NEW_AIR_ENTITLE"));
-        r.setNewBonus(rs.getBigDecimal("NEW_BONUS"));
-        r.setNewIncrementPer(rs.getBigDecimal("NEW_INCREMENT_PER"));
-        r.setNewBasicSalary(rs.getBigDecimal("NEW_BASIC_SALARY"));
-        r.setNewFaAlw(rs.getBigDecimal("NEW_FA_ALW"));
-        r.setNewTaAlw(rs.getBigDecimal("NEW_TA_ALW"));
-        r.setNewHraAlw(rs.getBigDecimal("NEW_HRA_ALW"));
-        r.setNewFixotAlw(rs.getBigDecimal("NEW_FIXOT_ALW"));
-        r.setNewSplAlw(rs.getBigDecimal("NEW_SPL_ALW"));
-        r.setNewOthAlw(rs.getBigDecimal("NEW_OTH_ALW"));
-        r.setNewAvgot(rs.getBigDecimal("NEW_AVGOT"));
-        r.setNewGrossPay(rs.getBigDecimal("NEW_GROSS_PAY"));
+        r.setNewBonus(getBd(rs, "NEW_BONUS"));
+        r.setNewIncrementPer(getBd(rs, "NEW_INCREMENT_PER"));
+        r.setNewBasicSalary(getBd(rs, "NEW_BASIC_SALARY"));
+        r.setNewFaAlw(getBd(rs, "NEW_FA_ALW"));
+        r.setNewTaAlw(getBd(rs, "NEW_TA_ALW"));
+        r.setNewHraAlw(getBd(rs, "NEW_HRA_ALW"));
+        r.setNewFixotAlw(getBd(rs, "NEW_FIXOT_ALW"));
+        r.setNewSplAlw(getBd(rs, "NEW_SPL_ALW"));
+        r.setNewOthAlw(getBd(rs, "NEW_OTH_ALW"));
+        r.setNewAvgot(getBd(rs, "NEW_AVGOT"));
+        r.setNewGrossPay(getBd(rs, "NEW_GROSS_PAY"));
         r.setStatus(rs.getString("STATUS"));
-        r.setNetIncrement(rs.getBigDecimal("NET_INCREMENT"));
+        r.setNetIncrement(getBd(rs, "NET_INCREMENT"));
         r.setLastIncrementDate(toLocalDate(rs, "LAST_INCREMENT_DATE"));
-        r.setLastIncrementAmt(rs.getBigDecimal("LAST_INCREMENT_AMT"));
-        r.setLastBonus(rs.getBigDecimal("LAST_BONUS"));
-        r.setCurTicketPeriod(rs.getBigDecimal("CUR_TICKET_PERIOD"));
-        r.setCurNoOfTickets(rs.getBigDecimal("CUR_NO_OF_TICKETS"));
-        r.setNewTicketPeriod(rs.getBigDecimal("NEW_TICKET_PERIOD"));
-        r.setNewNoOfTickets(rs.getBigDecimal("NEW_NO_OF_TICKETS"));
+        r.setLastIncrementAmt(getBd(rs, "LAST_INCREMENT_AMT"));
+        r.setLastBonus(getBd(rs, "LAST_BONUS"));
+        r.setCurTicketPeriod(getBd(rs, "CUR_TICKET_PERIOD"));
+        r.setCurNoOfTickets(getBd(rs, "CUR_NO_OF_TICKETS"));
+        r.setNewTicketPeriod(getBd(rs, "NEW_TICKET_PERIOD"));
+        r.setNewNoOfTickets(getBd(rs, "NEW_NO_OF_TICKETS"));
         r.setNewDesignationPoid(getLong(rs, "NEW_DESIGNATION_POID"));
-        r.setArrears(rs.getBigDecimal("ARREARS"));
-        r.setNewBonusPer(rs.getBigDecimal("NEW_BONUS_PER"));
+        r.setArrears(getBd(rs, "ARREARS"));
+        r.setNewBonusPer(getBd(rs, "NEW_BONUS_PER"));
         r.setLetterEmailedOn(toLocalDate(rs, "LETTER_EMAILED_ON"));
         r.setGridListingMethod(rs.getString("GRID_LISTING_METHOD"));
-        r.setRegisteredSalary(rs.getBigDecimal("REGISTERED_SALARY"));
-        r.setCurMonthlyCtc(rs.getBigDecimal("CUR_MONTHLY_CTC"));
-        r.setCurYearlyCtc(rs.getBigDecimal("CUR_YEARLY_CTC"));
-        r.setNewMonthlyCtc(rs.getBigDecimal("NEW_MONTHLY_CTC"));
-        r.setNewYearlyCtc(rs.getBigDecimal("NEW_YEARLY_CTC"));
+        r.setRegisteredSalary(getBd(rs, "REGISTERED_SALARY"));
+        r.setCurMonthlyCtc(getBd(rs, "CUR_MONTHLY_CTC"));
+        r.setCurYearlyCtc(getBd(rs, "CUR_YEARLY_CTC"));
+        r.setNewMonthlyCtc(getBd(rs, "NEW_MONTHLY_CTC"));
+        r.setNewYearlyCtc(getBd(rs, "NEW_YEARLY_CTC"));
         r.setLastDesignationPoid(getLong(rs, "LAST_DESIGNATION_POID"));
         r.setLastPromotionDate(toLocalDate(rs, "LAST_PROMOTION_DATE"));
         r.setCreatedBy(rs.getString("CREATED_BY"));
@@ -720,6 +807,11 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         r.setEmployeeName(rs.getString("EMPLOYEE_NAME"));
         r.setEmployeeName2(rs.getString("EMPLOYEE_NAME2"));
         return r;
+    }
+
+    private static BigDecimal getBd(ResultSet rs, String col) throws SQLException {
+        BigDecimal v = rs.getBigDecimal(col);
+        return v != null ? v.setScale(3, RoundingMode.HALF_UP) : null;
     }
 
     private static Long getLong(ResultSet rs, String col) throws SQLException {
@@ -743,6 +835,33 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             out.put(String.valueOf(values[i]), values[i + 1]);
         }
         return out;
+    }
+
+    private Map<String, Object> computeTotals(List<HrAppraisalDtlResponse> details) {
+        BigDecimal curGross = details.stream().map(d -> nz(d.getCurGrossPay())).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal newGross = details.stream().map(d -> nz(d.getNewGrossPay())).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal increase = newGross.subtract(curGross);
+        BigDecimal increasePct = curGross.compareTo(BigDecimal.ZERO) != 0
+                ? increase.divide(curGross, 4, RoundingMode.HALF_UP).multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+        BigDecimal bonus = details.stream().map(d -> nz(d.getNewBonus())).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal arrears = details.stream().map(d -> nz(d.getArrears())).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Map<String, Object> totals = new HashMap<>();
+        totals.put("totalGrossCurrent", curGross);
+        totals.put("totalGrossNew", newGross);
+        totals.put("totalIncrease", increase);
+        totals.put("totalIncreasePercent", increasePct);
+        totals.put("totalBonus", bonus);
+        totals.put("totalArrears", arrears);
+        totals.put("recordsCount", (long) details.size());
+        return totals;
+    }
+
+    private void appendRefreshedData(Map<String, Object> result, Long transactionPoid) {
+        List<HrAppraisalDtlResponse> details = fetchDetailsWithEmployeeData(transactionPoid, null, null, null, null);
+        result.put("details", details);
+        result.put("totals", computeTotals(details));
+        result.put("totalRecords", details.size());
     }
 
     /**

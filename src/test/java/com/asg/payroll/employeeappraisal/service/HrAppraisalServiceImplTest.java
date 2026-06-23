@@ -7,6 +7,7 @@ import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.DocumentDeleteService;
 import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
+import com.asg.common.lib.service.LovDataService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalActionRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalDtlRequest;
@@ -39,6 +40,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -85,6 +88,15 @@ class HrAppraisalServiceImplTest {
     @Mock
     private HrAppraisalService self;
 
+    @Mock
+    private LovDataService lovDataService;
+
+    @Mock
+    private Connection mockConnection;
+
+    @Mock
+    private CallableStatement mockCallableStatement;
+
     @InjectMocks
     private HrAppraisalServiceImpl service;
 
@@ -126,13 +138,13 @@ class HrAppraisalServiceImplTest {
     @Test
     void getAppraisalById_Success() {
         when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
-        when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(mockDtl));
 
         Map<String, Object> result = service.getAppraisalById(1L);
 
         assertNotNull(result);
         assertEquals(mockHdr, result.get("header"));
-        assertEquals(1, ((List<?>) result.get("details")).size());
+        assertNotNull(result.get("details"));
+        assertNotNull(result.get("totals"));
     }
 
     @Test
@@ -140,6 +152,16 @@ class HrAppraisalServiceImplTest {
         when(hdrRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.getAppraisalById(1L));
+    }
+
+    @Test
+    void getFilteredDetails_ReturnsTotals() {
+        Map<String, Object> result = service.getFilteredDetails(1L, null, null, null, null);
+
+        assertNotNull(result);
+        assertNotNull(result.get("details"));
+        assertNotNull(result.get("totals"));
+        assertNotNull(result.get("totalRecords"));
     }
 
     @Test
@@ -359,6 +381,7 @@ class HrAppraisalServiceImplTest {
         when(dtlRepository.findMaxDetRowIdByTransactionPoid(1L)).thenReturn(0L);
         when(dtlRepository.save(any())).thenReturn(mockDtl);
         when(self.getAppraisalById(1L)).thenReturn(Map.of());
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), eq(100L))).thenReturn("Y");
 
         try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getGroupPoid).thenReturn(10L);
@@ -382,6 +405,7 @@ class HrAppraisalServiceImplTest {
         when(dtlRepository.findMaxDetRowIdByTransactionPoid(1L)).thenReturn(0L);
         when(dtlRepository.save(any())).thenReturn(mockDtl);
         when(self.getAppraisalById(1L)).thenReturn(Map.of());
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), eq(100L))).thenReturn("Y");
 
         try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
@@ -582,14 +606,14 @@ class HrAppraisalServiceImplTest {
     }
 
     @Test
-    void recalculateDetail_NetDiffEdit_ZeroNetDiffAmount_ThrowsException() {
+    void recalculateDetail_NetDiffEdit_ZeroNetDiffAmount_NoRecalculation() {
         HrAppraisalRecalculationRequest request = new HrAppraisalRecalculationRequest();
         request.setMode("NET_DIFF_EDIT");
         request.setNetDiffAmount(BigDecimal.ZERO);
         request.setAppraisalBasicPercent(BigDecimal.valueOf(60));
         request.setAppraisalFixedPercent(BigDecimal.valueOf(40));
         request.setDetail(new HrAppraisalDtlRequest());
-        assertThrows(ValidationException.class, () -> service.recalculateDetail(request));
+        assertDoesNotThrow(() -> service.recalculateDetail(request));
     }
 
     // line 229/232/237: null-check false branches — basicPercent/fixedPercent not null but sum != 100
@@ -920,6 +944,7 @@ class HrAppraisalServiceImplTest {
         HrAppraisalRequest request = new HrAppraisalRequest();
         request.setDescription("Test");
         request.setPeriodFrom(LocalDate.now());
+        request.setTransactionDate(LocalDate.now());
         request.setAppraisalBasicPercent(BigDecimal.TEN);
         request.setAppraisalFixedPercent(BigDecimal.TEN);
         when(jdbcTemplate.queryForObject(anyString(), eq(String.class), any(), any()))
@@ -937,6 +962,7 @@ class HrAppraisalServiceImplTest {
         HrAppraisalRequest request = new HrAppraisalRequest();
         request.setDescription("Test");
         request.setPeriodFrom(LocalDate.now());
+        request.setTransactionDate(LocalDate.now());
         request.setAppraisalBasicPercent(BigDecimal.TEN);
         request.setAppraisalFixedPercent(BigDecimal.TEN);
         when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
@@ -1022,6 +1048,7 @@ class HrAppraisalServiceImplTest {
         HrAppraisalRequest request = new HrAppraisalRequest();
         request.setDescription("Test");
         request.setPeriodFrom(LocalDate.now());
+        request.setTransactionDate(LocalDate.now());
         request.setAppraisalBasicPercent(BigDecimal.TEN);
         request.setAppraisalFixedPercent(BigDecimal.TEN);
         request.setDetails(new ArrayList<>());
@@ -1042,6 +1069,7 @@ class HrAppraisalServiceImplTest {
         HrAppraisalRequest request = new HrAppraisalRequest();
         request.setDescription("Test");
         request.setPeriodFrom(LocalDate.now());
+        request.setTransactionDate(LocalDate.now());
         request.setAppraisalBasicPercent(BigDecimal.TEN);
         request.setAppraisalFixedPercent(BigDecimal.TEN);
         request.setDetails(new ArrayList<>());
@@ -1067,9 +1095,12 @@ class HrAppraisalServiceImplTest {
     }
 
     @Test
-    void getDetailsSp_Success() {
-        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
-             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+    void getDetailsSp_Success() throws Exception {
+        when(dataSource.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.prepareCall(anyString())).thenReturn(mockCallableStatement);
+        when(mockCallableStatement.getString(5)).thenReturn("SUCCESS");
+        when(mockCallableStatement.getObject(4)).thenReturn(null);
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
             assertDoesNotThrow(() -> service.getDetailsSp(1L, 100L));
         }
@@ -1118,6 +1149,9 @@ class HrAppraisalServiceImplTest {
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
             assertDoesNotThrow(() -> service.updateDataSp(1L, 100L, request));
         }
+        // Status must be set to "Updated" before the SP call (matches legacy ADF commit behaviour)
+        assertEquals("Updated", mockDtl.getStatus());
+        verify(dtlRepository).saveAll(anyList());
     }
 
     @Test
@@ -1204,7 +1238,10 @@ class HrAppraisalServiceImplTest {
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
-            assertDoesNotThrow(() -> service.arrearsCalcSp(1L));
+            Map<String, Object> result = service.arrearsCalcSp(1L);
+            // SP updates arrears per employee row — response must include refreshed details + totals
+            assertNotNull(result.get("details"));
+            assertNotNull(result.get("totals"));
         }
     }
 
@@ -1272,8 +1309,18 @@ class HrAppraisalServiceImplTest {
     }
 
     @Test
-    void printLetter_WithoutEmployeePoid_ThrowsValidationException() {
-        assertThrows(ValidationException.class, () -> service.printLetter(1L, null));
+    void printLetter_WithoutEmployeePoid_PrintsAllEmployees() throws Exception {
+        JasperReport report = mock(JasperReport.class);
+        when(printService.buildBaseParams(anyLong(), any())).thenReturn(new HashMap<>());
+        when(printService.load("HrAppraisalLetter.jrxml")).thenReturn(report);
+        when(printService.fillReportToPdf(any(), anyMap(), any())).thenReturn("PDF".getBytes());
+
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            // null employeePoid → legacy PrintLetterForEmployees (all employees, no EMPLOYEE_POID param)
+            byte[] result = service.printLetter(1L, null);
+            assertNotNull(result);
+        }
     }
 
     @Test

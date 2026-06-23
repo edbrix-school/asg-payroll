@@ -1,5 +1,6 @@
 package com.asg.payroll.employeeappraisal.dto;
 
+import com.asg.common.lib.dto.LovGetListDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -70,4 +71,8 @@ public class HrAppraisalDtlResponse {
     private LocalDateTime createdDate;
     private String lastmodifiedBy;
     private LocalDateTime lastmodifiedDate;
+    private LovGetListDto employeeDet;
+    private LovGetListDto designationDet;
+    private LovGetListDto newDesignationDet;
+    private LovGetListDto lastDesignationDet;
 }

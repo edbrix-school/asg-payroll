@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -68,6 +69,7 @@ class PayrollVariablesServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(service, "entityManager", entityManager);
         requestDTO = PayrollVariablesRequestDTO.builder()
                 .transactionDate(LocalDate.now())
                 .employeePoid(10L)
@@ -112,7 +114,7 @@ class PayrollVariablesServiceImplTest {
             assertNotNull(result.getEmployeeDet());
             assertEquals("EMP001", result.getEmployeeDet().getCode());
             verify(entityManager).refresh(entity);
-            verify(loggingService).createLogSummaryEntry(any(LogDetailsEnum.class), eq("DOC123"), eq("1"));
+            verify(loggingService).createLogSummaryEntry(eq("DOC123"), eq("1"), anyString());
         }
     }
 
@@ -355,7 +357,7 @@ class PayrollVariablesServiceImplTest {
 
     @Test
     void create_NullRequest() {
-        assertThrows(NullPointerException.class, () -> service.create(null));
+        assertThrows(ValidationException.class, () -> service.create(null));
     }
 
     @Test
