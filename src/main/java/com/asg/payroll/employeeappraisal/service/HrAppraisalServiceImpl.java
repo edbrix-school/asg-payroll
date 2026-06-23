@@ -233,6 +233,11 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             log.warn("PROC_HR_APPRAISAL_GET_DETAILS not available: {}", e.getMessage());
         }
 
+        hdrRepository.findById(transactionPoid).ifPresent(hdr -> {
+            result.put("description", hdr.getDescription());
+            result.put("effectiveDate", hdr.getPeriodFrom());
+        });
+
         result.put("detail", fetchDetailByEmployeePoid(transactionPoid, employeePoid));
         return result;
     }
