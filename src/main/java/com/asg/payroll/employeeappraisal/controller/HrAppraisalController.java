@@ -79,10 +79,25 @@ public class HrAppraisalController {
         return success("Employee appraisal details fetched successfully", result);
     }
 
+    @AllowedAction(UserRolesRightsEnum.VIEW)
+    @GetMapping("/{transactionPoid}/details")
+    public ResponseEntity<?> getFilteredDetails(
+            @PathVariable Long transactionPoid,
+            @RequestParam(required = false) Long departmentPoid,
+            @RequestParam(required = false) Long designationPoid,
+            @RequestParam(required = false) String listingMethod,
+            @RequestParam(required = false) String employeeName) {
+        return success("Appraisal details fetched successfully",
+                hrAppraisalService.getFilteredDetails(transactionPoid, departmentPoid, designationPoid, listingMethod, employeeName));
+    }
+
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/{transactionPoid}/load-data")
     public ResponseEntity<?> loadAppraisalData(@PathVariable Long transactionPoid, @RequestBody HrAppraisalActionRequest request) {
-        Map<String, Object> result = hrAppraisalService.loadAppraisalDataSp(transactionPoid, request.getActionType());
+        String actionType = request.getLoadActionType() != null
+                ? request.getLoadActionType().name()
+                : request.getActionType();
+        Map<String, Object> result = hrAppraisalService.loadAppraisalDataSp(transactionPoid, actionType);
         return success("Appraisal data load completed", result);
     }
 

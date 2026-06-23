@@ -16,6 +16,8 @@ public interface HrAppraisalService {
 
     Map<String, Object> getAppraisalById(Long transactionPoid);
 
+    Map<String, Object> getFilteredDetails(Long transactionPoid, Long departmentPoid, Long designationPoid, String listingMethod, String employeeName);
+
     Map<String, Object> createAppraisal(HrAppraisalRequest request);
 
     Map<String, Object> updateAppraisal(Long transactionPoid, HrAppraisalRequest request);

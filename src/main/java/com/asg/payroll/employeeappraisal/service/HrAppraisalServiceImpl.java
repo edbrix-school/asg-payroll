@@ -5,6 +5,7 @@ import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.DocumentDeleteService;
 import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
+import com.asg.common.lib.service.LovDataService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
 import jakarta.persistence.EntityManager;
@@ -16,6 +17,7 @@ import javax.sql.DataSource;
 
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalActionRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalDtlRequest;
+import com.asg.payroll.employeeappraisal.dto.HrAppraisalDtlResponse;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRecalculationRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRequest;
 import com.asg.payroll.employeeappraisal.entity.HrAppraisalDtl;
@@ -31,6 +33,7 @@ import com.asg.payroll.exceptions.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import oracle.jdbc.OracleTypes;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -42,9 +45,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -54,7 +65,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     private final EntityManager entityManager;
 
-    public HrAppraisalServiceImpl(EntityManager entityManager, @Lazy HrAppraisalService self, HrAppraisalHdrRepository hdrRepository, HrAppraisalDtlRepository dtlRepository, HrEmployeeSalaryMasterRepository salaryMasterRepository, HrPayrollVarAlwdedDtlRepository payrollVarDtlRepository, DocumentSearchService documentSearchService, DocumentDeleteService documentDeleteService, LoggingService loggingService, PrintService printService, DataSource dataSource, JdbcTemplate jdbcTemplate) {
+    public HrAppraisalServiceImpl(EntityManager entityManager, @Lazy HrAppraisalService self, HrAppraisalHdrRepository hdrRepository, HrAppraisalDtlRepository dtlRepository, HrEmployeeSalaryMasterRepository salaryMasterRepository, HrPayrollVarAlwdedDtlRepository payrollVarDtlRepository, DocumentSearchService documentSearchService, DocumentDeleteService documentDeleteService, LoggingService loggingService, PrintService printService, DataSource dataSource, JdbcTemplate jdbcTemplate, LovDataService lovDataService) {
         this.entityManager = entityManager;
         this.self = self;
         this.hdrRepository = hdrRepository;
@@ -67,6 +78,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         this.printService = printService;
         this.dataSource = dataSource;
         this.jdbcTemplate = jdbcTemplate;
+        this.lovDataService = lovDataService;
     }
     private final HrAppraisalService self;
     private final HrAppraisalHdrRepository hdrRepository;
@@ -79,6 +91,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private final PrintService printService;
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
+    private final LovDataService lovDataService;
 
 
     private static final String P_TRANS_POID = "P_TRANS_POID";
@@ -92,6 +105,21 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private static final String TRANSACTION_POID = "TRANSACTION_POID";
     private static final String APPRAISAL_NOT_FOUND = "Employee appraisal not found with ID: ";
     private static final String P_STATUS = "P_STATUS";
+    private static final String BASE_DETAIL_SQL =
+            "SELECT d.TRANSACTION_POID, d.DET_ROW_ID, d.EMPLOYEE_POID, d.DESIGNATION_POID, d.JOIN_DATE, " +
+            "d.CUR_AIR_ENTITLE, d.CUR_BONUS, d.CUR_INCREMENT, d.CUR_BASIC_SALARY, d.CUR_FA_ALW, " +
+            "d.CUR_TA_ALW, d.CUR_HRA_ALW, d.CUR_FIXOT_ALW, d.CUR_SPL_ALW, d.CUR_OTH_ALW, d.CUR_AVGOT, d.CUR_GROSS_PAY, " +
+            "d.NEW_AIR_ENTITLE, d.NEW_BONUS, d.NEW_INCREMENT_PER, d.NEW_BASIC_SALARY, d.NEW_FA_ALW, " +
+            "d.NEW_TA_ALW, d.NEW_HRA_ALW, d.NEW_FIXOT_ALW, d.NEW_SPL_ALW, d.NEW_OTH_ALW, d.NEW_AVGOT, d.NEW_GROSS_PAY, " +
+            "d.STATUS, d.NET_INCREMENT, d.LAST_INCREMENT_DATE, d.LAST_INCREMENT_AMT, d.LAST_BONUS, " +
+            "d.CUR_TICKET_PERIOD, d.CUR_NO_OF_TICKETS, d.NEW_TICKET_PERIOD, d.NEW_NO_OF_TICKETS, " +
+            "d.NEW_DESIGNATION_POID, d.ARREARS, d.NEW_BONUS_PER, d.LETTER_EMAILED_ON, d.GRID_LISTING_METHOD, " +
+            "d.REGISTERED_SALARY, d.CUR_MONTHLY_CTC, d.CUR_YEARLY_CTC, d.NEW_MONTHLY_CTC, d.NEW_YEARLY_CTC, " +
+            "d.LAST_DESIGNATION_POID, d.LAST_PROMOTION_DATE, d.CREATED_BY, d.CREATED_DATE, d.LASTMODIFIED_BY, d.LASTMODIFIED_DATE, " +
+            "e.EMPLOYEE_CODE, e.EMPLOYEE_NAME, e.EMPLOYEE_NAME2 " +
+            "FROM HR_APPRAISAL_DTL d " +
+            "LEFT JOIN HR_EMPLOYEE_MASTER e ON d.EMPLOYEE_POID = e.EMPLOYEE_POID " +
+            "WHERE d.TRANSACTION_POID = ?";
 
     @Override
     @Transactional(readOnly = true)
@@ -108,17 +136,31 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     @Transactional(readOnly = true)
     public Map<String, Object> getAppraisalById(Long transactionPoid) {
         HrAppraisalHdr hdr = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
-        List<HrAppraisalDtl> details = dtlRepository.findByTransactionPoid(transactionPoid);
+        List<HrAppraisalDtlResponse> details = fetchDetailsWithEmployeeData(transactionPoid, null, null, null, null);
         Map<String, Object> out = new HashMap<>();
         out.put("header", hdr);
         out.put("details", details);
+        out.put("totals", computeTotals(details));
+        return out;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> getFilteredDetails(Long transactionPoid, Long departmentPoid, Long designationPoid, String listingMethod, String employeeName) {
+        List<HrAppraisalDtlResponse> details = fetchDetailsWithEmployeeData(transactionPoid, departmentPoid, designationPoid, listingMethod, employeeName);
+        Map<String, Object> out = new HashMap<>();
+        out.put("details", details);
+        out.put("totals", computeTotals(details));
+        out.put("totalRecords", details.size());
         return out;
     }
 
     @Override
     public Map<String, Object> createAppraisal(HrAppraisalRequest request) {
         validateHeaderForLegacySave(request);
-        validateFinancialYear(request.getTransactionDate(), null);
+        if (request.getTransactionDate() != null) {
+            validateFinancialYear(request.getTransactionDate(), null);
+        }
         HrAppraisalHdr hdr = new HrAppraisalHdr();
         mapHeader(request, hdr);
         hdr.setGroupPoid(UserContext.getGroupPoid());
@@ -135,7 +177,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     public Map<String, Object> updateAppraisal(Long transactionPoid, HrAppraisalRequest request) {
         validateHeaderForLegacySave(request);
         HrAppraisalHdr existing = hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid));
-        validateFinancialYear(request.getTransactionDate(), existing.getTransactionDate());
+        if (request.getTransactionDate() != null) {
+            validateFinancialYear(request.getTransactionDate(), existing.getTransactionDate());
+        }
         HrAppraisalHdr oldEntity = new HrAppraisalHdr();
         BeanUtils.copyProperties(existing, oldEntity);
         mapHeader(request, existing);
@@ -160,12 +204,37 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> getDetailsSp(Long transactionPoid, Long employeePoid) {
-        return execute(
-                "PROC_HR_APPRAISAL_GET_DETAILS",
-                List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter("P_EMP_POID", Types.NUMERIC), new SqlOutParameter("OUTDATA", OracleTypes.CURSOR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
-                params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, "P_EMP_POID", employeePoid)
-        );
+        Map<String, Object> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             CallableStatement cs = conn.prepareCall("BEGIN PROC_HR_APPRAISAL_GET_DETAILS(?,?,?,?,?); END;")) {
+
+            cs.setObject(1, UserContext.getCompanyPoid(), Types.NUMERIC);
+            cs.setObject(2, transactionPoid, Types.NUMERIC);
+            cs.setObject(3, employeePoid, Types.NUMERIC);
+            cs.registerOutParameter(4, OracleTypes.CURSOR);
+            cs.registerOutParameter(5, Types.VARCHAR);
+            cs.execute();
+
+            result.put("status", cs.getString(5));
+
+            try (ResultSet rs = (ResultSet) cs.getObject(4)) {
+                if (rs != null && rs.next()) {
+                    result.put("serviceYears", rs.getBigDecimal("SERVICE_YEARS"));
+                    result.put("empCode",       rs.getString("EMP_CODE"));
+                    result.put("empName",        rs.getString("EMP_NAME"));
+                    String salesmanName = rs.getString("SALESMAN_NAME");
+                    result.put("salesmanName",   salesmanName);
+                    result.put("showSalesmanRpt", salesmanName != null && !salesmanName.isBlank());
+                }
+            }
+        } catch (SQLException e) {
+            log.warn("PROC_HR_APPRAISAL_GET_DETAILS not available: {}", e.getMessage());
+        }
+
+        result.put("detail", fetchDetailByEmployeePoid(transactionPoid, employeePoid));
+        return result;
     }
 
     @Override
@@ -173,20 +242,24 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (actionType == null || actionType.isBlank()) {
             throw new ValidationException("Appraisal load action type is required (legacy: LOAD_EMPLOYEES_BLANK_DATA or LOAD_EMPLOYEES_WITH_CURRENT_DATA).");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_LOAD_APPRAISAL_DATA",
                 List.of(new SqlParameter(P_TRANS_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER, Types.VARCHAR), new SqlParameter(P_LOGIN_COMPANY_POID, Types.NUMERIC), new SqlParameter("P_ACTION_TYPE", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_TRANS_POID, transactionPoid, P_LOGIN_USER, UserContext.getUserId(), P_LOGIN_COMPANY_POID, UserContext.getCompanyPoid(), "P_ACTION_TYPE", actionType)
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
     public Map<String, Object> clearAppraisalDataSp(Long transactionPoid) {
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_CLEAR_APPRAISAL_DATA",
                 List.of(new SqlParameter(P_TRANS_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER, Types.VARCHAR), new SqlParameter(P_LOGIN_COMPANY_POID, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_TRANS_POID, transactionPoid, P_LOGIN_USER, UserContext.getUserId(), P_LOGIN_COMPANY_POID, UserContext.getCompanyPoid())
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
@@ -196,11 +269,13 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (basic.compareTo(BigDecimal.ZERO) == 0 && bonus.compareTo(BigDecimal.ZERO) == 0) {
             throw new ValidationException("Both Basic and Bonus Percentages are zero...");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_BATCH_UPDATE",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_BASIC_INCREMENT_PERCENT, Types.NUMERIC), new SqlParameter(P_BONUS_PERCENT, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_BASIC_INCREMENT_PERCENT, request.getBasicIncrementPercent(), P_BONUS_PERCENT, request.getBonusPercent())
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
@@ -238,10 +313,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
                     throw new ValidationException("Some of Basic and Fixed percentages should be 100 for autocalculation of basic and fixed allowances..");
                 }
                 BigDecimal netDiffAmt = nz(request.getNetDiffAmount());
-                if (netDiffAmt.compareTo(BigDecimal.ZERO) <= 0) {
-                    throw new ValidationException("Net difference amount must be greater than zero for autocalculation.");
+                if (netDiffAmt.compareTo(BigDecimal.ZERO) > 0) {
+                    HrAppraisalLegacyRecalculation.applyFromNetDifference(row, netDiffAmt, basicPercent, request.getPeriodFrom(), today);
                 }
-                HrAppraisalLegacyRecalculation.applyFromNetDifference(row, netDiffAmt, basicPercent, request.getPeriodFrom(), today);
             }
             default ->
                     throw new ValidationException("Unsupported recalculation mode. Use AMOUNT_EDIT, PERCENT_EDIT, or NET_DIFF_EDIT.");
@@ -258,14 +332,20 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (employeePoid == null) {
             throw new ValidationException("No Employee record is selected.");
         }
-        if (dtlRepository.findByTransactionPoidAndEmployeePoid(transactionPoid, employeePoid).isEmpty()) {
+        List<HrAppraisalDtl> dtls = dtlRepository.findByTransactionPoidAndEmployeePoid(transactionPoid, employeePoid);
+        if (dtls.isEmpty()) {
             throw new ResourceNotFoundException("Employee not found in appraisal.");
         }
-        return execute(
+        // Match legacy: ADF committed STATUS='Updated' before calling PROC_HR_APPRAISAL_UPDATE_DATA
+        dtls.forEach(dtl -> dtl.setStatus("Updated"));
+        dtlRepository.saveAll(dtls);
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_UPDATE_DATA",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_EMPLOYEE_POID", Types.NUMERIC), new SqlParameter("P_ADDITIONAL_DATA", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_EMPLOYEE_POID", employeePoid, "P_ADDITIONAL_DATA", request.getAdditionalData())
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
@@ -284,11 +364,15 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (!employeesWithoutSalary.isEmpty()) {
             throw new ValidationException("Some employees in this appraisal do not have salary records.");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_UPDATE_MAST",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter(P_BASIC_INCREMENT_PERCENT, Types.NUMERIC), new SqlParameter(P_BONUS_PERCENT, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), P_BASIC_INCREMENT_PERCENT, request.getBasicIncrementPercent(), P_BONUS_PERCENT, request.getBonusPercent())
         );
+        // SP sets COMPLETED='Y' and COMPLETED_ON on HDR — React FE needs updated header to lock the screen
+        entityManager.clear();
+        result.put("header", hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid)));
+        return result;
     }
 
     @Override
@@ -300,20 +384,29 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             throw new ValidationException("No bonus amounts found in appraisal details. Cannot create JV.");
         }
 
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_CREATE_JV",
                 List.of(new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_APPRAISAL_POID", Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_APPRAISAL_POID", transactionPoid)
         );
+        // SP writes JV_DOC_REF and JV_DOC_POID to HDR — React FE needs updated header to display the new JV reference
+        entityManager.clear();
+        result.put("header", hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid)));
+        return result;
     }
 
     @Override
     public Map<String, Object> sendEmailSp(Long transactionPoid, String resend) {
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_APPRAISAL_SEND_EMAIL",
                 List.of(new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter("P_RESEND", Types.VARCHAR), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_LOGIN_USER_POID, UserContext.getUserPoid(), P_TRANSACTION_POID, transactionPoid, "P_RESEND", resend)
         );
+        // SP stamps LETTER_EMAILED_ON on each DTL row and on HDR — FE needs refreshed details + header
+        appendRefreshedData(result, transactionPoid);
+        entityManager.clear();
+        result.put("header", hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid)));
+        return result;
     }
 
     @Override
@@ -344,11 +437,15 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (maxExistingRowId > 0 && arrearsCount > 0) {
             throw new ValidationException("Payroll already has variable allowance entries. Please remove existing arrears entries before re-adding.");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_ARREARS",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlParameter("P_PAYROLL_POID", Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid(), "P_PAYROLL_POID", payrollPoid)
         );
+        // SP stores ARREARS_PAYROLL_POID on HDR — React FE needs updated header to know which payroll received the arrears
+        entityManager.clear();
+        result.put("header", hdrRepository.findById(transactionPoid).orElseThrow(() -> new ResourceNotFoundException(APPRAISAL_NOT_FOUND + transactionPoid)));
+        return result;
     }
 
     @Override
@@ -366,11 +463,13 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             throw new ValidationException("No employees with a positive net increment found. Arrears calculation requires at least one employee with an increment.");
         }
 
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_ARREARS_CALC",
                 List.of(new SqlParameter(P_COMPANYID, Types.NUMERIC), new SqlParameter(P_TRANSACTION_POID, Types.NUMERIC), new SqlOutParameter(P_STATUS, Types.VARCHAR)),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_TRANSACTION_POID, transactionPoid)
         );
+        appendRefreshedData(result, transactionPoid);
+        return result;
     }
 
     @Override
@@ -390,9 +489,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
 
     @Override
     public byte[] printLetter(Long transactionPoid, Long employeePoid) throws JRException {
-        if (employeePoid == null) {
-            throw new ValidationException("Select any employee from the below list to print individual letter.");
-        }
+        // employeePoid null → print letters for all employees (legacy PrintLetterForEmployees)
+        // employeePoid set  → print single employee letter (legacy PrintLetterForSingleEmployee)
         return generatePdf("HrAppraisalLetter.jrxml", transactionPoid, employeePoid);
     }
 
@@ -420,7 +518,16 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
                 .withProcedureName(procedureName)
                 .declareParameters(parameters.toArray(new org.springframework.jdbc.core.SqlParameter[0]));
-        return call.execute(inParams);
+        Map<String, Object> result = new HashMap<>(call.execute(inParams));
+        parameters.stream()
+                .filter(p -> p instanceof SqlOutParameter)
+                .map(p -> result.get(p.getName()))
+                .filter(v -> v instanceof String)
+                .map(v -> (String) v)
+                .filter(s -> s.toUpperCase(Locale.ROOT).startsWith("ERROR"))
+                .findFirst()
+                .ifPresent(s -> { throw new ValidationException(s); });
+        return result;
     }
 
     private void mapHeader(HrAppraisalRequest request, HrAppraisalHdr entity) {
@@ -467,6 +574,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (request.getEmployeePoid() != null && !dtlRepository.findByTransactionPoidAndEmployeePoid(transactionPoid, request.getEmployeePoid()).isEmpty()) {
             throw new ValidationException("Employee already exists in this appraisal.");
         }
+        validateActiveEmployee(request.getEmployeePoid());
+        validateEffectiveDateAfterLastIncrement(hdr.getPeriodFrom(), request.getLastIncrementDate(), request.getEmployeePoid());
+        validateProposedSalaryNotLessThanCurrent(request);
         HrAppraisalDtl entity = new HrAppraisalDtl();
         entity.setTransactionPoid(transactionPoid);
         entity.setDetRowId(dtlRepository.findMaxDetRowIdByTransactionPoid(transactionPoid) + 1);
@@ -488,6 +598,8 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private void updateDetail(Long transactionPoid, HrAppraisalDtlRequest request, HrAppraisalHdr hdr, LocalDate today) {
         HrAppraisalDtlId id = buildDtlId(transactionPoid, request.getDetRowId());
         HrAppraisalDtl existing = dtlRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Appraisal detail not found for detRowId: " + request.getDetRowId()));
+        validateEffectiveDateAfterLastIncrement(hdr.getPeriodFrom(), request.getLastIncrementDate(), request.getEmployeePoid());
+        validateProposedSalaryNotLessThanCurrent(request);
         HrAppraisalDtl oldEntity = new HrAppraisalDtl();
         BeanUtils.copyProperties(existing, oldEntity);
         mapDetail(request, existing);
@@ -555,12 +667,218 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         entity.setLastPromotionDate(request.getLastPromotionDate());
     }
 
+    private void validateActiveEmployee(Long employeePoid) {
+        if (employeePoid == null) return;
+        try {
+            String active = jdbcTemplate.queryForObject(
+                    "SELECT ACTIVE FROM HR_EMPLOYEE_MASTER WHERE EMPLOYEE_POID = ?",
+                    String.class, employeePoid);
+            if (!"Y".equalsIgnoreCase(active)) {
+                throw new ValidationException("Only active employees can be added to an appraisal. Employee ID: " + employeePoid);
+            }
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException("Employee not found with ID: " + employeePoid);
+        }
+    }
+
+    private void validateEffectiveDateAfterLastIncrement(LocalDate periodFrom, LocalDate lastIncrementDate, Long employeePoid) {
+        if (periodFrom == null || lastIncrementDate == null) return;
+        if (!periodFrom.isAfter(lastIncrementDate)) {
+            throw new ValidationException(String.format(
+                    "Appraisal effective date (%s) must be after the last increment date (%s)%s.",
+                    periodFrom, lastIncrementDate,
+                    employeePoid != null ? " for employee ID: " + employeePoid : ""));
+        }
+    }
+
+    private void validateProposedSalaryNotLessThanCurrent(HrAppraisalDtlRequest request) {
+        BigDecimal curBasic = nz(request.getCurBasicSalary());
+        BigDecimal newBasic = nz(request.getNewBasicSalary());
+        if (curBasic.compareTo(BigDecimal.ZERO) > 0 && newBasic.compareTo(BigDecimal.ZERO) > 0
+                && newBasic.compareTo(curBasic) < 0) {
+            throw new ValidationException("Proposed basic salary must be >= current basic salary.");
+        }
+        BigDecimal curGross = nz(request.getCurGrossPay());
+        BigDecimal newGross = nz(request.getNewGrossPay());
+        if (curGross.compareTo(BigDecimal.ZERO) > 0 && newGross.compareTo(BigDecimal.ZERO) > 0
+                && newGross.compareTo(curGross) < 0) {
+            throw new ValidationException("Proposed gross salary must be >= current gross salary.");
+        }
+    }
+
+    private HrAppraisalDtlResponse fetchDetailByEmployeePoid(Long transactionPoid, Long employeePoid) {
+        List<HrAppraisalDtlResponse> rows = jdbcTemplate.query(
+                BASE_DETAIL_SQL + " AND d.EMPLOYEE_POID = ? AND (d.DELETED IS NULL OR d.DELETED = 'N') ORDER BY d.DET_ROW_ID",
+                this::mapDtlRow, transactionPoid, employeePoid);
+        if (rows.isEmpty()) return null;
+        HrAppraisalDtlResponse row = rows.get(0);
+        row.setEmployeeDet(lovDataService.getDetailsByPoidAndLovNameFast(employeePoid, "EMPLOYEE_NAME_WITH_SHORT"));
+        List<Long> desPoids = Stream.of(row.getDesignationPoid(), row.getNewDesignationPoid(), row.getLastDesignationPoid())
+                .filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        if (!desPoids.isEmpty()) {
+            Map<Long, LovGetListDto> desMap = lovDataService.getDetailsByPoidsAndLovName(desPoids, "DESIGNATION");
+            row.setDesignationDet(desMap.get(row.getDesignationPoid()));
+            row.setNewDesignationDet(desMap.get(row.getNewDesignationPoid()));
+            row.setLastDesignationDet(desMap.get(row.getLastDesignationPoid()));
+        }
+        return row;
+    }
+
+    private List<HrAppraisalDtlResponse> fetchDetailsWithEmployeeData(Long transactionPoid, Long departmentPoid, Long designationPoid, String listingMethod, String employeeName) {
+        StringBuilder sql = new StringBuilder(BASE_DETAIL_SQL + " AND (d.DELETED IS NULL OR d.DELETED = 'N')");
+
+        List<Object> params = new ArrayList<>();
+        params.add(transactionPoid);
+
+        if (departmentPoid != null) {
+            sql.append(" AND e.DEPARTMENT_POID = ?");
+            params.add(departmentPoid);
+        }
+        if (designationPoid != null) {
+            sql.append(" AND d.DESIGNATION_POID = ?");
+            params.add(designationPoid);
+        }
+        if (listingMethod != null && !listingMethod.isBlank()) {
+            if ("UPDATED".equalsIgnoreCase(listingMethod)) {
+                sql.append(" AND d.STATUS = 'Updated'");
+            } else if ("PENDING".equalsIgnoreCase(listingMethod)) {
+                sql.append(" AND (d.STATUS IS NULL OR d.STATUS != 'Updated')");
+            }
+        }
+        if (employeeName != null && !employeeName.isBlank()) {
+            sql.append(" AND UPPER(e.EMPLOYEE_NAME) LIKE UPPER(?)");
+            params.add("%" + employeeName.trim() + "%");
+        }
+        sql.append(" ORDER BY d.DET_ROW_ID");
+
+        List<HrAppraisalDtlResponse> details = jdbcTemplate.query(sql.toString(), this::mapDtlRow, params.toArray());
+        List<Long> empPoids = details.stream()
+                .map(HrAppraisalDtlResponse::getEmployeePoid)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, LovGetListDto> empLovMap = lovDataService.getDetailsByPoidsAndLovName(empPoids, "EMPLOYEE_NAME_WITH_SHORT");
+        details.forEach(d -> {
+            if (d.getEmployeePoid() != null) d.setEmployeeDet(empLovMap.get(d.getEmployeePoid()));
+        });
+        return details;
+    }
+
+    private HrAppraisalDtlResponse mapDtlRow(ResultSet rs, int rowNum) throws SQLException {
+        HrAppraisalDtlResponse r = new HrAppraisalDtlResponse();
+        r.setTransactionPoid(getLong(rs, "TRANSACTION_POID"));
+        r.setDetRowId(getLong(rs, "DET_ROW_ID"));
+        r.setEmployeePoid(getLong(rs, "EMPLOYEE_POID"));
+        r.setDesignationPoid(getLong(rs, "DESIGNATION_POID"));
+        r.setJoinDate(toLocalDate(rs, "JOIN_DATE"));
+        r.setCurAirEntitle(rs.getString("CUR_AIR_ENTITLE"));
+        r.setCurBonus(getBd(rs, "CUR_BONUS"));
+        r.setCurIncrement(getBd(rs, "CUR_INCREMENT"));
+        r.setCurBasicSalary(getBd(rs, "CUR_BASIC_SALARY"));
+        r.setCurFaAlw(getBd(rs, "CUR_FA_ALW"));
+        r.setCurTaAlw(getBd(rs, "CUR_TA_ALW"));
+        r.setCurHraAlw(getBd(rs, "CUR_HRA_ALW"));
+        r.setCurFixotAlw(getBd(rs, "CUR_FIXOT_ALW"));
+        r.setCurSplAlw(getBd(rs, "CUR_SPL_ALW"));
+        r.setCurOthAlw(getBd(rs, "CUR_OTH_ALW"));
+        r.setCurAvgot(getBd(rs, "CUR_AVGOT"));
+        r.setCurGrossPay(getBd(rs, "CUR_GROSS_PAY"));
+        r.setNewAirEntitle(rs.getString("NEW_AIR_ENTITLE"));
+        r.setNewBonus(getBd(rs, "NEW_BONUS"));
+        r.setNewIncrementPer(getBd(rs, "NEW_INCREMENT_PER"));
+        r.setNewBasicSalary(getBd(rs, "NEW_BASIC_SALARY"));
+        r.setNewFaAlw(getBd(rs, "NEW_FA_ALW"));
+        r.setNewTaAlw(getBd(rs, "NEW_TA_ALW"));
+        r.setNewHraAlw(getBd(rs, "NEW_HRA_ALW"));
+        r.setNewFixotAlw(getBd(rs, "NEW_FIXOT_ALW"));
+        r.setNewSplAlw(getBd(rs, "NEW_SPL_ALW"));
+        r.setNewOthAlw(getBd(rs, "NEW_OTH_ALW"));
+        r.setNewAvgot(getBd(rs, "NEW_AVGOT"));
+        r.setNewGrossPay(getBd(rs, "NEW_GROSS_PAY"));
+        r.setStatus(rs.getString("STATUS"));
+        r.setNetIncrement(getBd(rs, "NET_INCREMENT"));
+        r.setLastIncrementDate(toLocalDate(rs, "LAST_INCREMENT_DATE"));
+        r.setLastIncrementAmt(getBd(rs, "LAST_INCREMENT_AMT"));
+        r.setLastBonus(getBd(rs, "LAST_BONUS"));
+        r.setCurTicketPeriod(getBd(rs, "CUR_TICKET_PERIOD"));
+        r.setCurNoOfTickets(getBd(rs, "CUR_NO_OF_TICKETS"));
+        r.setNewTicketPeriod(getBd(rs, "NEW_TICKET_PERIOD"));
+        r.setNewNoOfTickets(getBd(rs, "NEW_NO_OF_TICKETS"));
+        r.setNewDesignationPoid(getLong(rs, "NEW_DESIGNATION_POID"));
+        r.setArrears(getBd(rs, "ARREARS"));
+        r.setNewBonusPer(getBd(rs, "NEW_BONUS_PER"));
+        r.setLetterEmailedOn(toLocalDate(rs, "LETTER_EMAILED_ON"));
+        r.setGridListingMethod(rs.getString("GRID_LISTING_METHOD"));
+        r.setRegisteredSalary(getBd(rs, "REGISTERED_SALARY"));
+        r.setCurMonthlyCtc(getBd(rs, "CUR_MONTHLY_CTC"));
+        r.setCurYearlyCtc(getBd(rs, "CUR_YEARLY_CTC"));
+        r.setNewMonthlyCtc(getBd(rs, "NEW_MONTHLY_CTC"));
+        r.setNewYearlyCtc(getBd(rs, "NEW_YEARLY_CTC"));
+        r.setLastDesignationPoid(getLong(rs, "LAST_DESIGNATION_POID"));
+        r.setLastPromotionDate(toLocalDate(rs, "LAST_PROMOTION_DATE"));
+        r.setCreatedBy(rs.getString("CREATED_BY"));
+        r.setCreatedDate(toLocalDateTime(rs, "CREATED_DATE"));
+        r.setLastmodifiedBy(rs.getString("LASTMODIFIED_BY"));
+        r.setLastmodifiedDate(toLocalDateTime(rs, "LASTMODIFIED_DATE"));
+        r.setEmployeeCode(rs.getString("EMPLOYEE_CODE"));
+        r.setEmployeeName(rs.getString("EMPLOYEE_NAME"));
+        r.setEmployeeName2(rs.getString("EMPLOYEE_NAME2"));
+        return r;
+    }
+
+    private static BigDecimal getBd(ResultSet rs, String col) throws SQLException {
+        BigDecimal v = rs.getBigDecimal(col);
+        return v != null ? v.setScale(3, RoundingMode.HALF_UP) : null;
+    }
+
+    private static Long getLong(ResultSet rs, String col) throws SQLException {
+        long v = rs.getLong(col);
+        return rs.wasNull() ? null : v;
+    }
+
+    private static LocalDate toLocalDate(ResultSet rs, String col) throws SQLException {
+        java.sql.Date d = rs.getDate(col);
+        return d != null ? d.toLocalDate() : null;
+    }
+
+    private static LocalDateTime toLocalDateTime(ResultSet rs, String col) throws SQLException {
+        java.sql.Timestamp ts = rs.getTimestamp(col);
+        return ts != null ? ts.toLocalDateTime() : null;
+    }
+
     private Map<String, Object> params(Object... values) {
         Map<String, Object> out = new HashMap<>();
         for (int i = 0; i < values.length; i += 2) {
             out.put(String.valueOf(values[i]), values[i + 1]);
         }
         return out;
+    }
+
+    private Map<String, Object> computeTotals(List<HrAppraisalDtlResponse> details) {
+        BigDecimal curGross = details.stream().map(d -> nz(d.getCurGrossPay())).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal newGross = details.stream().map(d -> nz(d.getNewGrossPay())).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal increase = newGross.subtract(curGross);
+        BigDecimal increasePct = curGross.compareTo(BigDecimal.ZERO) != 0
+                ? increase.divide(curGross, 4, RoundingMode.HALF_UP).multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+        BigDecimal bonus = details.stream().map(d -> nz(d.getNewBonus())).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal arrears = details.stream().map(d -> nz(d.getArrears())).reduce(BigDecimal.ZERO, BigDecimal::add);
+        Map<String, Object> totals = new HashMap<>();
+        totals.put("totalGrossCurrent", curGross);
+        totals.put("totalGrossNew", newGross);
+        totals.put("totalIncrease", increase);
+        totals.put("totalIncreasePercent", increasePct);
+        totals.put("totalBonus", bonus);
+        totals.put("totalArrears", arrears);
+        totals.put("recordsCount", (long) details.size());
+        return totals;
+    }
+
+    private void appendRefreshedData(Map<String, Object> result, Long transactionPoid) {
+        List<HrAppraisalDtlResponse> details = fetchDetailsWithEmployeeData(transactionPoid, null, null, null, null);
+        result.put("details", details);
+        result.put("totals", computeTotals(details));
+        result.put("totalRecords", details.size());
     }
 
     /**
