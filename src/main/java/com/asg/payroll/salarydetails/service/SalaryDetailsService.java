@@ -30,4 +30,12 @@ public interface SalaryDetailsService {
 
     byte[] printContract(Long id, String contractPrintType) throws Exception;
 
+    byte[] printAnnex(Long id) throws Exception;
+
+    byte[] printEmployeeDetails(Long id, boolean preview) throws Exception;
+
+    Map<String, Object> getSalaryRevisions(Long salaryPoid);
+
+    void enableSalaryEdit(Long id);
+
 }

@@ -184,6 +184,7 @@ class SalaryDetailsControllerTest {
 
         assertNotNull(responseEntity);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        verify(service).printOfferLetter(1L);
     }
 
     @Test
@@ -206,6 +207,7 @@ class SalaryDetailsControllerTest {
 
         assertNotNull(responseEntity);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        verify(service).printSalaryCertificate(1L);
     }
 
     @Test
@@ -228,28 +230,31 @@ class SalaryDetailsControllerTest {
 
         assertNotNull(responseEntity);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        verify(service).printContract(1L, "OFFICIAL");
     }
 
     @Test
     void testPrintAnnex_Success() throws Exception {
         byte[] pdfContent = new byte[]{1, 2, 3};
-        when(service.printContract(1L, null)).thenReturn(pdfContent);
+        when(service.printAnnex(1L)).thenReturn(pdfContent);
 
         ResponseEntity<?> responseEntity = controller.printAnnex(1L);
 
         assertNotNull(responseEntity);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertArrayEquals(pdfContent, (byte[]) responseEntity.getBody());
+        verify(service).printAnnex(1L);
     }
 
     @Test
     void testPrintAnnex_Exception() throws Exception {
-        when(service.printContract(1L, null)).thenThrow(new RuntimeException("Printer error"));
+        when(service.printAnnex(1L)).thenThrow(new RuntimeException("Printer error"));
 
         ResponseEntity<?> responseEntity = controller.printAnnex(1L);
 
         assertNotNull(responseEntity);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        verify(service).printAnnex(1L);
     }
 
     @Test
