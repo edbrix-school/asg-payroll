@@ -32,7 +32,7 @@ public interface EmployeeSettlementService {
     Map<String, String> getEmployeeLeaveDates(String employeePoid);
 
 
-    Map<String, Object> calculateIndemnity(Long companyPoid, Long settlementPoid, Long employeePoid, LocalDate settlementDate, Long withoutPayDays, String fullIndmtOnly);
+    Map<String, Object> calculateIndemnity(Long companyPoid, Long settlementPoid, Long employeePoid, LocalDate settlementDate, Long withoutPayDays);
 
     Map<String, Object> getLeaveRequestDetails(Long id);
 

@@ -10,6 +10,7 @@ import com.asg.common.lib.exception.ResourceNotFoundException;
 import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.DocumentDeleteService;
 import com.asg.common.lib.service.DocumentSearchService;
+import com.asg.common.lib.service.GlobalParameterService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
@@ -59,6 +60,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
     private final DocumentSearchService documentSearchService;
     private final PrintService printService;
     private final DataSource dataSource;
+    private final GlobalParameterService globalParameterService;
 
     private static final String SALARY_POID = "SALARY_POID";
     private static final String EMPLOYEE_POID = "EMPLOYEE_POID";
@@ -122,6 +124,8 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
     @Override
     public String addToHistory(Long salaryPoid) {
+        repository.findById(salaryPoid)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, SALARY_POID, salaryPoid));
         return procRepository.addToSalaryHistory(UserContext.getCompanyPoid(), UserContext.getUserPoid(), salaryPoid);
     }
 
@@ -251,7 +255,11 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         if (request.getPaymentMethod().equalsIgnoreCase("bank") && request.getBankPoid() == null) throw new ValidationException("Bank is mandatory");
         if (request.getPaymentMethod().equalsIgnoreCase("bank") && request.getBankRegistrationId() == null) throw new ValidationException("Bank Reg ID is mandatory");
 
-        if (request.getIbanAccountNo() != null && request.getIbanAccountNo().length() != 22) {
+        String ibanValidationParam = globalParameterService.getParameterValue(
+                "Payroll_IBANValidation", "Company", UserContext.getCompanyPoid().toString(), "Y");
+        boolean ibanValidationEnabled = !"N".equalsIgnoreCase(ibanValidationParam);
+
+        if (ibanValidationEnabled && request.getIbanAccountNo() != null && request.getIbanAccountNo().length() != 22) {
             throw new ValidationException("IBAN Account number should be 22 characters");
         }
     }
@@ -267,8 +275,11 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         }
         entity.setTotAllowance(totalAllowance);
         entity.setGrossSalary(basic.add(totalAllowance));
-        BigDecimal totalDeduction = BigDecimal.ZERO;
-        // TODO: include deductions once HrEmployeeSalaryDedDtl repository is available
+        BigDecimal totalDeduction = alwDtlRepository.findBySalaryPoid(entity.getSalaryPoid() != null ? entity.getSalaryPoid() : 0L)
+                .stream()
+                .filter(a -> a.getActive() != null && a.getActive() == 0L) // active=0 means deduction
+                .map(a -> a.getAmount() != null ? a.getAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         entity.setNetSalary(entity.getGrossSalary().subtract(totalDeduction));
     }
 

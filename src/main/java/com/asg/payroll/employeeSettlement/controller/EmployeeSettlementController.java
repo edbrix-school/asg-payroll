@@ -130,11 +130,11 @@ public class EmployeeSettlementController {
             @ApiResponse(responseCode = "404", description = "Employee Settlement not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/create-bpv/{id}")
-    public ResponseEntity<?> createSettlementBpv(@PathVariable Long id  , @RequestBody EmployeeSettlementDtl request) {
-
+    public ResponseEntity<?> createSettlementBpv(@PathVariable Long id, @RequestBody EmployeeSettlementDtl request) {
+        // BPV = CHEQUE payment, paymentDocType must be CHEQUE
         String status = service.createSettlementBpv(
                 id,
-                request.getPaymentMethod(),
+                request.getPaymentDocType(),      // CHEQUE or TRANSFER (legacy: attrPaymentDocType)
                 request.getPaymentBankPoid(),
                 request.getPaymentPayeeName(),
                 request.getPaymentValueDate(),
@@ -149,11 +149,11 @@ public class EmployeeSettlementController {
             @ApiResponse(responseCode = "404", description = "Employee Settlement not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/create-bdv/{id}")
-    public ResponseEntity<?> createSettlementBdv(@PathVariable Long id  , @RequestBody EmployeeSettlementDtl request) {
-
+    public ResponseEntity<?> createSettlementBdv(@PathVariable Long id, @RequestBody EmployeeSettlementDtl request) {
+        // BDV = TRANSFER payment, paymentDocType must be TRANSFER
         String status = service.createSettlementBdv(
                 id,
-                request.getPaymentMethod(),
+                request.getPaymentDocType(),      // CHEQUE or TRANSFER (legacy: attrPaymentDocType)
                 request.getPaymentBankPoid(),
                 request.getPaymentPayeeName(),
                 request.getPaymentValueDate(),
@@ -235,11 +235,10 @@ public class EmployeeSettlementController {
             @RequestParam Long settlementPoid,
             @RequestParam Long employeePoid,
             @RequestParam LocalDate settlementDate,
-            @RequestParam(defaultValue = "0") Long withoutPayDays,
-            @RequestParam(defaultValue = "N") String fullIndmtOnly
+            @RequestParam(defaultValue = "0") Long withoutPayDays
     ) {
 
-        Map<String, Object> response = service.calculateIndemnity(companyPoid, settlementPoid, employeePoid, settlementDate, withoutPayDays, fullIndmtOnly);
+        Map<String, Object> response = service.calculateIndemnity(companyPoid, settlementPoid, employeePoid, settlementDate, withoutPayDays);
         return success("Indemnity Calculated Successfully", response);
     }
 

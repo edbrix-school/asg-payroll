@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -15,6 +16,8 @@ public class SalaryDetailResponse {
 
     private Long salaryPoid;
     private Long employeePoid;
+    private LocalDateTime createdDate;
+    private String createdBy;
     
     // Read only fields from employee/master
     private String employeeName;

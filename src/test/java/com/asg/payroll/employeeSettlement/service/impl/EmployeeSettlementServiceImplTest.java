@@ -8,7 +8,9 @@ import com.asg.common.lib.service.DocumentDeleteService;
 import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.LovDataService;
+import com.asg.common.lib.service.PrintService;
 import com.asg.payroll.employeeSettlement.dto.EmployeeSettlementDto;
+import javax.sql.DataSource;
 import com.asg.payroll.employeeSettlement.dto.LoanDeductionDto;
 import com.asg.payroll.employeeSettlement.entity.EmployeeSettlementDtl;
 import com.asg.payroll.employeeSettlement.entity.LoanDeductionDtl;
@@ -56,6 +58,12 @@ class EmployeeSettlementServiceImplTest {
 
     @Mock
     private LovDataService lovDataService;
+
+    @Mock
+    private PrintService printService;
+
+    @Mock
+    private DataSource dataSource;
 
     @Mock
     private JdbcTemplate jdbcTemplate;
