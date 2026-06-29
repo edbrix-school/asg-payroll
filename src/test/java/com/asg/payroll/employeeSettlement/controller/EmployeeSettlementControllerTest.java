@@ -187,11 +187,11 @@ class EmployeeSettlementControllerTest {
     @Test
     void testCreateSettlementBpv_Success() {
         EmployeeSettlementDtl request = new EmployeeSettlementDtl();
-        request.setPaymentMethod("BANK");
+        request.setPaymentDocType("CHEQUE");  // legacy: paymentDocType not paymentMethod
         request.setPaymentBankPoid(5L);
         request.setPaymentPayeeName("John Doe");
         request.setPaymentValueDate(LocalDate.now());
-        request.setPaymentPrePrinted("N");
+        request.setPaymentPrePrinted("Y");
 
         when(service.createSettlementBpv(anyLong(), anyString(), anyLong(), anyString(), any(), anyString()))
                 .thenReturn("SUCCESS");
@@ -199,6 +199,7 @@ class EmployeeSettlementControllerTest {
         ResponseEntity<?> response = controller.createSettlementBpv(1L, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(service).createSettlementBpv(eq(1L), eq("CHEQUE"), eq(5L), eq("John Doe"), any(), eq("Y"));
     }
 
     // --- CREATE BDV ---
@@ -206,11 +207,11 @@ class EmployeeSettlementControllerTest {
     @Test
     void testCreateSettlementBdv_Success() {
         EmployeeSettlementDtl request = new EmployeeSettlementDtl();
-        request.setPaymentMethod("BANK");
+        request.setPaymentDocType("TRANSFER");  // legacy: paymentDocType not paymentMethod
         request.setPaymentBankPoid(5L);
         request.setPaymentPayeeName("Jane Doe");
         request.setPaymentValueDate(LocalDate.now());
-        request.setPaymentPrePrinted("N");
+        request.setPaymentPrePrinted("Y");
 
         when(service.createSettlementBdv(anyLong(), anyString(), anyLong(), anyString(), any(), anyString()))
                 .thenReturn("SUCCESS");
@@ -218,6 +219,7 @@ class EmployeeSettlementControllerTest {
         ResponseEntity<?> response = controller.createSettlementBdv(1L, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(service).createSettlementBdv(eq(1L), eq("TRANSFER"), eq(5L), eq("Jane Doe"), any(), eq("Y"));
     }
 
     // --- CREATE JV ---
@@ -304,13 +306,15 @@ class EmployeeSettlementControllerTest {
     @Test
     void testCalculateIndemnity_Success() {
         Map<String, Object> result = Map.of("status", "SUCCESS", "data", Map.of());
-        when(service.calculateIndemnity(anyLong(), anyLong(), anyLong(), any(), anyLong(), anyString()))
+        when(service.calculateIndemnity(anyLong(), anyLong(), anyLong(), any(), anyLong()))
                 .thenReturn(result);
 
+        // fullIndmtOnly param removed - matches legacy 7-param procedure
         ResponseEntity<?> response = controller.calculateIndemnity(
-                10L, 1L, 100L, LocalDate.now(), 0L, "N");
+                10L, 1L, 100L, LocalDate.now(), 0L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(service).calculateIndemnity(eq(10L), eq(1L), eq(100L), any(), eq(0L));
     }
 
     // --- PROCESS LEAVE PAYROLL ---

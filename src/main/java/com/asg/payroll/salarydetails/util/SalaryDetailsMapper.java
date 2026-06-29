@@ -48,6 +48,8 @@ public class SalaryDetailsMapper {
         SalaryDetailResponse response = SalaryDetailResponse.builder()
                 .salaryPoid(entity.getSalaryPoid())
                 .employeePoid(entity.getEmployeePoid())
+                .createdDate(entity.getCreatedDate())
+                .createdBy(entity.getCreatedBy())
                 .lastIncrementDate(entity.getLastIncrementDate())
                 .nextIncrementDate(entity.getNextIncrementDate())
                 .indemnityDueFrom(entity.getIndemnityDueFrom())

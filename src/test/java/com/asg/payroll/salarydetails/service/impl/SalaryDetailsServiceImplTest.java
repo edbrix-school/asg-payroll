@@ -8,6 +8,7 @@ import com.asg.common.lib.exception.ResourceNotFoundException;
 import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.DocumentDeleteService;
 import com.asg.common.lib.service.DocumentSearchService;
+import com.asg.common.lib.service.GlobalParameterService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.payroll.common.util.ActionType;
@@ -67,6 +68,8 @@ class SalaryDetailsServiceImplTest {
     private PrintService printService;
     @Mock
     private DataSource dataSource;
+    @Mock
+    private GlobalParameterService globalParameterService;
 
     @InjectMocks
     private SalaryDetailsServiceImpl service;
@@ -109,14 +112,12 @@ class SalaryDetailsServiceImplTest {
         entity.setEmployeePoid(100L);
 
         when(repository.findById(id)).thenReturn(Optional.of(entity));
+        when(globalParameterService.getParameterValue(eq("Payroll_IBANValidation"), any(), any(), any())).thenReturn("Y");
         when(alwDtlRepository.getMaxDetRowId(id)).thenReturn(10L);
 
         HrEmployeeSalaryAlwDtl savedAlw = new HrEmployeeSalaryAlwDtl();
         savedAlw.setDetRowId(11L);
         when(alwDtlRepository.saveAll(any())).thenReturn(List.of(savedAlw));
-
-        // Mocking getById part of update
-        when(repository.findById(id)).thenReturn(Optional.of(entity));
         when(alwDtlRepository.findBySalaryPoid(id)).thenReturn(new ArrayList<>());
         when(histRepository.findBySalaryPoid(id)).thenReturn(new ArrayList<>());
         when(procRepository.getEmployeeDetails(100L)).thenReturn(Map.of("DESIGNATION_NAME", "Manager"));
@@ -175,7 +176,8 @@ class SalaryDetailsServiceImplTest {
 
         request.setBankRegistrationId("REG-1");
         request.setIbanAccountNo("too-short");
-        // IBAN length check
+        // IBAN length check — param enabled by default
+        when(globalParameterService.getParameterValue(eq("Payroll_IBANValidation"), any(), any(), any())).thenReturn("Y");
         assertThrows(ValidationException.class, () -> service.update(1L, request));
     }
 
@@ -259,10 +261,33 @@ class SalaryDetailsServiceImplTest {
     }
 
     @Test
+    void testIbanValidation_DisabledByParam() {
+        SalaryDetailRequest request = new SalaryDetailRequest();
+        request.setEmployeePoid(100L);
+        request.setPaymentMethod("CASH");
+        request.setIbanAccountNo("short"); // invalid length but param disabled
+
+        HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
+        entity.setSalaryPoid(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(globalParameterService.getParameterValue(eq("Payroll_IBANValidation"), any(), any(), any())).thenReturn("N");
+        when(alwDtlRepository.findBySalaryPoid(1L)).thenReturn(new ArrayList<>());
+
+        assertDoesNotThrow(() -> service.update(1L, request));
+    }
+
+    @Test
     void testAddToHistory() {
+        when(repository.findById(1L)).thenReturn(Optional.of(new HrEmployeeSalaryMaster()));
         when(procRepository.addToSalaryHistory(any(), any(), any())).thenReturn("SUCCESS");
         String result = service.addToHistory(1L);
         assertEquals("SUCCESS", result);
+    }
+
+    @Test
+    void testAddToHistory_NotFound() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.addToHistory(99L));
     }
 
     @Test
@@ -409,6 +434,7 @@ class SalaryDetailsServiceImplTest {
         entity.setSalaryPoid(1L);
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
         when(repository.save(any())).thenReturn(entity);
+        when(alwDtlRepository.findBySalaryPoid(1L)).thenReturn(new ArrayList<>());
 
         service.update(1L, request);
 

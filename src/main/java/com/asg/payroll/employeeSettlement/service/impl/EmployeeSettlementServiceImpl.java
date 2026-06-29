@@ -159,9 +159,9 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
                 CallableStatement cs = connection.prepareCall(sql);
                 cs.setLong(1, entity.getCompanyPoid());
                 cs.setLong(2, entity.getEmployeePoid());
-                cs.setDate(3, Date.valueOf(entity.getLeaveStartDate()));
-                cs.setDate(4, Date.valueOf(entity.getLeaveEndDate()));
-                cs.setLong(5, entity.getTransactionPoid());
+                cs.setDate(3, entity.getLeaveStartDate() != null ? Date.valueOf(entity.getLeaveStartDate()) : null);
+                cs.setNull(4, Types.DATE); // legacy always passes null for leaveEndDate
+                cs.setObject(5, entity.getTransactionPoid());
                 if (entity.getLeaveAbsentDays() != null) {
                     cs.setLong(6, entity.getLeaveAbsentDays().longValue());
                 } else {
@@ -341,20 +341,19 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
 
     @Override
     @Transactional
-    public Map<String, Object> calculateIndemnity(Long companyPoid, Long settlementPoid, Long employeePoid, LocalDate settlementDate, Long withoutPayDays, String fullIndmtOnly) {
+    public Map<String, Object> calculateIndemnity(Long companyPoid, Long settlementPoid, Long employeePoid, LocalDate settlementDate, Long withoutPayDays) {
 
         try {
-            String sql = "{call PROC_HR_INDEMNITY_DAYS_V2(?,?,?,?,?,?,?,?)}";
+            String sql = "{call PROC_HR_INDEMNITY_DAYS_V2(?,?,?,?,?,?,?)}";
             return jdbcTemplate.execute((ConnectionCallback<Map<String, Object>>) connection -> {
                 CallableStatement stmt = connection.prepareCall(sql);
                 stmt.setLong(1, companyPoid);
                 stmt.setLong(2, settlementPoid);
                 stmt.setLong(3, employeePoid);
-                stmt.setDate(4, Date.valueOf(settlementDate));
-                stmt.setLong(5, withoutPayDays);
+                stmt.setObject(4, settlementDate != null ? Date.valueOf(settlementDate) : null);
+                stmt.setObject(5, withoutPayDays);
                 stmt.registerOutParameter(6, Types.VARCHAR);
                 stmt.registerOutParameter(7, OracleTypes.CURSOR);
-                stmt.setString(8, fullIndmtOnly);
                 stmt.execute();
 
                 Map<String, Object> response = new HashMap<>();
@@ -385,7 +384,7 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
             String sql = "{call PROC_HR_RECURRING_TO_PAYROLL(?,?,?,?,?)}";
             return jdbcTemplate.execute((ConnectionCallback<Map<String, Object>>) connection -> {
                 CallableStatement cs = connection.prepareCall(sql);
-                cs.setLong(1, payrollPoid);
+                cs.setNull(1, Types.NUMERIC); // legacy always passes null for payrollPoid
                 if (settlementPoid != null) {
                     cs.setLong(2, settlementPoid);
                 } else {
@@ -430,12 +429,12 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
                 } else {
                     cs.setNull(2, Types.NUMERIC);
                 }
-                cs.setLong(3, attendTrnsPoid);
-                cs.setLong(4, attend2TrnsPoid);
+                cs.setObject(3, attendTrnsPoid);
+                cs.setObject(4, attend2TrnsPoid);
                 cs.setLong(5, empPoid);
-                cs.setDate(6, Date.valueOf(finalDateOfWork));
-                cs.setDate(7, Date.valueOf(leaveEndDate));
-                cs.setLong(8, loanDedAmt);
+                cs.setObject(6, finalDateOfWork != null ? Date.valueOf(finalDateOfWork) : null);
+                cs.setObject(7, leaveEndDate != null ? Date.valueOf(leaveEndDate) : null);
+                cs.setNull(8, Types.NUMERIC); // legacy always passes null for loanDedAmt
                 cs.registerOutParameter(9, Types.VARCHAR);
                 cs.registerOutParameter(10, OracleTypes.CURSOR);
                 cs.registerOutParameter(11, OracleTypes.CURSOR);

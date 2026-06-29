@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,11 +61,14 @@ class SalaryDetailsMapperTest {
 
     @Test
     void testMapToResponse_Success() {
+        LocalDateTime now = LocalDateTime.now();
         HrEmployeeSalaryMaster entity = HrEmployeeSalaryMaster.builder()
                 .salaryPoid(1L)
                 .employeePoid(100L)
                 .basicSalary(BigDecimal.valueOf(1000))
                 .build();
+        entity.setCreatedBy("admin");
+        entity.setCreatedDate(now);
 
         HrEmployeeSalaryAlwDtl alw = HrEmployeeSalaryAlwDtl.builder()
                 .amount(BigDecimal.valueOf(100))
@@ -81,6 +85,8 @@ class SalaryDetailsMapperTest {
         assertNotNull(response);
         assertEquals(1L, response.getSalaryPoid());
         assertEquals(100L, response.getEmployeePoid());
+        assertEquals("admin", response.getCreatedBy());
+        assertEquals(now, response.getCreatedDate());
         assertEquals(1, response.getAllowances().size());
         assertEquals(1, response.getHistory().size());
     }
