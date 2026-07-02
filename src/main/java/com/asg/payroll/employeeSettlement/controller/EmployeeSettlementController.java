@@ -60,7 +60,7 @@ public class EmployeeSettlementController {
             @Parameter(description = "Transaction POID", required = true, example = "5001") @PathVariable Long id,
             @Valid @RequestBody(required = false) DeleteReasonDto deleteReason) {
         log.info("Delete request for Employee Settlement with id: {}", id);
-        service.deleteEmployeeSettlement(id,deleteReason);
+        service.deleteEmployeeSettlement(id, deleteReason);
         loggingService.createLogSummaryEntry(LogDetailsEnum.DELETED, UserContext.getDocumentId(), id.toString());
         return success("Employee Settlement deleted successfully");
     }
@@ -99,17 +99,14 @@ public class EmployeeSettlementController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/search")
     public ResponseEntity<?> searchEmployeeSettlement(@ParameterObject Pageable pageable,
-                                               @RequestBody(required = false) FilterRequestDto filters,
-                                               @RequestParam(required = false) LocalDate startDate, @RequestParam(required = false) LocalDate endDate) {
-
+                                                      @RequestBody(required = false) FilterRequestDto filters,
+                                                      @RequestParam(required = false) LocalDate startDate,
+                                                      @RequestParam(required = false) LocalDate endDate) {
         log.info("Search request for EmployeeSettlement with docId: {}", UserContext.getDocumentId());
-
         if ((startDate == null && endDate != null) || (startDate != null && endDate == null)) {
             return badRequest("Both startDate and endDate should be specified or both dates should be empty.");
         }
-
-        Map<String, Object> result = service.searchEmployeeSettlement(UserContext.getDocumentId(), filters,
-                pageable, startDate, endDate);
+        Map<String, Object> result = service.searchEmployeeSettlement(UserContext.getDocumentId(), filters, pageable, startDate, endDate);
         return success("Employee Settlement records retrieved successfully", result);
     }
 
@@ -120,8 +117,23 @@ public class EmployeeSettlementController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/eligible-leave-days/{id}")
     public ResponseEntity<?> getEmployeeEligibileleave(@PathVariable Long id) {
-        Object response=service.getEmployeeEligibleLeave(id);
-        return success("Employee Eligible Leave fetched successfully",response);
+        Object response = service.getEmployeeEligibleLeave(id);
+        return success("Employee Eligible Leave fetched successfully", response);
+    }
+
+    @AllowedAction(UserRolesRightsEnum.VIEW)
+    @Operation(summary = "Get Employee Eligible Leave Days by Params", responses = {
+            @ApiResponse(responseCode = "200", description = "Eligible Leave Fetched successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/eligible-leave-days")
+    public ResponseEntity<?> getEmployeeEligibleLeaveByParams(
+            @RequestParam Long companyPoid,
+            @RequestParam Long employeePoid,
+            @RequestParam LocalDate leaveStartDate,
+            @RequestParam(required = false) Long settlementPoid,
+            @RequestParam(required = false) Long leaveAbsentDays) {
+        Object response = service.getEmployeeEligibleLeaveByParams(companyPoid, employeePoid, leaveStartDate, settlementPoid, leaveAbsentDays);
+        return success("Employee Eligible Leave fetched successfully", response);
     }
 
     @AllowedAction(UserRolesRightsEnum.CREATE)
@@ -131,10 +143,9 @@ public class EmployeeSettlementController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/create-bpv/{id}")
     public ResponseEntity<?> createSettlementBpv(@PathVariable Long id, @RequestBody EmployeeSettlementDtl request) {
-        // BPV = CHEQUE payment, paymentDocType must be CHEQUE
         String status = service.createSettlementBpv(
                 id,
-                request.getPaymentDocType(),      // CHEQUE or TRANSFER (legacy: attrPaymentDocType)
+                request.getPaymentDocType(),
                 request.getPaymentBankPoid(),
                 request.getPaymentPayeeName(),
                 request.getPaymentValueDate(),
@@ -150,10 +161,9 @@ public class EmployeeSettlementController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/create-bdv/{id}")
     public ResponseEntity<?> createSettlementBdv(@PathVariable Long id, @RequestBody EmployeeSettlementDtl request) {
-        // BDV = TRANSFER payment, paymentDocType must be TRANSFER
         String status = service.createSettlementBdv(
                 id,
-                request.getPaymentDocType(),      // CHEQUE or TRANSFER (legacy: attrPaymentDocType)
+                request.getPaymentDocType(),
                 request.getPaymentBankPoid(),
                 request.getPaymentPayeeName(),
                 request.getPaymentValueDate(),
@@ -161,7 +171,6 @@ public class EmployeeSettlementController {
         );
         return success(status);
     }
-
 
     @AllowedAction(UserRolesRightsEnum.CREATE)
     @Operation(summary = "Create Settlement JV", responses = {
@@ -171,7 +180,7 @@ public class EmployeeSettlementController {
     @PostMapping("/create-jv/{id}")
     public ResponseEntity<?> createSettlementJV(@PathVariable Long id) {
         String status = service.createSettlementJv(id);
-        return success("Created the Settlement JV Successfully",status);
+        return success("Created the Settlement JV Successfully", status);
     }
 
     @AllowedAction(UserRolesRightsEnum.VIEW)
@@ -181,19 +190,15 @@ public class EmployeeSettlementController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/leave-dates/{employeePoid}")
     public ResponseEntity<?> getEmployeeLeaveDates(@PathVariable String employeePoid) {
-
-        Map<String, String> response =
-                service.getEmployeeLeaveDates(employeePoid);
-
-        return success("Employee Leave Data Fetched Successfully",response);
+        Map<String, String> response = service.getEmployeeLeaveDates(employeePoid);
+        return success("Employee Leave Data Fetched Successfully", response);
     }
 
     @AllowedAction(UserRolesRightsEnum.VIEW)
     @Operation(summary = "Get Employee Leave Request Details", responses = {
-                    @ApiResponse(responseCode = "200", description = "Leave details fetched successfully"),
-                    @ApiResponse(responseCode = "404", description = "Leave request not found"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized")
-            }, security = @SecurityRequirement(name = "bearerAuth"))
+            @ApiResponse(responseCode = "200", description = "Leave details fetched successfully"),
+            @ApiResponse(responseCode = "404", description = "Leave request not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")}, security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("/leave-request-details/{id}")
     public ResponseEntity<?> getLeaveRequestDetails(@PathVariable Long id) {
         Map<String, Object> response = service.getLeaveRequestDetails(id);
@@ -221,9 +226,7 @@ public class EmployeeSettlementController {
             @PathVariable Long payrollPoid,
             @RequestParam(required = false) Long settlementPoid,
             @RequestParam(required = false) Long empPoid,
-            @RequestParam(required = false) LocalDate payrollDate
-    ) {
-
+            @RequestParam(required = false) LocalDate payrollDate) {
         Map<String, Object> response = service.getRecurringToPayroll(payrollPoid, settlementPoid, empPoid, payrollDate);
         return success("Recurring Payroll Data Fetched Successfully", response.get("data"));
     }
@@ -235,9 +238,7 @@ public class EmployeeSettlementController {
             @RequestParam Long settlementPoid,
             @RequestParam Long employeePoid,
             @RequestParam LocalDate settlementDate,
-            @RequestParam(defaultValue = "0") Long withoutPayDays
-    ) {
-
+            @RequestParam(defaultValue = "0") Long withoutPayDays) {
         Map<String, Object> response = service.calculateIndemnity(companyPoid, settlementPoid, employeePoid, settlementDate, withoutPayDays);
         return success("Indemnity Calculated Successfully", response);
     }
@@ -252,8 +253,7 @@ public class EmployeeSettlementController {
             @RequestParam Long empPoid,
             @RequestParam LocalDate finalDateOfWork,
             @RequestParam(required = false) LocalDate leaveEndDate,
-            @RequestParam(defaultValue = "0") Long loanDedAmt
-    ) {
+            @RequestParam(defaultValue = "0") Long loanDedAmt) {
         Map<String, Object> response = service.processLeavePayroll(companyPoid, settlementTranPoid, attendTrnsPoid, attend2TrnsPoid, empPoid, finalDateOfWork, leaveEndDate, loanDedAmt);
         return success("Payroll Processed Successfully", response);
     }
@@ -265,8 +265,7 @@ public class EmployeeSettlementController {
         try {
             byte[] pdf = service.printSettlement(transactionPoid);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -281,8 +280,7 @@ public class EmployeeSettlementController {
         try {
             byte[] pdf = service.printSettlementAmtDetailsForBank(transactionPoid);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -297,13 +295,11 @@ public class EmployeeSettlementController {
         try {
             byte[] pdf = service.printSettlementRetirementLetterForBank(transactionPoid);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=purchase-journal-" + transactionPoid + ".pdf")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
             return internalServerError("Failed to generate PDF: " + e.getMessage());
         }
     }
-
 }

@@ -22,15 +22,17 @@ public interface EmployeeSettlementService {
 
     Object getEmployeeEligibleLeave(Long id);
 
-    String createSettlementBpv(Long id,String paymentMethod, Long paymentBankPoid, String paymentPayeeName, LocalDate paymentValueDate, String paymentPrePrinted);
-    String createSettlementBdv(Long id,String paymentMethod, Long paymentBankPoid, String paymentPayeeName, LocalDate paymentValueDate, String paymentPrePrinted);
+    Object getEmployeeEligibleLeaveByParams(Long companyPoid, Long employeePoid, LocalDate leaveStartDate, Long settlementPoid, Long leaveAbsentDays);
+
+    String createSettlementBpv(Long id, String paymentMethod, Long paymentBankPoid, String paymentPayeeName, LocalDate paymentValueDate, String paymentPrePrinted);
+
+    String createSettlementBdv(Long id, String paymentMethod, Long paymentBankPoid, String paymentPayeeName, LocalDate paymentValueDate, String paymentPrePrinted);
 
     String createSettlementJv(Long id);
 
     String syncHRData();
 
     Map<String, String> getEmployeeLeaveDates(String employeePoid);
-
 
     Map<String, Object> calculateIndemnity(Long companyPoid, Long settlementPoid, Long employeePoid, LocalDate settlementDate, Long withoutPayDays);
 
