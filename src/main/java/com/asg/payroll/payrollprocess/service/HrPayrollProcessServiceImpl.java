@@ -237,8 +237,43 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
                     p -> p,
                     p -> lovDataService.getDetailsByPoidAndLovName(p, EMP_ALOW_DEDUCTION))));
         }
-
+        mapLovFields(response);
         return response;
+    }
+
+    private void mapLovFields(HrPayrollHdrResponse response) {
+        // Map LOV fields for each detail list
+        if (response.getPayrollDetails() != null) {
+            response.getPayrollDetails().forEach(dtl -> {
+                if (dtl.getEmployeePoid() != null) {
+                    dtl.setEmployeeLov(response.getEmployeeLov().get(dtl.getEmployeePoid()));
+                }
+            });
+        }
+        if (response.getVariableDetails() != null) {
+            response.getVariableDetails().forEach(varDtl -> {
+                if (varDtl.getEmployeePoid() != null) {
+                    varDtl.setEmployeeLov(response.getEmployeeLov().get(varDtl.getEmployeePoid()));
+                }
+                if (varDtl.getAllowanceDeductionPoid() != null) {
+                    varDtl.setAllowanceDeductionLov(response.getAllowanceDeductionLov().get(varDtl.getAllowanceDeductionPoid()));
+                }
+            });
+        }
+        if (response.getProvisionDetails() != null) {
+            response.getProvisionDetails().forEach(provDtl -> {
+                if (provDtl.getEmployeePoid() != null) {
+                    provDtl.setEmployeeLov(response.getEmployeeLov().get(provDtl.getEmployeePoid()));
+                }
+            });
+        }
+        if (response.getRecurringDetails() != null) {
+            response.getRecurringDetails().forEach(recurDtl -> {
+                if (recurDtl.getEmployeePoid() != null) {
+                    recurDtl.setEmployeeLov(response.getEmployeeLov().get(recurDtl.getEmployeePoid()));
+                }
+            });
+        }
     }
 
     // ─── CRUD ────────────────────────────────────────────────────────────────

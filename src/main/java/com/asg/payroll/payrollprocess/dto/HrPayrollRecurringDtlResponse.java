@@ -4,6 +4,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+import com.asg.common.lib.dto.LovGetListDto;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,6 +14,7 @@ public class HrPayrollRecurringDtlResponse {
 
     private Long detRowId;
     private Long employeePoid;
+    private LovGetListDto employeeLov;
     private String employeeName;
     private String refNo;
     private BigDecimal balAmt;
