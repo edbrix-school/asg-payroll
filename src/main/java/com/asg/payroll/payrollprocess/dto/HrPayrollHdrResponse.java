@@ -35,7 +35,11 @@ public class HrPayrollHdrResponse {
     private String verified;
     private String approved;
     private String payrollReleased;
-    
+
+    // Edit permission driven by PROC_HR_PAYROLL_VALIDATE (BEFORE_EDIT)
+    private Boolean allowEdit;
+    private String infoMessage;
+
     private List<HrPayrollDtlResponse> payrollDetails;
     private List<HrPayrollVarAlwdedDtlResponse> variableDetails;
     private List<HrPayrollProvisionDtlResponse> provisionDetails;
