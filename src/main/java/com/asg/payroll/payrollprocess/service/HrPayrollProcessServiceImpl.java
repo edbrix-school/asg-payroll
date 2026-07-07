@@ -238,6 +238,16 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
                     p -> lovDataService.getDetailsByPoidAndLovName(p, EMP_ALOW_DEDUCTION))));
         }
         mapLovFields(response);
+
+        // Determine whether this payroll can still be edited (BEFORE_EDIT check).
+        // We surface the proc message instead of throwing, so the UI can enable/disable
+        // editing and show the reason.
+        String editStatus = runValidateProc(
+                hdr.getTransactionPoid(), hdr.getAttendTranPoid(), hdr.getPayrollMonth(), BEFORE_EDIT);
+        boolean allowEdit = editStatus == null || !editStatus.toUpperCase().contains(ERROR);
+        response.setAllowEdit(allowEdit);
+        response.setInfoMessage(editStatus);
+
         return response;
     }
 
@@ -671,6 +681,17 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
     }
 
     private void callValidateProc(Long docPoid, Long attendTranPoid, LocalDate payrollDate, String actionType) {
+        String status = runValidateProc(docPoid, attendTranPoid, payrollDate, actionType);
+        if (status != null && status.toUpperCase().contains(ERROR)) {
+            throw new ValidationException(status);
+        }
+    }
+
+    /**
+     * Runs PROC_HR_PAYROLL_VALIDATE and returns the raw P_STATUS message from the proc
+     * without throwing, so callers (e.g. the GET response) can decide how to react.
+     */
+    private String runValidateProc(Long docPoid, Long attendTranPoid, LocalDate payrollDate, String actionType) {
         Map<String, Object> result = execute(
                 "PROC_HR_PAYROLL_VALIDATE",
                 List.of(
@@ -687,10 +708,7 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
                         P_VALIDATE_ACTION, actionType
                 )
         );
-        String status = (String) result.get(P_STATUS);
-        if (status != null && status.toUpperCase().contains(ERROR)) {
-            throw new ValidationException(status);
-        }
+        return (String) result.get(P_STATUS);
     }
 
     private void validateActionRequest(Long transactionPoid, PayrollActionRequest request) {
@@ -1126,6 +1144,10 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
             HrPayrollVarAlwdedDtlResponse dto = new HrPayrollVarAlwdedDtlResponse();
             dto.setDetRowId(entity.getDetRowId());
             dto.setEmployeePoid(entity.getEmployeePoid());
+            if (entity.getEmployeePoid() != null) {
+                dto.setEmployeeLov(lovDataService.getDetailsByPoidAndLovName(
+                        entity.getEmployeePoid(), EMPLOYEE_NAME));
+            }
             dto.setAllowanceDeductionPoid(entity.getAllowanceDeductionPoid());
             dto.setAmount(entity.getAmount());
             dto.setRemarks(entity.getRemarks());
