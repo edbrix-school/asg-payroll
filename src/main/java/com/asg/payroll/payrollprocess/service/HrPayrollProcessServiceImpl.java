@@ -227,6 +227,12 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
             response.setAttendancePeriodLov(lovDataService.getDetailsByPoidAndLovName(
                     hdr.getAttendTranPoid(), HR_ATTENDANCE_POID));
         }
+        if(null != response.getProvisionDetails()) {
+            response.getProvisionDetails().stream().map(HrPayrollProvisionDtlResponse::getEmployeePoid).filter(Objects::nonNull).forEach(empPoids::add);
+        }
+        if(null != response.getPayrollDetails()) {
+            response.getPayrollDetails().stream().map(HrPayrollDtlResponse::getEmployeePoid).filter(Objects::nonNull).forEach(empPoids::add);
+        }
         if (!empPoids.isEmpty()) {
             response.setEmployeeLov(empPoids.stream().collect(Collectors.toMap(
                     p -> p,
