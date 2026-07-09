@@ -169,7 +169,7 @@ class HrPayrollProcessServiceImplTest {
 
             assertNotNull(result.getEmployeeLov());
             assertFalse(result.getEmployeeLov().isEmpty());
-            verify(lovDataService, times(2)).getDetailsByPoidAndLovName(anyLong(), eq("EMPLOYEE_NAME"));
+            verify(lovDataService, times(3)).getDetailsByPoidAndLovName(anyLong(), eq("EMPLOYEE_NAME"));
         }
     }
 
@@ -844,7 +844,11 @@ class HrPayrollProcessServiceImplTest {
         return mockConstruction(SimpleJdbcCall.class, (mock, ctx) -> {
             when(mock.withProcedureName(anyString())).thenReturn(mock);
             when(mock.declareParameters(any(org.springframework.jdbc.core.SqlParameter[].class))).thenReturn(mock);
-            when(mock.execute(anyMap())).thenReturn(Map.of("P_STATUS", "SUCCESS"));
+            Map<String, Object> result = new HashMap<>();
+            result.put("P_STATUS", "SUCCESS");
+            result.put("VARIABLES_REC", new ArrayList<>());
+            result.put("ATT_REC", new ArrayList<>());
+            when(mock.execute(anyMap())).thenReturn(result);
         });
     }
 
@@ -879,7 +883,11 @@ class HrPayrollProcessServiceImplTest {
         return mockConstruction(SimpleJdbcCall.class, (mock, ctx) -> {
             when(mock.withProcedureName(anyString())).thenReturn(mock);
             when(mock.declareParameters(any(org.springframework.jdbc.core.SqlParameter[].class))).thenReturn(mock);
-            when(mock.execute(anyMap())).thenReturn(Map.of("P_STATUS", status));
+            Map<String, Object> result = new HashMap<>();
+            result.put("P_STATUS", status);
+            result.put("VARIABLES_REC", new ArrayList<>());
+            result.put("ATT_REC", new ArrayList<>());
+            when(mock.execute(anyMap())).thenReturn(result);
         });
     }
 }

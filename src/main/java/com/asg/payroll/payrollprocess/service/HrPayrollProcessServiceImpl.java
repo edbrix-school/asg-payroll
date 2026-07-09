@@ -96,6 +96,7 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
     private static final String ERROR = "ERROR";
     private static final String WARNING = "WARNING";
     private static final String EMPLOYEE_POID = "EMPLOYEE_POID";
+    private static final String ALLOWANCE_DEDUCTION_POID = "ALLOWANCE_DEDUCTION_POID";
     private static final String MONTHLY_WOKING_DAYS = "MONTHLY_WOKING_DAYS";
     private static final String ATTENDANCE_FROM = "ATTENDANCE_FROM";
     private static final String ATTENDANCE_TO = "ATTENDANCE_TO";
@@ -229,6 +230,12 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         if (hdr.getAttendTranPoid() != null) {
             response.setAttendancePeriodLov(lovDataService.getDetailsByPoidAndLovName(
                     hdr.getAttendTranPoid(), HR_ATTENDANCE_POID));
+        }
+        if(null != response.getProvisionDetails()) {
+            response.getProvisionDetails().stream().map(HrPayrollProvisionDtlResponse::getEmployeePoid).filter(Objects::nonNull).forEach(empPoids::add);
+        }
+        if(null != response.getPayrollDetails()) {
+            response.getPayrollDetails().stream().map(HrPayrollDtlResponse::getEmployeePoid).filter(Objects::nonNull).forEach(empPoids::add);
         }
         if (!empPoids.isEmpty()) {
             response.setEmployeeLov(empPoids.stream().collect(Collectors.toMap(
@@ -439,6 +446,44 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> variables = (List<Map<String, Object>>) result.get(VARIABLES_REC);
+
+        Set<Long> empPoids = variables.stream()
+                .map(map -> map.get(EMPLOYEE_POID))
+                .filter(Objects::nonNull)
+                .map(value -> ((Number) value).longValue())
+                .collect(Collectors.toSet());
+
+        Set<Long> alwdedPoids = variables.stream()
+                .map(map -> map.get(ALLOWANCE_DEDUCTION_POID))
+                .filter(Objects::nonNull)
+                .map(value -> ((Number) value).longValue())
+                .collect(Collectors.toSet());
+
+        final Map<Long, LovGetListDto> employeeLov = new HashMap<>();
+        if (!empPoids.isEmpty()) {
+            employeeLov.putAll(empPoids.stream().collect(Collectors.toMap(
+                    p -> p,
+                    p -> lovDataService.getDetailsByPoidAndLovName(p, EMPLOYEE_NAME))));
+        }
+
+        final Map<Long, LovGetListDto> allowanceDeductionLov = new HashMap<>();
+        if (!alwdedPoids.isEmpty()) {
+            allowanceDeductionLov.putAll(alwdedPoids.stream().collect(Collectors.toMap(
+                    p -> p,
+                    p -> lovDataService.getDetailsByPoidAndLovName(p, EMP_ALOW_DEDUCTION))));
+        }
+
+        variables.forEach(row -> {
+            Object empPoidValue = row.get(EMPLOYEE_POID);
+            if (empPoidValue != null) {
+                row.put("employeeLov", employeeLov.get(((Number) empPoidValue).longValue()));
+            }
+            Object alwdedPoidValue = row.get(ALLOWANCE_DEDUCTION_POID);
+            if (alwdedPoidValue != null) {
+                row.put("allowanceDeductionLov", allowanceDeductionLov.get(((Number) alwdedPoidValue).longValue()));
+            }
+        });
+
         return new VariableLoadResponse((String) result.get(P_STATUS), variables);
     }
 
@@ -457,6 +502,30 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         });
         loggingService.createLogSummaryEntry(UserContext.getDocumentId(), transactionPoid.toString(),
                 "Loans and Advances / Recurring Deductions refreshed...");
+        
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> loansAdvances = (List<Map<String, Object>>) result.get(ATT_REC);
+
+        Set<Long> empPoids = loansAdvances.stream()
+                .map(map -> map.get(EMPLOYEE_POID))
+                .filter(Objects::nonNull)
+                .map(value -> ((Number) value).longValue())
+                .collect(Collectors.toSet());
+
+        final Map<Long, LovGetListDto> employeeLov = new HashMap<>();
+        if (!empPoids.isEmpty()) {
+            employeeLov.putAll(empPoids.stream().collect(Collectors.toMap(
+                    p -> p,
+                    p -> lovDataService.getDetailsByPoidAndLovName(p, EMPLOYEE_NAME))));
+        }
+
+        loansAdvances.forEach(row -> {
+            Object poidValue = row.get(EMPLOYEE_POID);
+            if (poidValue != null) {
+                Long employeePoid = ((Number) poidValue).longValue();
+                row.put("employeeLov", employeeLov.get(employeePoid));
+            }
+        });
 
         return new LoansAdvancesResponse(loansAdvances);
     }
