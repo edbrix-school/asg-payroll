@@ -503,9 +503,6 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         loggingService.createLogSummaryEntry(UserContext.getDocumentId(), transactionPoid.toString(),
                 "Loans and Advances / Recurring Deductions refreshed...");
         
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> loansAdvances = (List<Map<String, Object>>) result.get(ATT_REC);
-
         Set<Long> empPoids = loansAdvances.stream()
                 .map(map -> map.get(EMPLOYEE_POID))
                 .filter(Objects::nonNull)
