@@ -1166,10 +1166,6 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
             HrPayrollVarAlwdedDtlResponse dto = new HrPayrollVarAlwdedDtlResponse();
             dto.setDetRowId(entity.getDetRowId());
             dto.setEmployeePoid(entity.getEmployeePoid());
-            if (entity.getEmployeePoid() != null) {
-                dto.setEmployeeLov(lovDataService.getDetailsByPoidAndLovName(
-                        entity.getEmployeePoid(), EMPLOYEE_NAME));
-            }
             dto.setAllowanceDeductionPoid(entity.getAllowanceDeductionPoid());
             dto.setAmount(entity.getAmount());
             dto.setRemarks(entity.getRemarks());

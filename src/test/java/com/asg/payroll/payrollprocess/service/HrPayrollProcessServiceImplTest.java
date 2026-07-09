@@ -113,10 +113,13 @@ class HrPayrollProcessServiceImplTest {
         when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of());
         when(provisionDtlRepository.findByTransactionPoid(1L)).thenReturn(List.of());
 
-        HrPayrollHdrResponse result = service.getPayrollById(1L);
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp()) {
+            HrPayrollHdrResponse result = service.getPayrollById(1L);
 
-        assertNotNull(result);
-        assertEquals(mockHdr.getTransactionPoid(), result.getTransactionPoid());
+            assertNotNull(result);
+            assertEquals(mockHdr.getTransactionPoid(), result.getTransactionPoid());
+            assertTrue(result.getAllowEdit());
+        }
     }
 
     @Test
@@ -137,10 +140,12 @@ class HrPayrollProcessServiceImplTest {
         when(lovDataService.getDetailsByPoidAndLovName(10L, "HR_ATTENDANCE_POID"))
                 .thenReturn(mock(LovGetListDto.class));
 
-        HrPayrollHdrResponse result = service.getPayrollById(1L);
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp()) {
+            HrPayrollHdrResponse result = service.getPayrollById(1L);
 
-        assertNotNull(result.getAttendancePeriodLov());
-        verify(lovDataService).getDetailsByPoidAndLovName(10L, "HR_ATTENDANCE_POID");
+            assertNotNull(result.getAttendancePeriodLov());
+            verify(lovDataService).getDetailsByPoidAndLovName(10L, "HR_ATTENDANCE_POID");
+        }
     }
 
     @Test
@@ -159,11 +164,13 @@ class HrPayrollProcessServiceImplTest {
         when(lovDataService.getDetailsByPoidAndLovName(anyLong(), eq("EMPLOYEE_NAME")))
                 .thenReturn(mock(LovGetListDto.class));
 
-        HrPayrollHdrResponse result = service.getPayrollById(1L);
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp()) {
+            HrPayrollHdrResponse result = service.getPayrollById(1L);
 
-        assertNotNull(result.getEmployeeLov());
-        assertFalse(result.getEmployeeLov().isEmpty());
-        verify(lovDataService, times(2)).getDetailsByPoidAndLovName(anyLong(), eq("EMPLOYEE_NAME"));
+            assertNotNull(result.getEmployeeLov());
+            assertFalse(result.getEmployeeLov().isEmpty());
+            verify(lovDataService, times(2)).getDetailsByPoidAndLovName(anyLong(), eq("EMPLOYEE_NAME"));
+        }
     }
 
     @Test
@@ -180,11 +187,13 @@ class HrPayrollProcessServiceImplTest {
         when(lovDataService.getDetailsByPoidAndLovName(50L, "EMP_ALOW_DEDUCTION"))
                 .thenReturn(mock(LovGetListDto.class));
 
-        HrPayrollHdrResponse result = service.getPayrollById(1L);
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp()) {
+            HrPayrollHdrResponse result = service.getPayrollById(1L);
 
-        assertNotNull(result.getAllowanceDeductionLov());
-        assertFalse(result.getAllowanceDeductionLov().isEmpty());
-        verify(lovDataService).getDetailsByPoidAndLovName(50L, "EMP_ALOW_DEDUCTION");
+            assertNotNull(result.getAllowanceDeductionLov());
+            assertFalse(result.getAllowanceDeductionLov().isEmpty());
+            verify(lovDataService).getDetailsByPoidAndLovName(50L, "EMP_ALOW_DEDUCTION");
+        }
     }
 
     // ── createPayroll ─────────────────────────────────────────────────────────
