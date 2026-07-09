@@ -36,7 +36,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import org.springframework.jdbc.core.ConnectionCallback;
+
 import javax.sql.DataSource;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -110,6 +118,7 @@ class HrPayrollProcessServiceImplTest {
 
             assertNotNull(result);
             assertEquals(mockHdr.getTransactionPoid(), result.getTransactionPoid());
+            assertTrue(result.getAllowEdit());
         }
     }
 
@@ -521,44 +530,93 @@ class HrPayrollProcessServiceImplTest {
     // ── loadVariables ─────────────────────────────────────────────────────────
 
     @Test
-    void loadVariables_Success() {
-        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
-             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+    void loadVariables_ReturnsCursorRows() throws SQLException {
+        ResultSet cursor = cursorWith(Map.of("EMPLOYEE_POID", 100L, "AMOUNT", 250L));
+        CallableStatement cs = mock(CallableStatement.class);
+        when(cs.getObject(5)).thenReturn(cursor);
+        when(cs.getString(6)).thenReturn("SUCCESS");
+        stubConnectionCallback(cs);
+
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            assertDoesNotThrow(() -> service.loadVariables(1L, 2L, 100L, "2024-01-31"));
+            VariableLoadResponse response = service.loadVariables(1L, 2L, 100L, "2024-01-31");
+
+            assertEquals("SUCCESS", response.getStatus());
+            assertEquals(1, response.getVariables().size());
+            assertEquals(100L, response.getVariables().get(0).get("EMPLOYEE_POID"));
+            assertEquals(250L, response.getVariables().get(0).get("AMOUNT"));
         }
     }
 
     @Test
-    void loadVariables_NullPayrollMonth_ThrowsValidationException() {
-        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
-             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+    void loadVariables_BindsParametersPositionally() throws SQLException {
+        CallableStatement cs = mock(CallableStatement.class);
+        when(cs.getObject(5)).thenReturn(null);
+        stubConnectionCallback(cs);
+
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
-            
-            assertDoesNotThrow(() -> service.loadVariables(1L, 2L, 100L, null));
+
+            service.loadVariables(1L, 2L, 100L, "2024-01-31");
+
+            verify(cs).setLong(1, 1L);
+            verify(cs).setLong(2, 2L);
+            verify(cs).setLong(3, 100L);
+            verify(cs).setDate(4, java.sql.Date.valueOf(LocalDate.of(2024, 1, 31)));
+            verify(cs).registerOutParameter(5, oracle.jdbc.OracleTypes.CURSOR);
+            verify(cs).registerOutParameter(6, Types.VARCHAR);
+        }
+    }
+
+    @Test
+    void loadVariables_NullPayrollMonth_BindsNullDate() throws SQLException {
+        CallableStatement cs = mock(CallableStatement.class);
+        when(cs.getObject(5)).thenReturn(null);
+        stubConnectionCallback(cs);
+
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+
+            VariableLoadResponse response = service.loadVariables(1L, 2L, 100L, null);
+
+            verify(cs).setNull(4, Types.DATE);
+            assertTrue(response.getVariables().isEmpty());
         }
     }
 
     // ── loadLoansAdvances ─────────────────────────────────────────────────────
 
     @Test
-    void loadLoansAdvances_Success() {
-        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
-             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+    void loadLoansAdvances_ReturnsCursorRows() throws SQLException {
+        ResultSet cursor = cursorWith(Map.of("EMPLOYEE_POID", 100L, "REF_NO", "L-1"));
+        CallableStatement cs = mock(CallableStatement.class);
+        when(cs.getObject(5)).thenReturn(cursor);
+        stubConnectionCallback(cs);
+
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            assertDoesNotThrow(() -> service.loadLoansAdvances(1L, 2L, 100L, LocalDate.of(2024, 1, 31)));
+            LoansAdvancesResponse response = service.loadLoansAdvances(1L, 2L, 100L, LocalDate.of(2024, 1, 31));
+
+            assertEquals(1, response.getLoansAdvances().size());
+            assertEquals("L-1", response.getLoansAdvances().get(0).get("REF_NO"));
         }
     }
 
     @Test
-    void loadLoansAdvances_NullPayrollMonth_ThrowsValidationException() {
-        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
-             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+    void loadLoansAdvances_NullPayrollMonth_BindsNullDate() throws SQLException {
+        CallableStatement cs = mock(CallableStatement.class);
+        when(cs.getObject(5)).thenReturn(null);
+        stubConnectionCallback(cs);
+
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
-            
-            assertDoesNotThrow(() -> service.loadLoansAdvances(1L, 2L, 100L, null));
+
+            LoansAdvancesResponse response = service.loadLoansAdvances(1L, 2L, 100L, null);
+
+            verify(cs).setNull(4, Types.DATE);
+            assertTrue(response.getLoansAdvances().isEmpty());
         }
     }
 
@@ -792,6 +850,33 @@ class HrPayrollProcessServiceImplTest {
             result.put("ATT_REC", new ArrayList<>());
             when(mock.execute(anyMap())).thenReturn(result);
         });
+    }
+
+    /** Runs the service's ConnectionCallback against a connection that hands back the given statement. */
+    @SuppressWarnings("unchecked")
+    private void stubConnectionCallback(CallableStatement cs) throws SQLException {
+        Connection connection = mock(Connection.class);
+        when(connection.prepareCall(anyString())).thenReturn(cs);
+        when(jdbcTemplate.execute(any(ConnectionCallback.class)))
+                .thenAnswer(inv -> ((ConnectionCallback<Object>) inv.getArgument(0)).doInConnection(connection));
+    }
+
+    /** A single-row REF CURSOR as ColumnMapRowMapper reads it. */
+    private ResultSet cursorWith(Map<String, Object> row) throws SQLException {
+        List<String> columns = new ArrayList<>(row.keySet());
+
+        ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+        when(metaData.getColumnCount()).thenReturn(columns.size());
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getMetaData()).thenReturn(metaData);
+        when(rs.next()).thenReturn(true, false);
+        for (int i = 0; i < columns.size(); i++) {
+            String column = columns.get(i);
+            when(metaData.getColumnLabel(i + 1)).thenReturn(column);
+            when(metaData.getColumnName(i + 1)).thenReturn(column);
+            when(rs.getObject(i + 1)).thenReturn(row.get(column));
+        }
+        return rs;
     }
 
     private MockedConstruction<SimpleJdbcCall> mockSpWithStatus(String status) {

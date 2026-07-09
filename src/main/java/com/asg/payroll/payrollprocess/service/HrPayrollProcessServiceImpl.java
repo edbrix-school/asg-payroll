@@ -32,7 +32,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
@@ -41,6 +44,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -77,10 +83,7 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
     private static final String P_SUPPRESS_ARREARS_VALIDATION = "P_SUPPRESS_ARREARS_VALIDATION";
     private static final String P_POST_JV = "P_POST_JV";
     private static final String P_PAYROLL_POID = "P_PAYROLL_POID";
-    private static final String P_SETTLEMENT_POID = "P_SETTLEMENT_POID";
-    private static final String P_EMP_POID = "P_EMP_POID";
     private static final String VARIABLES_REC = "VARIABLES_REC";
-    private static final String ATT_REC = "ATT_REC";
     private static final String P_BANK_CASH = "P_BANK_CASH";
     private static final String P_TRNNO = "P_TRNNO";
     private static final String P_APIFILE = "p_apifile";
@@ -421,23 +424,24 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
 
     @Override
     public VariableLoadResponse loadVariables(Long transactionPoid, Long settlementPoid, Long empPoid, String payrollDate) {
-        Map<String, Object> result = execute(
-                "PROC_HR_VARIABLE_TO_PAYROLL",
-                List.of(
-                        new SqlParameter(P_PAYROLL_POID, Types.NUMERIC),
-                        new SqlParameter(P_SETTLEMENT_POID, Types.NUMERIC),
-                        new SqlParameter(P_EMP_POID, Types.NUMERIC),
-                        new SqlParameter(P_PAYROLL_DATE, Types.DATE),
-                        new SqlOutParameter(VARIABLES_REC, OracleTypes.CURSOR),
-                        new SqlOutParameter(P_STATUS, Types.VARCHAR)
-                ),
-                params(
-                        P_PAYROLL_POID, transactionPoid,
-                        P_SETTLEMENT_POID, settlementPoid,
-                        P_EMP_POID, empPoid,
-                        P_PAYROLL_DATE, payrollDate
-                )
-        );
+        LocalDate parsedDate = (payrollDate == null || payrollDate.isBlank()) ? null : LocalDate.parse(payrollDate);
+
+        Map<String, Object> result = jdbcTemplate.execute((ConnectionCallback<Map<String, Object>>) connection -> {
+            try (CallableStatement cs = connection.prepareCall("{call PROC_HR_VARIABLE_TO_PAYROLL(?,?,?,?,?,?)}")) {
+                setNumeric(cs, 1, transactionPoid);
+                setNumeric(cs, 2, settlementPoid);
+                setNumeric(cs, 3, empPoid);
+                setDate(cs, 4, parsedDate);
+                cs.registerOutParameter(5, OracleTypes.CURSOR);
+                cs.registerOutParameter(6, Types.VARCHAR);
+                cs.execute();
+
+                Map<String, Object> out = new HashMap<>();
+                out.put(VARIABLES_REC, extractCursor(cs.getObject(5)));
+                out.put(P_STATUS, cs.getString(6));
+                return out;
+            }
+        });
         logProcedureResult(transactionPoid, result, "Payroll variables loaded...", null);
 
         @SuppressWarnings("unchecked")
@@ -485,28 +489,20 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
 
     @Override
     public LoansAdvancesResponse loadLoansAdvances(Long transactionPoid, Long settlementPoid, Long empPoid, LocalDate payrollDate) {
-        Map<String, Object> result = execute(
-                "PROC_HR_RECURRING_TO_PAYROLL",
-                List.of(
-                        new SqlParameter(P_PAYROLL_POID, Types.NUMERIC),
-                        new SqlParameter(P_SETTLEMENT_POID, Types.NUMERIC),
-                        new SqlParameter(P_EMP_POID, Types.NUMERIC),
-                        new SqlParameter(P_PAYROLL_DATE, Types.DATE),
-                        new SqlOutParameter(ATT_REC, OracleTypes.CURSOR)
-                ),
-                params(
-                        P_PAYROLL_POID, transactionPoid,
-                        P_SETTLEMENT_POID, settlementPoid,
-                        P_EMP_POID, empPoid,
-                        P_PAYROLL_DATE, payrollDate
-                )
-        );
+        List<Map<String, Object>> loansAdvances = jdbcTemplate.execute((ConnectionCallback<List<Map<String, Object>>>) connection -> {
+            try (CallableStatement cs = connection.prepareCall("{call PROC_HR_RECURRING_TO_PAYROLL(?,?,?,?,?)}")) {
+                setNumeric(cs, 1, transactionPoid);
+                setNumeric(cs, 2, settlementPoid);
+                setNumeric(cs, 3, empPoid);
+                setDate(cs, 4, payrollDate);
+                cs.registerOutParameter(5, OracleTypes.CURSOR);
+                cs.execute();
+                return extractCursor(cs.getObject(5));
+            }
+        });
         loggingService.createLogSummaryEntry(UserContext.getDocumentId(), transactionPoid.toString(),
                 "Loans and Advances / Recurring Deductions refreshed...");
         
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> loansAdvances = (List<Map<String, Object>>) result.get(ATT_REC);
-
         Set<Long> empPoids = loansAdvances.stream()
                 .map(map -> map.get(EMPLOYEE_POID))
                 .filter(Objects::nonNull)
@@ -931,6 +927,31 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
             out.put(String.valueOf(values[i]), values[i + 1]);
         }
         return out;
+    }
+
+    private void setNumeric(CallableStatement cs, int index, Long value) throws SQLException {
+        if (value == null) {
+            cs.setNull(index, Types.NUMERIC);
+        } else {
+            cs.setLong(index, value);
+        }
+    }
+
+    private void setDate(CallableStatement cs, int index, LocalDate value) throws SQLException {
+        if (value == null) {
+            cs.setNull(index, Types.DATE);
+        } else {
+            cs.setDate(index, java.sql.Date.valueOf(value));
+        }
+    }
+
+    private List<Map<String, Object>> extractCursor(Object cursor) throws SQLException {
+        if (!(cursor instanceof ResultSet rs)) {
+            return List.of();
+        }
+        try (ResultSet open = rs) {
+            return new RowMapperResultSetExtractor<>(new ColumnMapRowMapper()).extractData(open);
+        }
     }
 
     // ─── ADDITIONAL VALIDATIONS ──────────────────────────────────────────────
