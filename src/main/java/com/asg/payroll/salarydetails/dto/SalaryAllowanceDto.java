@@ -15,7 +15,7 @@ public class SalaryAllowanceDto {
     private Long allowanceDeductionPoid;
     private String allowanceName;
     private BigDecimal amount;
-    private Long active;
+    private String active;
     private String formula;
     private String remarks;
     private ActionType actionType;

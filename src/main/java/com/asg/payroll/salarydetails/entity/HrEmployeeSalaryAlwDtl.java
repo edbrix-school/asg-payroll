@@ -31,7 +31,7 @@ public class HrEmployeeSalaryAlwDtl extends BaseEntity {
     private BigDecimal amount;
 
     @Column(name = "ACTIVE", length =1)
-    private Long active;
+    private String active;
 
     @Column(name = "FORMULA", length = 50)
     private String formula;

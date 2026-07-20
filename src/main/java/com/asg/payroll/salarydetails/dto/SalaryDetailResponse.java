@@ -31,7 +31,8 @@ public class SalaryDetailResponse {
     private LocalDate indemnityDueFrom;
     
     private BigDecimal basicSalary;
-    private BigDecimal registeredSalary; // Gosi Salary
+    private BigDecimal registeredSalary;
+    private BigDecimal gosiSalary; // alias for registeredSalary used by FE
     private String gosiType;
     
     private BigDecimal grossSalary;

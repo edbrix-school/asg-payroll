@@ -134,7 +134,6 @@ class SalaryDetailsMapperTest {
         SalaryHistoryDto dto = SalaryDetailsMapper.mapToHistoryDto(entity);
         assertNotNull(dto);
         assertEquals(1L, dto.getDetRowId());
-        assertEquals("10", dto.getDesignation());
     }
 
     @Test

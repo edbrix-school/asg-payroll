@@ -459,19 +459,13 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
                 .map(value -> ((Number) value).longValue())
                 .collect(Collectors.toSet());
 
+        // Collectors.toMap rejects null values; the LOV lookup may return null
+        // for a poid with no master entry, so populate the map null-tolerantly.
         final Map<Long, LovGetListDto> employeeLov = new HashMap<>();
-        if (!empPoids.isEmpty()) {
-            employeeLov.putAll(empPoids.stream().collect(Collectors.toMap(
-                    p -> p,
-                    p -> lovDataService.getDetailsByPoidAndLovName(p, EMPLOYEE_NAME))));
-        }
+        empPoids.forEach(p -> employeeLov.put(p, lovDataService.getDetailsByPoidAndLovName(p, EMPLOYEE_NAME)));
 
         final Map<Long, LovGetListDto> allowanceDeductionLov = new HashMap<>();
-        if (!alwdedPoids.isEmpty()) {
-            allowanceDeductionLov.putAll(alwdedPoids.stream().collect(Collectors.toMap(
-                    p -> p,
-                    p -> lovDataService.getDetailsByPoidAndLovName(p, EMP_ALOW_DEDUCTION))));
-        }
+        alwdedPoids.forEach(p -> allowanceDeductionLov.put(p, lovDataService.getDetailsByPoidAndLovName(p, EMP_ALOW_DEDUCTION)));
 
         variables.forEach(row -> {
             Object empPoidValue = row.get(EMPLOYEE_POID);
@@ -509,12 +503,10 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
                 .map(value -> ((Number) value).longValue())
                 .collect(Collectors.toSet());
 
+        // Collectors.toMap rejects null values; the LOV lookup may return null
+        // for a poid with no master entry, so populate the map null-tolerantly.
         final Map<Long, LovGetListDto> employeeLov = new HashMap<>();
-        if (!empPoids.isEmpty()) {
-            employeeLov.putAll(empPoids.stream().collect(Collectors.toMap(
-                    p -> p,
-                    p -> lovDataService.getDetailsByPoidAndLovName(p, EMPLOYEE_NAME))));
-        }
+        empPoids.forEach(p -> employeeLov.put(p, lovDataService.getDetailsByPoidAndLovName(p, EMPLOYEE_NAME)));
 
         loansAdvances.forEach(row -> {
             Object poidValue = row.get(EMPLOYEE_POID);
