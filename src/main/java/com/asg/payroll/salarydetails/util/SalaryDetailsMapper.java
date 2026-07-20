@@ -109,7 +109,6 @@ public class SalaryDetailsMapper {
                 .hra(entity.getHraAlw())
                 .transport(entity.getTaAlw())
                 .gross(entity.getGrossPay())
-                .designation(String.valueOf(entity.getDesignationPoid())) // Name needs to be fetched or already present if we change DTO
                 .noOfTickets(entity.getNoOfTickets())
                 .ticketPeriod(entity.getTicketPeriod())
                 .remarks(entity.getRemarks())

@@ -4,13 +4,15 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.StoredProcedureQuery;
+import java.sql.ResultSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Repository
 @Slf4j
@@ -23,15 +25,16 @@ public class HrEmployeeSalaryProcRepositoryImpl implements HrEmployeeSalaryProcR
     public Map<String, Object> getEmployeeDetails(Long employeePoid) {
         try {
             StoredProcedureQuery query = entityManager.createStoredProcedureQuery("PROC_HR_GET_EMP_DETAILS");
-            query.registerStoredProcedureParameter("P_EMPLOYEE_POID", Long.class, ParameterMode.IN);
-            query.registerStoredProcedureParameter("OUTDATA", void.class, ParameterMode.REF_CURSOR);
-            query.registerStoredProcedureParameter("P_STATUS", String.class, ParameterMode.OUT);
+            // Use positional parameters matching proc signature: (P_EMPLOYEE_POID IN, OUTDATA OUT SYS_REFCURSOR, P_STATUS OUT)
+            query.registerStoredProcedureParameter(1, Long.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter(2, ResultSet.class, ParameterMode.REF_CURSOR);
+            query.registerStoredProcedureParameter(3, String.class, ParameterMode.OUT);
 
-            query.setParameter("P_EMPLOYEE_POID", employeePoid);
+            query.setParameter(1, employeePoid);
 
             query.execute();
 
-            String status = (String) query.getOutputParameterValue("P_STATUS");
+            String status = (String) query.getOutputParameterValue(3);
             if (!"SUCCESS".equalsIgnoreCase(status)) {
                 log.error("PROC_HR_GET_EMP_DETAILS failed with status: {}", status);
                 return null;
@@ -53,6 +56,35 @@ public class HrEmployeeSalaryProcRepositoryImpl implements HrEmployeeSalaryProcR
             log.error("Error executing PROC_HR_GET_EMP_DETAILS: {}", e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public Map<Long, String> getAllowanceDeductionTypes(Collection<Long> poids) {
+        if (poids == null || poids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = entityManager.createNativeQuery(
+                            "SELECT ALLOWACE_DEDUCTION_POID, TYPE FROM HR_ALLOWANCE_DEDUCTION_MASTER "
+                                    + "WHERE ALLOWACE_DEDUCTION_POID IN (:poids)")
+                    .setParameter("poids", poids)
+                    .getResultList();
+
+            Map<Long, String> typeByPoid = new HashMap<>();
+            for (Object[] row : rows) {
+                if (row[0] == null) {
+                    continue;
+                }
+                Long poid = ((Number) row[0]).longValue();
+                String type = row[1] != null ? row[1].toString() : null;
+                typeByPoid.put(poid, type);
+            }
+            return typeByPoid;
+        } catch (Exception e) {
+            log.error("Error fetching allowance/deduction types: {}", e.getMessage());
+            return Collections.emptyMap();
+        }
     }
 
     @Override

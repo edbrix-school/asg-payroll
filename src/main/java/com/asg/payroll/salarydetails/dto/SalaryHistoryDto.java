@@ -1,5 +1,6 @@
 package com.asg.payroll.salarydetails.dto;
 
+import com.asg.common.lib.dto.LovGetListDto;
 import lombok.*;
 import java.time.LocalDate;
 
@@ -19,7 +20,7 @@ public class SalaryHistoryDto {
     private Long hra;
     private Long transport;
     private Long gross;
-    private String designation;
+    private LovGetListDto designationDet;
     private Long noOfTickets;
     private Long ticketPeriod;
     private String crNumber;

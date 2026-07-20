@@ -103,7 +103,7 @@ class SalaryDetailsServiceImplTest {
         SalaryAllowanceDto alw1 = SalaryAllowanceDto.builder()
                 .actionType(ActionType.ISCREATED)
                 .amount(BigDecimal.valueOf(500L))
-                .active(1L)
+                .active("1")
                 .build();
         request.setAllowances(List.of(alw1));
 
@@ -188,8 +188,8 @@ class SalaryDetailsServiceImplTest {
         request.setEmployeePoid(100L);
         request.setPaymentMethod("CASH");
 
-        SalaryAllowanceDto alwCreate = SalaryAllowanceDto.builder().actionType(ActionType.ISCREATED).amount(BigDecimal.valueOf(100L)).active(1L).build();
-        SalaryAllowanceDto alwUpdate = SalaryAllowanceDto.builder().actionType(ActionType.ISUPDATED).detRowId(20L).amount(BigDecimal.valueOf(200L)).active(1L).build();
+        SalaryAllowanceDto alwCreate = SalaryAllowanceDto.builder().actionType(ActionType.ISCREATED).amount(BigDecimal.valueOf(100L)).active("1").build();
+        SalaryAllowanceDto alwUpdate = SalaryAllowanceDto.builder().actionType(ActionType.ISUPDATED).detRowId(20L).amount(BigDecimal.valueOf(200L)).active("1").build();
         SalaryAllowanceDto alwDelete = SalaryAllowanceDto.builder().actionType(ActionType.ISDELETED).detRowId(30L).build();
         request.setAllowances(List.of(alwCreate, alwUpdate, alwDelete));
 
@@ -425,8 +425,9 @@ class SalaryDetailsServiceImplTest {
         request.setBasicSalary(BigDecimal.valueOf(1000));
         SalaryAllowanceDto alw = SalaryAllowanceDto.builder()
                 .actionType(ActionType.ISCREATED)
+                .allowanceDeductionPoid(47L)
                 .amount(BigDecimal.valueOf(300))
-                .active(1L)
+                .active("Y")
                 .build();
         request.setAllowances(List.of(alw));
 
@@ -435,12 +436,51 @@ class SalaryDetailsServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
         when(repository.save(any())).thenReturn(entity);
         when(alwDtlRepository.findBySalaryPoid(1L)).thenReturn(new ArrayList<>());
+        when(procRepository.getAllowanceDeductionTypes(any())).thenReturn(Map.of(47L, "ALLOWANCE"));
 
         service.update(1L, request);
 
         // gross = 1000 + 300 = 1300, net = gross - 0 deductions = 1300
         assertEquals(new BigDecimal("1300"), entity.getGrossSalary());
         assertEquals(new BigDecimal("1300"), entity.getNetSalary());
+    }
+
+    @Test
+    void testCalculateTotals_ClassifiesByMasterType() {
+        SalaryDetailRequest request = new SalaryDetailRequest();
+        request.setEmployeePoid(100L);
+        request.setPaymentMethod("CASH");
+        request.setBasicSalary(BigDecimal.valueOf(1000));
+
+        // allowance row (TYPE=ALLOWANCE) comes from the request
+        SalaryAllowanceDto alw = SalaryAllowanceDto.builder()
+                .actionType(ActionType.ISCREATED)
+                .allowanceDeductionPoid(47L)
+                .amount(BigDecimal.valueOf(300))
+                .active("Y")
+                .build();
+        request.setAllowances(List.of(alw));
+
+        HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
+        entity.setSalaryPoid(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(repository.save(any())).thenReturn(entity);
+
+        // deduction row (TYPE=DEDUCTION) comes from the persisted rows
+        HrEmployeeSalaryAlwDtl deduction = new HrEmployeeSalaryAlwDtl();
+        deduction.setAllowanceDeductionPoid(81L);
+        deduction.setAmount(BigDecimal.valueOf(100));
+        when(alwDtlRepository.findBySalaryPoid(1L)).thenReturn(new ArrayList<>(List.of(deduction)));
+
+        when(procRepository.getAllowanceDeductionTypes(any()))
+                .thenReturn(Map.of(47L, "ALLOWANCE", 81L, "DEDUCTION"));
+
+        service.update(1L, request);
+
+        // gross = 1000 + 300 allowance = 1300 ; net = 1300 - 100 deduction = 1200
+        assertEquals(new BigDecimal("300"), entity.getTotAllowance());
+        assertEquals(new BigDecimal("1300"), entity.getGrossSalary());
+        assertEquals(new BigDecimal("1200"), entity.getNetSalary());
     }
 
     @Test
@@ -499,7 +539,7 @@ class SalaryDetailsServiceImplTest {
 
         SalaryAllowanceDto alw1 = new SalaryAllowanceDto();
         SalaryAllowanceDto alw2 = new SalaryAllowanceDto();
-        alw2.setActive(0L);
+        alw2.setActive("0");
         alw2.setAmount(BigDecimal.valueOf(100));
 
         request.setAllowances(List.of(alw1, alw2));

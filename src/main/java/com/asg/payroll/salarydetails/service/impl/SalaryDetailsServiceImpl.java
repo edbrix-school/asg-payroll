@@ -12,6 +12,7 @@ import com.asg.common.lib.service.DocumentDeleteService;
 import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.GlobalParameterService;
 import com.asg.common.lib.service.LoggingService;
+import com.asg.common.lib.service.LovDataService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
 import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryMaster;
@@ -41,9 +42,13 @@ import org.springframework.stereotype.Service;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -61,10 +66,17 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
     private final PrintService printService;
     private final DataSource dataSource;
     private final GlobalParameterService globalParameterService;
+    private final LovDataService lovDataService;
+
+    private static final String DESIGNATION_LOV = "DESIGNATION_NAME";
 
     private static final String SALARY_POID = "SALARY_POID";
     private static final String EMPLOYEE_POID = "EMPLOYEE_POID";
     private static final String RESOURCE_NAME = "Salary Details";
+
+    // HR_ALLOWANCE_DEDUCTION_MASTER.TYPE values
+    private static final String TYPE_ALLOWANCE = "ALLOWANCE";
+    private static final String TYPE_DEDUCTION = "DEDUCTION";
 
     @Override
     @Transactional
@@ -228,6 +240,22 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         SalaryDetailResponse response =
                 SalaryDetailsMapper.mapToResponse(entity, allowances, history);
 
+        // populate gosiSalary alias
+        response.setGosiSalary(entity.getRegisteredSalary());
+
+        // resolve designation LOV for each history entry
+        if (response.getHistory() != null) {
+            history.forEach(h -> response.getHistory().stream()
+                    .filter(dto -> h.getDetRowId() != null && h.getDetRowId().equals(dto.getDetRowId()))
+                    .findFirst()
+                    .ifPresent(dto -> {
+                        if (h.getDesignationPoid() != null) {
+                            dto.setDesignationDet(lovDataService.getDetailsByPoidAndLovNameFast(
+                                    h.getDesignationPoid(), DESIGNATION_LOV));
+                        }
+                    }));
+        }
+
         // Fetch read-only fields
         Map<String, Object> employeeDetails =
                 procRepository.getEmployeeDetails(entity.getEmployeePoid());
@@ -266,18 +294,40 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
     private void calculateTotals(HrEmployeeSalaryMaster entity, List<SalaryAllowanceDto> allowances) {
         BigDecimal basic = entity.getBasicSalary() != null ? entity.getBasicSalary() : BigDecimal.ZERO;
+
+        List<HrEmployeeSalaryAlwDtl> persistedRows =
+                alwDtlRepository.findBySalaryPoid(entity.getSalaryPoid() != null ? entity.getSalaryPoid() : 0L);
+
+        // Allowance vs. deduction is determined by HR_ALLOWANCE_DEDUCTION_MASTER.TYPE
+        // (ALLOWANCE / DEDUCTION / PROVISION), keyed by ALLOWANCE_DEDUCTION_POID -
+        // NOT by the ACTIVE flag (which is a Y/N record flag).
+        Set<Long> poids = new HashSet<>();
+        if (allowances != null) {
+            allowances.stream()
+                    .map(SalaryAllowanceDto::getAllowanceDeductionPoid)
+                    .filter(Objects::nonNull)
+                    .forEach(poids::add);
+        }
+        persistedRows.stream()
+                .map(HrEmployeeSalaryAlwDtl::getAllowanceDeductionPoid)
+                .filter(Objects::nonNull)
+                .forEach(poids::add);
+
+        Map<Long, String> resolvedTypes = procRepository.getAllowanceDeductionTypes(poids);
+        final Map<Long, String> types = resolvedTypes != null ? resolvedTypes : Collections.emptyMap();
+
         BigDecimal totalAllowance = BigDecimal.ZERO;
         if (allowances != null) {
             totalAllowance = allowances.stream()
-                    .filter(a -> a.getActive() != null && a.getActive() == 1L)
+                    .filter(a -> TYPE_ALLOWANCE.equalsIgnoreCase(types.get(a.getAllowanceDeductionPoid())))
                     .map(a -> a.getAmount() != null ? a.getAmount() : BigDecimal.ZERO)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
         entity.setTotAllowance(totalAllowance);
         entity.setGrossSalary(basic.add(totalAllowance));
-        BigDecimal totalDeduction = alwDtlRepository.findBySalaryPoid(entity.getSalaryPoid() != null ? entity.getSalaryPoid() : 0L)
-                .stream()
-                .filter(a -> a.getActive() != null && a.getActive() == 0L) // active=0 means deduction
+
+        BigDecimal totalDeduction = persistedRows.stream()
+                .filter(a -> TYPE_DEDUCTION.equalsIgnoreCase(types.get(a.getAllowanceDeductionPoid())))
                 .map(a -> a.getAmount() != null ? a.getAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         entity.setNetSalary(entity.getGrossSalary().subtract(totalDeduction));
