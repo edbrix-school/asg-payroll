@@ -13,6 +13,11 @@ public interface HrEmployeeSalaryProcRepository {
      */
     Map<Long, String> getAllowanceDeductionTypes(Collection<Long> poids);
 
+    /**
+     * Returns the CR_NUMBER from ADMIN_CR_MASTER for the given CR poids, keyed by poid.
+     */
+    Map<Long, String> getCrNumbers(Collection<Long> poids);
+
     String addToSalaryHistory(Long companyId, Long loginUserPoid, Long salaryPoid);
 
     String syncHRData();

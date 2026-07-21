@@ -89,6 +89,7 @@ public class SalaryDetailsMapper {
     public static SalaryAllowanceDto mapToAllowanceDto(HrEmployeeSalaryAlwDtl entity) {
         if (entity == null) return null;
         return SalaryAllowanceDto.builder()
+                .detRowId(entity.getDetRowId())
                 .allowanceDeductionPoid(entity.getAllowanceDeductionPoid())
                 .amount(entity.getAmount())
                 .active(entity.getActive())
