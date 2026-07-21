@@ -243,8 +243,16 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         // populate gosiSalary alias
         response.setGosiSalary(entity.getRegisteredSalary());
 
-        // resolve designation LOV for each history entry
+        // resolve designation LOV and CR number for each history entry
         if (response.getHistory() != null) {
+            Set<Long> crPoids = new HashSet<>();
+            history.stream()
+                    .map(HrEmployeeSalaryHist::getCrPoid)
+                    .filter(Objects::nonNull)
+                    .forEach(crPoids::add);
+            Map<Long, String> crNumbers = procRepository.getCrNumbers(crPoids);
+            final Map<Long, String> crNumberByPoid = crNumbers != null ? crNumbers : Collections.emptyMap();
+
             history.forEach(h -> response.getHistory().stream()
                     .filter(dto -> h.getDetRowId() != null && h.getDetRowId().equals(dto.getDetRowId()))
                     .findFirst()
@@ -252,6 +260,9 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
                         if (h.getDesignationPoid() != null) {
                             dto.setDesignationDet(lovDataService.getDetailsByPoidAndLovNameFast(
                                     h.getDesignationPoid(), DESIGNATION_LOV));
+                        }
+                        if (h.getCrPoid() != null) {
+                            dto.setCrNumber(crNumberByPoid.get(h.getCrPoid()));
                         }
                     }));
         }

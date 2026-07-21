@@ -88,6 +88,34 @@ public class HrEmployeeSalaryProcRepositoryImpl implements HrEmployeeSalaryProcR
     }
 
     @Override
+    public Map<Long, String> getCrNumbers(Collection<Long> poids) {
+        if (poids == null || poids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = entityManager.createNativeQuery(
+                            "SELECT CR_POID, CR_NUMBER FROM ADMIN_CR_MASTER WHERE CR_POID IN (:poids)")
+                    .setParameter("poids", poids)
+                    .getResultList();
+
+            Map<Long, String> crNumberByPoid = new HashMap<>();
+            for (Object[] row : rows) {
+                if (row[0] == null) {
+                    continue;
+                }
+                Long poid = ((Number) row[0]).longValue();
+                String crNumber = row[1] != null ? row[1].toString() : null;
+                crNumberByPoid.put(poid, crNumber);
+            }
+            return crNumberByPoid;
+        } catch (Exception e) {
+            log.error("Error fetching CR numbers: {}", e.getMessage());
+            return Collections.emptyMap();
+        }
+    }
+
+    @Override
     public String addToSalaryHistory(Long companyId, Long loginUserPoid, Long salaryPoid) {
         try {
             StoredProcedureQuery query = entityManager.createStoredProcedureQuery("PROC_HR_SALARY_TO_HISTORY");
