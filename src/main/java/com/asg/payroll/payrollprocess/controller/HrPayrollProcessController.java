@@ -54,6 +54,20 @@ public class HrPayrollProcessController {
         return success("Payroll retrieved successfully", hrPayrollProcessService.getPayrollById(transactionPoid));
     }
 
+    /**
+     * Field-level check for the payroll month, mirroring the legacy PayrollMonthValidator.
+     * Always returns 200; the payload carries the outcome so the UI can validate on change.
+     * Pass transactionPoid in edit mode so the record being edited is not treated as a clash.
+     */
+    @AllowedAction(UserRolesRightsEnum.VIEW)
+    @GetMapping("/validate-payroll-month")
+    public ResponseEntity<?> validatePayrollMonth(
+            @RequestParam(required = false) LocalDate payrollMonth,
+            @RequestParam(required = false) Long transactionPoid) {
+        return success("Payroll month validated successfully",
+                hrPayrollProcessService.validatePayrollMonth(payrollMonth, transactionPoid));
+    }
+
     @AllowedAction(UserRolesRightsEnum.CREATE)
     @PostMapping
     public ResponseEntity<?> createPayroll(@Valid @RequestBody HrPayrollHdrRequest request) {

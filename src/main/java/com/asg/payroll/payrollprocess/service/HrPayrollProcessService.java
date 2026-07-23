@@ -15,6 +15,8 @@ public interface HrPayrollProcessService {
 
     HrPayrollHdrResponse getPayrollById(Long transactionPoid);
 
+    PayrollMonthValidationResponse validatePayrollMonth(LocalDate payrollMonth, Long transactionPoid);
+
     HrPayrollHdrResponse createPayroll(HrPayrollHdrRequest request);
 
     HrPayrollHdrResponse updatePayroll(Long transactionPoid, HrPayrollHdrRequest request);
