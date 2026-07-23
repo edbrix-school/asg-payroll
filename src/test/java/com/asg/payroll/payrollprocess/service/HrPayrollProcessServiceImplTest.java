@@ -21,7 +21,6 @@ import com.asg.payroll.payrollprocess.repository.*;
 import jakarta.persistence.EntityManager;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperReport;
-import org.junit.jupiter.api.Disabled;
 import org.mockito.quality.Strictness;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.junit.jupiter.api.BeforeEach;
@@ -531,7 +530,6 @@ class HrPayrollProcessServiceImplTest {
     // ── loadVariables ─────────────────────────────────────────────────────────
 
     @Test
-    @Disabled
     void loadVariables_ReturnsCursorRows() throws SQLException {
         ResultSet cursor = cursorWith(Map.of("EMPLOYEE_POID", 100L, "AMOUNT", 250L));
         CallableStatement cs = mock(CallableStatement.class);
@@ -590,7 +588,6 @@ class HrPayrollProcessServiceImplTest {
     // ── loadLoansAdvances ─────────────────────────────────────────────────────
 
     @Test
-    @Disabled
     void loadLoansAdvances_ReturnsCursorRows() throws SQLException {
         ResultSet cursor = cursorWith(Map.of("EMPLOYEE_POID", 100L, "REF_NO", "L-1"));
         CallableStatement cs = mock(CallableStatement.class);
