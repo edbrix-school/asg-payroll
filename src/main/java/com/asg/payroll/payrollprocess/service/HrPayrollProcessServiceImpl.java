@@ -219,7 +219,6 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         response.setVerified(hdr.getVerified());
         response.setApproved(hdr.getApproved());
         response.setPayrollReleased(hdr.getPayrollReleased());
-        response.setRemarks(hdr.getRemarks());
         
         // Set detail lists (these would need proper mapping if entities differ from DTOs)
         response.setPayrollDetails(mapToPayrollDtlResponse(dtlRepository.findByTransactionPoid(transactionPoid)));
@@ -789,7 +788,6 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         entity.setEmailPayslipScheduleOn(request.getEmailPayslipScheduleOn());
         entity.setSuppressArrearsValidation(request.getSuppressArrearsValidation() != null
                 ? request.getSuppressArrearsValidation() : N);
-        entity.setRemarks(request.getRemarks());
     }
 
     // ─── VARIABLE ALLOWANCE / DEDUCTION DETAILS ──────────────────────────────
