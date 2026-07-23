@@ -51,6 +51,7 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -119,6 +120,12 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
     private static final String DISCONTINUED = "DISCONTINUED";
     private static final String NULL_STRING = "null";
     private static final String DISCONTINUED_SUFFIX = ", Discontinued: ";
+
+    // Payroll month validation (legacy PayrollMonthValidator)
+    private static final String PAYROLL_DATE_REQUIRED = "Payroll date is a required field.";
+    private static final DateTimeFormatter MONTH_END_FORMAT = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
+    /** Sentinel poid used in create mode, where there is no record to exclude. */
+    private static final long NO_POID = -1L;
 
     private final EntityManager entityManager;
     private final HrPayrollProcessService self;
@@ -259,6 +266,30 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         response.setInfoMessage(editStatus);
 
         return response;
+    }
+
+    /**
+     * Port of the legacy ADF PayrollMonthValidator: the payroll month is required, is
+     * normalised to month end, and may not already be booked by another payroll.
+     * Returns the outcome instead of throwing so the UI can validate the field on change.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public PayrollMonthValidationResponse validatePayrollMonth(LocalDate payrollMonth, Long transactionPoid) {
+        if (payrollMonth == null) {
+            return new PayrollMonthValidationResponse(false, null, PAYROLL_DATE_REQUIRED, null);
+        }
+        LocalDate monthEnd = YearMonth.from(payrollMonth).atEndOfMonth();
+        List<String> clashes = hdrRepository.findDocRefsByPayrollMonthExcluding(
+                monthEnd, transactionPoid != null ? transactionPoid : NO_POID);
+        if (clashes.isEmpty()) {
+            return new PayrollMonthValidationResponse(true, monthEnd, null, null);
+        }
+        String existingDocRef = clashes.get(0);
+        String message = String.format("Payroll for %s already exists%s.",
+                monthEnd.format(MONTH_END_FORMAT),
+                existingDocRef != null ? " (" + existingDocRef + ")" : "");
+        return new PayrollMonthValidationResponse(false, monthEnd, message, existingDocRef);
     }
 
     private void mapLovFields(HrPayrollHdrResponse response) {
@@ -716,7 +747,15 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         if (!payrollMonth.equals(monthEnd)) {
             throw new ValidationException("Payroll date has to be month end date.");
         }
-        
+
+        // Legacy PayrollMonthValidator ran on the UI field only; enforce it here too so the
+        // rule holds for direct API calls. PROC_HR_PAYROLL_VALIDATE misses this on create,
+        // where its TRANSACTION_POID <> P_PAYROLL_POID test is NULL for every row.
+        PayrollMonthValidationResponse monthCheck = validatePayrollMonth(payrollMonth, existingPoid);
+        if (Boolean.FALSE.equals(monthCheck.getValid())) {
+            throw new ValidationException(monthCheck.getMessage());
+        }
+
         // Validate employees are active and not terminated
 //        validateEmployeeActiveStatus(
 //                request.getAttendTranPoid(),

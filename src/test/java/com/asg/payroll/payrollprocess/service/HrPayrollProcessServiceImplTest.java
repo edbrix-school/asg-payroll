@@ -196,6 +196,61 @@ class HrPayrollProcessServiceImplTest {
         }
     }
 
+    // ── validatePayrollMonth ──────────────────────────────────────────────────
+
+    @Test
+    void validatePayrollMonth_NullDate_ReturnsRequiredMessage() {
+        PayrollMonthValidationResponse result = service.validatePayrollMonth(null, null);
+
+        assertFalse(result.getValid());
+        assertNull(result.getPayrollMonth());
+        assertEquals("Payroll date is a required field.", result.getMessage());
+    }
+
+    @Test
+    void validatePayrollMonth_MidMonthDate_NormalisesToMonthEnd() {
+        when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of());
+
+        PayrollMonthValidationResponse result = service.validatePayrollMonth(LocalDate.of(2024, 2, 5), null);
+
+        assertTrue(result.getValid());
+        // 2024 is a leap year - month end is the 29th
+        assertEquals(LocalDate.of(2024, 2, 29), result.getPayrollMonth());
+        assertNull(result.getMessage());
+        verify(hdrRepository).findDocRefsByPayrollMonthExcluding(LocalDate.of(2024, 2, 29), -1L);
+    }
+
+    @Test
+    void validatePayrollMonth_MonthAlreadyUsed_ReturnsInvalidWithDocRef() {
+        when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of("PAY-0007"));
+
+        PayrollMonthValidationResponse result = service.validatePayrollMonth(LocalDate.of(2024, 1, 31), null);
+
+        assertFalse(result.getValid());
+        assertEquals("PAY-0007", result.getExistingDocRef());
+        assertEquals("Payroll for 31-Jan-2024 already exists (PAY-0007).", result.getMessage());
+    }
+
+    @Test
+    void validatePayrollMonth_EditMode_ExcludesOwnRecord() {
+        when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of());
+
+        PayrollMonthValidationResponse result = service.validatePayrollMonth(LocalDate.of(2024, 1, 31), 55L);
+
+        assertTrue(result.getValid());
+        verify(hdrRepository).findDocRefsByPayrollMonthExcluding(LocalDate.of(2024, 1, 31), 55L);
+    }
+
+    @Test
+    void createPayroll_DuplicatePayrollMonth_ThrowsValidationException() {
+        HrPayrollHdrRequest request = validHdrRequest();
+        when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of("PAY-0007"));
+
+        ValidationException ex = assertThrows(ValidationException.class, () -> service.createPayroll(request));
+        assertTrue(ex.getMessage().contains("already exists"));
+        verify(hdrRepository, never()).saveAndFlush(any());
+    }
+
     // ── createPayroll ─────────────────────────────────────────────────────────
 
     @Test
