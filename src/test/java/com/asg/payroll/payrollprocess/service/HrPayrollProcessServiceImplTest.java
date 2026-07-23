@@ -10,6 +10,7 @@ import com.asg.common.lib.service.DocumentSearchService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.LovDataService;
 import com.asg.common.lib.service.PrintService;
+import com.asg.payroll.common.service.UniqueFieldValidationService;
 import com.asg.payroll.employeeappraisal.entity.HrPayrollVarAlwdedDtl;
 import com.asg.payroll.employeeappraisal.repository.HrPayrollVarAlwdedDtlRepository;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
@@ -70,6 +71,7 @@ class HrPayrollProcessServiceImplTest {
     @Mock private JdbcTemplate jdbcTemplate;
     @Mock private EntityManager entityManager;
     @Mock private HrPayrollProcessService self;
+    @Mock private UniqueFieldValidationService uniqueFieldValidationService;
 
     @InjectMocks
     private HrPayrollProcessServiceImpl service;
@@ -204,12 +206,14 @@ class HrPayrollProcessServiceImplTest {
 
         assertFalse(result.getValid());
         assertNull(result.getPayrollMonth());
-        assertEquals("Payroll date is a required field.", result.getMessage());
+        // legacy ValidatorForRequiredUniqueField wording
+        assertEquals("Value required for this field", result.getMessage());
     }
 
     @Test
     void validatePayrollMonth_MidMonthDate_NormalisesToMonthEnd() {
-        when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of());
+        when(uniqueFieldValidationService.isDuplicate(any(), any(), any(), any(), any(), any()))
+                .thenReturn(false);
 
         PayrollMonthValidationResponse result = service.validatePayrollMonth(LocalDate.of(2024, 2, 5), null);
 
@@ -217,37 +221,66 @@ class HrPayrollProcessServiceImplTest {
         // 2024 is a leap year - month end is the 29th
         assertEquals(LocalDate.of(2024, 2, 29), result.getPayrollMonth());
         assertNull(result.getMessage());
-        verify(hdrRepository).findDocRefsByPayrollMonthExcluding(LocalDate.of(2024, 2, 29), -1L);
+        // month end, not the entered 5th, is what gets checked
+        verify(uniqueFieldValidationService).isDuplicate("HR_PAYROLL_HDR",
+                "TO_CHAR(PAYROLL_MONTH,'YYYY-MM-DD')", "2024-02-29", "TRANSACTION_POID", null, null);
     }
 
     @Test
     void validatePayrollMonth_MonthAlreadyUsed_ReturnsInvalidWithDocRef() {
+        when(uniqueFieldValidationService.isDuplicate(any(), any(), any(), any(), any(), any()))
+                .thenReturn(true);
         when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of("PAY-0007"));
 
         PayrollMonthValidationResponse result = service.validatePayrollMonth(LocalDate.of(2024, 1, 31), null);
 
         assertFalse(result.getValid());
+        // legacy wording verbatim; the clashing ref rides in its own field
+        assertEquals("The value entered is not unique (should not be repeating)...", result.getMessage());
         assertEquals("PAY-0007", result.getExistingDocRef());
-        assertEquals("Payroll for 31-Jan-2024 already exists (PAY-0007).", result.getMessage());
+    }
+
+    @Test
+    void validatePayrollMonth_DuplicateButDocRefUnavailable_StillInvalid() {
+        when(uniqueFieldValidationService.isDuplicate(any(), any(), any(), any(), any(), any()))
+                .thenReturn(true);
+        when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of());
+
+        PayrollMonthValidationResponse result = service.validatePayrollMonth(LocalDate.of(2024, 1, 31), null);
+
+        assertFalse(result.getValid());
+        assertNull(result.getExistingDocRef());
+        assertEquals("The value entered is not unique (should not be repeating)...", result.getMessage());
     }
 
     @Test
     void validatePayrollMonth_EditMode_ExcludesOwnRecord() {
-        when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of());
+        when(uniqueFieldValidationService.isDuplicate(any(), any(), any(), any(), any(), any()))
+                .thenReturn(false);
 
         PayrollMonthValidationResponse result = service.validatePayrollMonth(LocalDate.of(2024, 1, 31), 55L);
 
         assertTrue(result.getValid());
-        verify(hdrRepository).findDocRefsByPayrollMonthExcluding(LocalDate.of(2024, 1, 31), 55L);
+        verify(uniqueFieldValidationService).isDuplicate("HR_PAYROLL_HDR",
+                "TO_CHAR(PAYROLL_MONTH,'YYYY-MM-DD')", "2024-01-31", "TRANSACTION_POID", 55L, null);
+    }
+
+    @Test
+    void validatePayrollMonth_NullDate_SkipsDbLookup() {
+        service.validatePayrollMonth(null, null);
+
+        verifyNoInteractions(uniqueFieldValidationService);
     }
 
     @Test
     void createPayroll_DuplicatePayrollMonth_ThrowsValidationException() {
         HrPayrollHdrRequest request = validHdrRequest();
+        when(uniqueFieldValidationService.isDuplicate(any(), any(), any(), any(), any(), any()))
+                .thenReturn(true);
         when(hdrRepository.findDocRefsByPayrollMonthExcluding(any(), any())).thenReturn(List.of("PAY-0007"));
 
         ValidationException ex = assertThrows(ValidationException.class, () -> service.createPayroll(request));
-        assertTrue(ex.getMessage().contains("already exists"));
+        assertEquals("The value entered is not unique (should not be repeating)...", ex.getMessage());
         verify(hdrRepository, never()).saveAndFlush(any());
     }
 

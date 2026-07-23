@@ -13,18 +13,19 @@ import java.util.List;
 public interface HrPayrollHdrRepository extends JpaRepository<HrPayrollHdr, Long> {
 
     /**
-     * Returns DOC_REFs of non-deleted payrolls already booked against the given payroll
-     * month, ignoring the record being edited. Mirrors the legacy
-     * ValidatorForRequiredUniqueField check on HR_PAYROLL_HDR.PAYROLL_MONTH.
+     * Returns DOC_REFs of payrolls already booked against the given payroll month,
+     * ignoring the record being edited. Mirrors the legacy
+     * ValidatorForRequiredUniqueField check on HR_PAYROLL_HDR.PAYROLL_MONTH, which is
+     * called with a null CustomValidation and so scans every row — soft-deleted payrolls
+     * included. Live payrolls sort first so the message names one where it exists.
      *
      * @param excludePoid TRANSACTION_POID to skip; pass a non-existent id (e.g. -1) for create mode
      */
     @Query("""
             SELECT h.docRef FROM HrPayrollHdr h
             WHERE h.payrollMonth = :payrollMonth
-              AND (h.deleted = 'N' OR h.deleted IS NULL)
               AND h.transactionPoid <> :excludePoid
-            ORDER BY h.transactionPoid
+            ORDER BY CASE WHEN h.deleted = 'Y' THEN 1 ELSE 0 END, h.transactionPoid
             """)
     List<String> findDocRefsByPayrollMonthExcluding(@Param("payrollMonth") LocalDate payrollMonth,
                                                     @Param("excludePoid") Long excludePoid);

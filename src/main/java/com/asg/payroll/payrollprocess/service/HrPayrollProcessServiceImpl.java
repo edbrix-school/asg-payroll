@@ -9,6 +9,7 @@ import com.asg.common.lib.service.LoggingService;
 import com.asg.common.lib.service.LovDataService;
 import com.asg.common.lib.service.PrintService;
 import com.asg.common.lib.utility.PaginationUtil;
+import com.asg.payroll.common.service.UniqueFieldValidationService;
 import com.asg.payroll.common.util.ActionType;
 import com.asg.payroll.employeeappraisal.entity.HrPayrollVarAlwdedDtl;
 import com.asg.payroll.employeeappraisal.entity.HrPayrollVarAlwdedDtlId;
@@ -51,7 +52,6 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -122,8 +122,12 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
     private static final String DISCONTINUED_SUFFIX = ", Discontinued: ";
 
     // Payroll month validation (legacy PayrollMonthValidator)
-    private static final String PAYROLL_DATE_REQUIRED = "Payroll date is a required field.";
-    private static final DateTimeFormatter MONTH_END_FORMAT = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH);
+    /**
+     * Field expression handed to the unique check. Legacy used 'DD-MON-YYYY', whose month
+     * abbreviation depends on the session NLS_DATE_LANGUAGE; the numeric mask compares the
+     * same dates without that dependency and matches LocalDate.toString().
+     */
+    private static final String PAYROLL_MONTH_EXPR = "TO_CHAR(PAYROLL_MONTH,'YYYY-MM-DD')";
     /** Sentinel poid used in create mode, where there is no record to exclude. */
     private static final long NO_POID = -1L;
 
@@ -141,6 +145,7 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
     private final PrintService printService;
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
+    private final UniqueFieldValidationService uniqueFieldValidationService;
 
     public HrPayrollProcessServiceImpl(
             EntityManager entityManager,
@@ -156,7 +161,8 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
             LovDataService lovDataService,
             PrintService printService,
             DataSource dataSource,
-            JdbcTemplate jdbcTemplate) {
+            JdbcTemplate jdbcTemplate,
+            UniqueFieldValidationService uniqueFieldValidationService) {
         this.entityManager = entityManager;
         this.self = self;
         this.hdrRepository = hdrRepository;
@@ -171,6 +177,7 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         this.printService = printService;
         this.dataSource = dataSource;
         this.jdbcTemplate = jdbcTemplate;
+        this.uniqueFieldValidationService = uniqueFieldValidationService;
     }
 
     // ─── LIST / GET ──────────────────────────────────────────────────────────
@@ -272,24 +279,32 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
      * Port of the legacy ADF PayrollMonthValidator: the payroll month is required, is
      * normalised to month end, and may not already be booked by another payroll.
      * Returns the outcome instead of throwing so the UI can validate the field on change.
+     * <p>
+     * Matches FUNC_GLOBAL_UNIQUE_CHECKING, which the legacy validator calls with a null
+     * CustomValidation: every row is scanned (soft-deleted included), there is no company
+     * or group scoping, and the record being edited is excluded only when a poid is given.
      */
     @Override
     @Transactional(readOnly = true)
     public PayrollMonthValidationResponse validatePayrollMonth(LocalDate payrollMonth, Long transactionPoid) {
         if (payrollMonth == null) {
-            return new PayrollMonthValidationResponse(false, null, PAYROLL_DATE_REQUIRED, null);
+            return new PayrollMonthValidationResponse(false, null,
+                    UniqueFieldValidationService.VALUE_REQUIRED, null);
         }
         LocalDate monthEnd = YearMonth.from(payrollMonth).atEndOfMonth();
-        List<String> clashes = hdrRepository.findDocRefsByPayrollMonthExcluding(
-                monthEnd, transactionPoid != null ? transactionPoid : NO_POID);
-        if (clashes.isEmpty()) {
+        boolean duplicate = uniqueFieldValidationService.isDuplicate(
+                HR_PAYROLL_HDR, PAYROLL_MONTH_EXPR, monthEnd.toString(),
+                TRANSACTION_POID, transactionPoid, null);
+        if (!duplicate) {
             return new PayrollMonthValidationResponse(true, monthEnd, null, null);
         }
-        String existingDocRef = clashes.get(0);
-        String message = String.format("Payroll for %s already exists%s.",
-                monthEnd.format(MONTH_END_FORMAT),
-                existingDocRef != null ? " (" + existingDocRef + ")" : "");
-        return new PayrollMonthValidationResponse(false, monthEnd, message, existingDocRef);
+        // Legacy wording is returned verbatim; the clashing doc ref is surfaced as a separate
+        // field so the UI can show it without altering the message.
+        String existingDocRef = hdrRepository.findDocRefsByPayrollMonthExcluding(
+                        monthEnd, transactionPoid != null ? transactionPoid : NO_POID)
+                .stream().findFirst().orElse(null);
+        return new PayrollMonthValidationResponse(false, monthEnd,
+                UniqueFieldValidationService.NOT_UNIQUE, existingDocRef);
     }
 
     private void mapLovFields(HrPayrollHdrResponse response) {
