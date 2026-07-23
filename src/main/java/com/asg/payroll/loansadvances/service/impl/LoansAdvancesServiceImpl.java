@@ -148,8 +148,6 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
             throw new ValidationException("Receipt No and Date required when settled");
 
         // Business rule
-        if (request.getTotalAmount() != null && (request.getTotalAmount().compareTo(request.getMonthlyAmount()) > 0))
-            throw new ValidationException("Total Amount should not be greater than Monthly Amount");
 
         String result = loansAdvancesProcRepository.validateRecurring(
                 request.getEmployeePoid(),
