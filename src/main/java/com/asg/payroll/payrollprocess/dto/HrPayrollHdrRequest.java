@@ -30,6 +30,8 @@ public class HrPayrollHdrRequest {
 
     private String suppressArrearsValidation;
 
+    private String remarks;
+
     @Valid
     private List<HrPayrollVarAlwdedDtlRequest> variableDetails;
 
