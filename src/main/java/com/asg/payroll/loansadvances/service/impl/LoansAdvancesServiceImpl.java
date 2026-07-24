@@ -80,7 +80,7 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
     @Override
     public HrRecurringPayDeductResponse getById(Long id) {
 
-        HrRecurringPayDeduct entity = repository.findByTransactionPoidDeleted(id)
+        HrRecurringPayDeduct entity = repository.findByTransactionPoid(id)
                 .orElseThrow(() -> new ResourceNotFoundException(LOANSADVANCES, TRANSACTIONPOID, id));
 
         log.info("Fetched Loan/Advance with ID: {}", entity.getTransactionPoid());
@@ -118,7 +118,7 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
     @Transactional
     public void delete(Long id, DeleteReasonDto deleteReasonDto) {
 
-        repository.findByTransactionPoidDeleted(id)
+        repository.findByTransactionPoid(id)
                 .orElseThrow(() -> new ResourceNotFoundException(LOANSADVANCES, TRANSACTIONPOID, id));
 
         // Use DocumentDeleteService for deletion (handles logging internally)

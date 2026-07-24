@@ -10,13 +10,8 @@ import java.util.Optional;
 @Repository
 public interface HrRecurringPayDeductRepository extends JpaRepository<HrRecurringPayDeduct, Long> {
 
-    @Query("""
-            SELECT h 
-            FROM HrRecurringPayDeduct h
-            WHERE h.transactionPoid = :id
-            AND (h.deleted = 'N' OR h.deleted IS NULL)
-            """)
-    Optional<HrRecurringPayDeduct> findByTransactionPoidDeleted(Long id);
+
+    Optional<HrRecurringPayDeduct> findByTransactionPoid(Long id);
 
 
 }

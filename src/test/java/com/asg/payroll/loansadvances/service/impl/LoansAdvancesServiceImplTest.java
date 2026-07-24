@@ -196,7 +196,7 @@ class LoansAdvancesServiceImplTest {
     void testGetById_Success() {
         HrRecurringPayDeduct entity = new HrRecurringPayDeduct();
         entity.setTransactionPoid(100L);
-        when(repository.findByTransactionPoidDeleted(100L)).thenReturn(Optional.of(entity));
+        when(repository.findByTransactionPoid(100L)).thenReturn(Optional.of(entity));
 
         HrRecurringPayDeductResponse response = service.getById(100L);
 
@@ -206,7 +206,7 @@ class LoansAdvancesServiceImplTest {
 
     @Test
     void testGetById_NotFound() {
-        when(repository.findByTransactionPoidDeleted(100L)).thenReturn(Optional.empty());
+        when(repository.findByTransactionPoid(100L)).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.getById(100L));
         assertTrue(exception.getMessage().contains("Loans/Advances"));
@@ -243,7 +243,7 @@ class LoansAdvancesServiceImplTest {
     void testDelete_Success() {
         HrRecurringPayDeduct entity = new HrRecurringPayDeduct();
         entity.setTransactionPoid(100L);
-        when(repository.findByTransactionPoidDeleted(100L)).thenReturn(Optional.of(entity));
+        when(repository.findByTransactionPoid(100L)).thenReturn(Optional.of(entity));
 
         DeleteReasonDto deleteReasonDto = new DeleteReasonDto();
         service.delete(100L, deleteReasonDto);
@@ -253,7 +253,7 @@ class LoansAdvancesServiceImplTest {
 
     @Test
     void testDelete_NotFound() {
-        when(repository.findByTransactionPoidDeleted(100L)).thenReturn(Optional.empty());
+        when(repository.findByTransactionPoid(100L)).thenReturn(Optional.empty());
 
         DeleteReasonDto deleteReasonDto = new DeleteReasonDto();
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.delete(100L, deleteReasonDto));
