@@ -20,6 +20,7 @@ public class HrAppraisalDtlResponse {
     private String employeeCode;
     private String employeeName;
     private String employeeName2;
+    private Long departmentPoid;
     private Long designationPoid;
     private LocalDate joinDate;
     private String curAirEntitle;
@@ -72,6 +73,7 @@ public class HrAppraisalDtlResponse {
     private String lastmodifiedBy;
     private LocalDateTime lastmodifiedDate;
     private LovGetListDto employeeDet;
+    private LovGetListDto departmentDet;
     private LovGetListDto designationDet;
     private LovGetListDto newDesignationDet;
     private LovGetListDto lastDesignationDet;

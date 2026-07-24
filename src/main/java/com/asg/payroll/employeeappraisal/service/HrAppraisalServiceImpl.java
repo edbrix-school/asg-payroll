@@ -116,7 +116,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
             "d.NEW_DESIGNATION_POID, d.ARREARS, d.NEW_BONUS_PER, d.LETTER_EMAILED_ON, d.GRID_LISTING_METHOD, " +
             "d.REGISTERED_SALARY, d.CUR_MONTHLY_CTC, d.CUR_YEARLY_CTC, d.NEW_MONTHLY_CTC, d.NEW_YEARLY_CTC, " +
             "d.LAST_DESIGNATION_POID, d.LAST_PROMOTION_DATE, d.CREATED_BY, d.CREATED_DATE, d.LASTMODIFIED_BY, d.LASTMODIFIED_DATE, " +
-            "e.EMPLOYEE_CODE, e.EMPLOYEE_NAME, e.EMPLOYEE_NAME2 " +
+            "e.EMPLOYEE_CODE, e.EMPLOYEE_NAME, e.EMPLOYEE_NAME2, e.DEPARTMENT_POID " +
             "FROM HR_APPRAISAL_DTL d " +
             "LEFT JOIN HR_EMPLOYEE_MASTER e ON d.EMPLOYEE_POID = e.EMPLOYEE_POID " +
             "WHERE d.TRANSACTION_POID = ?";
@@ -718,6 +718,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (rows.isEmpty()) return null;
         HrAppraisalDtlResponse row = rows.get(0);
         row.setEmployeeDet(lovDataService.getDetailsByPoidAndLovNameFast(employeePoid, "EMPLOYEE_NAME_WITH_SHORT"));
+        if (row.getDepartmentPoid() != null) {
+            row.setDepartmentDet(lovDataService.getDetailsByPoidAndLovNameFast(row.getDepartmentPoid(), "DEPARTMENT"));
+        }
         List<Long> desPoids = Stream.of(row.getDesignationPoid(), row.getNewDesignationPoid(), row.getLastDesignationPoid())
                 .filter(Objects::nonNull).distinct().collect(Collectors.toList());
         if (!desPoids.isEmpty()) {
@@ -763,8 +766,17 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
                 .distinct()
                 .collect(Collectors.toList());
         Map<Long, LovGetListDto> empLovMap = lovDataService.getDetailsByPoidsAndLovName(empPoids, "EMPLOYEE_NAME_WITH_SHORT");
+        List<Long> deptPoids = details.stream()
+                .map(HrAppraisalDtlResponse::getDepartmentPoid)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, LovGetListDto> deptLovMap = deptPoids.isEmpty()
+                ? Collections.emptyMap()
+                : lovDataService.getDetailsByPoidsAndLovName(deptPoids, "DEPARTMENT");
         details.forEach(d -> {
             if (d.getEmployeePoid() != null) d.setEmployeeDet(empLovMap.get(d.getEmployeePoid()));
+            if (d.getDepartmentPoid() != null) d.setDepartmentDet(deptLovMap.get(d.getDepartmentPoid()));
         });
         return details;
     }
@@ -828,6 +840,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         r.setEmployeeCode(rs.getString("EMPLOYEE_CODE"));
         r.setEmployeeName(rs.getString("EMPLOYEE_NAME"));
         r.setEmployeeName2(rs.getString("EMPLOYEE_NAME2"));
+        r.setDepartmentPoid(getLong(rs, "DEPARTMENT_POID"));
         return r;
     }
 
