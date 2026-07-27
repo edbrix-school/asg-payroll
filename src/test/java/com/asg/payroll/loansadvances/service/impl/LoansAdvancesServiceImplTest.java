@@ -85,9 +85,9 @@ class LoansAdvancesServiceImplTest {
         HrRecurringPayDeductRequest request = new HrRecurringPayDeductRequest();
         request.setEmployeePoid(10L);
         request.setTransactionDate(LocalDate.now()); // Prevent NPE from DateUtil
-        // Set total <= monthly to pass validation
-        request.setTotalAmount(new BigDecimal("100.00"));
-        request.setMonthlyAmount(new BigDecimal("1000.00"));
+        // Monthly instalment must not exceed the loan total
+        request.setTotalAmount(new BigDecimal("1000.00"));
+        request.setMonthlyAmount(new BigDecimal("100.00"));
         request.setSettledAndClosed("N");
         return request;
     }
@@ -119,14 +119,13 @@ class LoansAdvancesServiceImplTest {
     }
 
     @Test
-    @Disabled
     void testCreate_ValidationFailure_BusinessRule1() {
         HrRecurringPayDeductRequest request = createValidRequest();
-        request.setTotalAmount(new BigDecimal("1000.00"));
-        request.setMonthlyAmount(new BigDecimal("100.00")); // total > monthly causes validation failure
+        request.setTotalAmount(new BigDecimal("100.00"));
+        request.setMonthlyAmount(new BigDecimal("1000.00")); // monthly > total causes validation failure
 
         ValidationException exception = assertThrows(ValidationException.class, () -> service.create(request));
-        assertEquals("Total Amount should not be greater than Monthly Amount", exception.getMessage());
+        assertEquals("Monthly Amount should not be greater than Total Amount", exception.getMessage());
     }
 
     @Test
