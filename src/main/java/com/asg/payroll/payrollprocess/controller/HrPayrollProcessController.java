@@ -12,6 +12,7 @@ import com.asg.payroll.payrollprocess.dto.HrPayrollHdrRequest;
 import com.asg.payroll.payrollprocess.dto.LoadLoansAdvancesRequest;
 import com.asg.payroll.payrollprocess.dto.LoadVariablesRequest;
 import com.asg.payroll.payrollprocess.dto.PayrollActionRequest;
+import com.asg.payroll.payrollprocess.entity.HrPayrollHdr;
 import com.asg.payroll.payrollprocess.service.HrPayrollProcessService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -171,7 +172,7 @@ public class HrPayrollProcessController {
             byte[] pdf = hrPayrollProcessService.printPayslip(transactionPoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "payslip", "pdf"))
+                            HrPayrollHdr.class, transactionPoid, "payslip", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -186,7 +187,7 @@ public class HrPayrollProcessController {
             byte[] pdf = hrPayrollProcessService.printPreview(transactionPoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "payslip-preview", "pdf"))
+                            HrPayrollHdr.class, transactionPoid, "payslip-preview", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {

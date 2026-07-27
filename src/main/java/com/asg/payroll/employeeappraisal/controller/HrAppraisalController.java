@@ -11,6 +11,7 @@ import com.asg.common.lib.service.LoggingService;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalActionRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRecalculationRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRequest;
+import com.asg.payroll.employeeappraisal.entity.HrAppraisalHdr;
 import com.asg.payroll.employeeappraisal.service.HrAppraisalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -172,7 +173,7 @@ public class HrAppraisalController {
             byte[] pdf = hrAppraisalService.printA3(transactionPoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "appraisal-a3", "pdf"))
+                            HrAppraisalHdr.class, transactionPoid, "appraisal-a3", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -187,7 +188,7 @@ public class HrAppraisalController {
             byte[] pdf = hrAppraisalService.printByCompany(transactionPoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "appraisal-by-company", "pdf"))
+                            HrAppraisalHdr.class, transactionPoid, "appraisal-by-company", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -202,7 +203,7 @@ public class HrAppraisalController {
             byte[] pdf = hrAppraisalService.printBank(transactionPoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "appraisal-bank", "pdf"))
+                            HrAppraisalHdr.class, transactionPoid, "appraisal-bank", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -218,7 +219,7 @@ public class HrAppraisalController {
             byte[] pdf = hrAppraisalService.printLetter(transactionPoid, employeePoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "appraisal-letter", "pdf"))
+                            HrAppraisalHdr.class, transactionPoid, "appraisal-letter", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {

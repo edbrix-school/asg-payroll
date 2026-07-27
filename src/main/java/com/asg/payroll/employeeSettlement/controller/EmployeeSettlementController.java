@@ -268,7 +268,7 @@ public class EmployeeSettlementController {
             byte[] pdf = service.printSettlement(transactionPoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "purchase-journal", "pdf"))
+                            EmployeeSettlementDtl.class, transactionPoid, "purchase-journal", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -284,7 +284,7 @@ public class EmployeeSettlementController {
             byte[] pdf = service.printSettlementAmtDetailsForBank(transactionPoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "purchase-journal", "pdf"))
+                            EmployeeSettlementDtl.class, transactionPoid, "purchase-journal", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
@@ -300,7 +300,7 @@ public class EmployeeSettlementController {
             byte[] pdf = service.printSettlementRetirementLetterForBank(transactionPoid);
             return ResponseEntity.ok()
                     .headers(downloadHeaderService.buildAttachmentHeaders(
-                            UserContext.getDocumentId(), transactionPoid, "purchase-journal", "pdf"))
+                            EmployeeSettlementDtl.class, transactionPoid, "purchase-journal", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdf);
         } catch (Exception e) {
