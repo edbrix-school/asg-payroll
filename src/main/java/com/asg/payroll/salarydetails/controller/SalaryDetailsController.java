@@ -6,9 +6,11 @@ import com.asg.common.lib.dto.FilterRequestDto;
 import com.asg.common.lib.enums.LogDetailsEnum;
 import com.asg.common.lib.enums.UserRolesRightsEnum;
 import com.asg.common.lib.security.util.UserContext;
+import com.asg.common.lib.service.DocumentDownloadHeaderService;
 import com.asg.common.lib.service.LoggingService;
 import com.asg.payroll.salarydetails.dto.SalaryDetailRequest;
 import com.asg.payroll.salarydetails.dto.SalaryDetailResponse;
+import com.asg.payroll.salarydetails.entity.HrEmployeeSalaryMaster;
 import com.asg.payroll.salarydetails.service.SalaryDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +38,7 @@ public class SalaryDetailsController {
 
     private final LoggingService loggingService;
     private final SalaryDetailsService service;
+    private final DocumentDownloadHeaderService downloadHeaderService;
 
     private static final String FAILEDTOGENERATECONTRACTPDF = "Failed to generate contract PDF: ";
 
@@ -117,8 +120,8 @@ public class SalaryDetailsController {
         try {
             byte[] res = service.printOfferLetter(id);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=offer-letter-" + id + ".pdf")
+                    .headers(downloadHeaderService.buildAttachmentHeaders(
+                            HrEmployeeSalaryMaster.class, "SALARY_POID", id, "offer-letter", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF).body(res);
         } catch (Exception e) {
             log.error("Failed to generate offer letter: {}", id, e);
@@ -135,8 +138,8 @@ public class SalaryDetailsController {
         try {
             byte[] res = service.printSalaryCertificate(id);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=salary-certificate-" + id + ".pdf")
+                    .headers(downloadHeaderService.buildAttachmentHeaders(
+                            HrEmployeeSalaryMaster.class, "SALARY_POID", id, "salary-certificate", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF).body(res);
         } catch (Exception e) {
             log.error("Failed to generate salary certificate: {}", id, e);
@@ -152,8 +155,8 @@ public class SalaryDetailsController {
         try {
             byte[] res = service.printContract(id, contractPrintType);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=contract-" + id + ".pdf")
+                    .headers(downloadHeaderService.buildAttachmentHeaders(
+                            HrEmployeeSalaryMaster.class, "SALARY_POID", id, "contract", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF).body(res);
         } catch (Exception e) {
             log.error("Failed to generate contract: {}", id, e);
@@ -168,8 +171,8 @@ public class SalaryDetailsController {
         try {
             byte[] res = service.printAnnex(id);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=annex-" + id + ".pdf")
+                    .headers(downloadHeaderService.buildAttachmentHeaders(
+                            HrEmployeeSalaryMaster.class, "SALARY_POID", id, "annex", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF).body(res);
         } catch (Exception e) {
             log.error("Failed to generate annex: {}", id, e);
@@ -186,8 +189,8 @@ public class SalaryDetailsController {
         try {
             byte[] res = service.printEmployeeDetails(id, preview);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=employee-details-" + id + ".pdf")
+                    .headers(downloadHeaderService.buildAttachmentHeaders(
+                            HrEmployeeSalaryMaster.class, "SALARY_POID", id, "employee-details", "pdf"))
                     .contentType(MediaType.APPLICATION_PDF).body(res);
         } catch (Exception e) {
             log.error("Failed to generate employee details report: {}", id, e);

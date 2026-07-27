@@ -1,0 +1,307 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Appraisal Page — Frontend Calculation Spec</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  h1 {
+    font-size: 20pt;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.3px;
+  }
+  .sub {
+    color: #666;
+    font-size: 9.5pt;
+    margin-bottom: 4px;
+  }
+  .rule { border-bottom: 2px solid #1a1a1a; margin: 10px 0 22px 0; }
+  h2 {
+    font-size: 13pt;
+    margin: 26px 0 8px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #d5d5d5;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 11pt;
+    margin: 18px 0 6px 0;
+    page-break-after: avoid;
+  }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0; padding-left: 20px; }
+  li { margin: 4px 0; }
+  code {
+    font-family: "DejaVu Sans Mono", Consolas, monospace;
+    font-size: 9pt;
+    background: #f2f2f2;
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+  pre {
+    font-family: "DejaVu Sans Mono", Consolas, monospace;
+    font-size: 8.8pt;
+    line-height: 1.45;
+    background: #f7f7f7;
+    border-left: 3px solid #999;
+    padding: 10px 12px;
+    margin: 10px 0;
+    white-space: pre-wrap;
+    page-break-inside: avoid;
+  }
+  pre code { background: none; padding: 0; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+  th {
+    text-align: left;
+    background: #efefef;
+    border-bottom: 1.5px solid #bbb;
+    padding: 6px 8px;
+  }
+  td {
+    border-bottom: 1px solid #e2e2e2;
+    padding: 6px 8px;
+    vertical-align: top;
+  }
+  .yes { color: #1a7a1a; font-weight: 600; }
+  .no  { color: #a02020; font-weight: 600; }
+  .case {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    padding: 2px 16px 12px 16px;
+    margin: 14px 0;
+    page-break-inside: avoid;
+  }
+  .note {
+    background: #fff9e6;
+    border-left: 3px solid #e0a800;
+    padding: 8px 12px;
+    margin: 10px 0;
+    font-size: 9.8pt;
+  }
+  .warn {
+    background: #fdf0f0;
+    border-left: 3px solid #c0392b;
+    padding: 8px 12px;
+    margin: 10px 0;
+    font-size: 9.8pt;
+  }
+  .gotcha { margin: 12px 0; page-break-inside: avoid; }
+  .gotcha strong { display: block; margin-bottom: 2px; }
+  .updates {
+    font-size: 9.8pt;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed #ccc;
+  }
+  .updates b { color: #0a4d8c; }
+  footer {
+    margin-top: 30px;
+    padding-top: 8px;
+    border-top: 1px solid #ddd;
+    font-size: 8.5pt;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<h1>Appraisal Page — Frontend Calculation Spec</h1>
+<div class="sub">Derived from <code>AppraisalPage.jsff</code> and <code>HRAppraisalBean.java</code> (Oracle ADF legacy)</div>
+<div class="rule"></div>
+
+<h2>The screen has three groups of numbers</h2>
+
+<p><b>Current column</b> — read-only. Comes from the server. Basic, JobAllowance, FixedOT, HRA, Transport, Gross.</p>
+
+<p><b>Proposed column</b> — the user types here. New Basic, New JobAllowance, New FixedOT, New HRA, New Transport. New Gross is read-only and calculated.</p>
+
+<p><b>Right side</b> — Net Increment, Increment %, Bonus, Bonus %. All four are typed by the user, and all four also get filled in automatically depending on what else the user touched.</p>
+
+<h2>Which fields cause a calculation</h2>
+
+<p>Nine fields. Nothing else does anything.</p>
+
+<table>
+  <tr><th style="width:42%">Field</th><th style="width:14%">Triggers?</th><th>What runs</th></tr>
+  <tr><td>New Basic, New JobAllowance, New FixedOT, New HRA, New Transport</td><td class="yes">Yes</td><td>Case 1 — full gross recalc</td></tr>
+  <tr><td>Bonus</td><td class="yes">Yes</td><td>Case 1 — same routine</td></tr>
+  <tr><td>Increment %</td><td class="yes">Yes</td><td>Case 2 — percent to components</td></tr>
+  <tr><td>Bonus %</td><td class="yes">Yes</td><td>Case 3 — bonus only</td></tr>
+  <tr><td>Net Increment</td><td class="yes">Yes</td><td>Case 4 — allocate, then Case 1</td></tr>
+  <tr><td>Ticket Period, Ticket Count, New Designation</td><td class="no">No</td><td>Saved only, no math</td></tr>
+  <tr><td>Effective Date (Period From)</td><td class="no">No</td><td>But it feeds the Arrears formula — see gotchas</td></tr>
+  <tr><td>Basic Salary %, Fixed Allowance % (Batch tab)</td><td class="no">No</td><td>Settings read by Case 4</td></tr>
+</table>
+
+<div class="note">
+Calculations run when the user <b>leaves the box or presses Enter</b>. Not while typing. This matches the original ADF behaviour.
+</div>
+
+<h2>Before any calculation</h2>
+
+<p>If FixedOT, HRA or Transport in the Proposed column is empty, copy the Current value into it. Only when it is empty — never overwrite something the user typed, and never if it is zero.</p>
+
+<p>Do <b>not</b> do this for Basic or JobAllowance.</p>
+
+<pre><code>if (New FixedOT   is empty) New FixedOT   = Current FixedOT
+if (New HRA       is empty) New HRA       = Current HRA
+if (New Transport is empty) New Transport = Current Transport</code></pre>
+
+<h2>Case 1 — user edits any of the five salary boxes, or Bonus</h2>
+
+<div class="case">
+<p>Add up both columns:</p>
+<pre><code>Current Gross = Current (Basic + JobAllowance + FixedOT + Transport + HRA)
+New Gross     = New     (Basic + JobAllowance + FixedOT + Transport + HRA)</code></pre>
+
+<p>Then:</p>
+<pre><code>Net Increment = New Gross - Current Gross
+
+Increment %   = Net Increment / Current Gross * 100
+
+Bonus %       = Bonus / (Current Basic + Current JobAllowance) * 100
+                (skip if Bonus is zero)
+
+Arrears       = Net Increment * months from Effective Date to today
+                (only if Effective Date is in the past)</code></pre>
+
+<div class="note">
+Bonus % uses the <b>Current</b> Basic and JobAllowance, not the new ones. That is how the old system works. Leave it as is.
+</div>
+
+<p>Months are counted by calendar month boundaries, ignoring the day. So 31&nbsp;Jan to 1&nbsp;Feb counts as one month.</p>
+
+<div class="updates">
+<b>Update on screen:</b> New Gross, Net Increment, Increment %, Bonus %, the row in the table below, and the totals at the bottom.
+</div>
+</div>
+
+<h2>Case 2 — user types Increment %</h2>
+
+<div class="case">
+<p>Apply the percent to <b>Basic and JobAllowance only</b>. FixedOT, HRA and Transport stay as they are.</p>
+
+<pre><code>New Basic        = Current Basic        + (Current Basic        * % / 100)
+New JobAllowance = Current JobAllowance + (Current JobAllowance * % / 100)</code></pre>
+
+<p>Then recalculate New Gross, Net Increment and Arrears exactly as in Case 1.</p>
+
+<p>Do not touch Bonus or Bonus %. Do not overwrite the Increment % the user just typed.</p>
+
+<div class="updates">
+<b>Update on screen:</b> New Basic, New JobAllowance, New Gross, Net Increment, table row, totals.
+</div>
+</div>
+
+<h2>Case 3 — user types Bonus %</h2>
+
+<div class="case">
+<p>Just one line. Nothing else changes.</p>
+
+<pre><code>Bonus = (Current Basic + Current JobAllowance) * Bonus % / 100</code></pre>
+
+<div class="updates">
+<b>Update on screen:</b> Bonus, and the Bonus total at the bottom. Nothing else.
+</div>
+</div>
+
+<h2>Case 4 — user types Net Increment</h2>
+
+<div class="case">
+<p>This one works backwards. The user says "give this person 500" and the system decides how much goes to Basic and how much to JobAllowance.</p>
+
+<p>The split comes from two settings on the <b>Batch Update</b> tab: Basic Salary % and Fixed Allowance %.</p>
+
+<p>First check three things. If any fails, show the message and stop — do not change any numbers.</p>
+
+<ul>
+  <li>Basic Salary % is filled in</li>
+  <li>Fixed Allowance % is filled in</li>
+  <li>The two add up to exactly 100</li>
+</ul>
+
+<p>Then:</p>
+
+<pre><code>if (amount &gt; 0 AND employee HAS a JobAllowance)
+    Basic goes up by        (amount * Basic % / 100)
+    JobAllowance goes up by (whatever is left over)
+
+if (amount &gt; 0 AND employee has NO JobAllowance)
+    all of it goes to Basic
+
+if (amount &lt;= 0)
+    reset New Basic and New JobAllowance back to the Current values
+    (the old system has no way to reduce a salary here)</code></pre>
+
+<p>After that, run Case 1's calculation. Net Increment will come back to the same number the user typed.</p>
+
+<div class="note">
+Fixed Allowance % is only used in the "adds up to 100" check. The actual JobAllowance amount is the leftover, so all rounding drift lands in JobAllowance.
+</div>
+
+<div class="updates">
+<b>Update on screen:</b> New Basic, New JobAllowance, plus everything from Case 1.
+</div>
+</div>
+
+<h2>Totals at the bottom</h2>
+
+<p>Recalculate these after every single change:</p>
+
+<pre><code>Total Gross Current = sum of all Current Gross
+Total Gross New     = sum of all New Gross
+Increase            = Total Gross New - Total Gross Current
+Increase %          = Increase / Total Gross Current * 100
+Bonus               = sum of all Bonus
+Arrears             = sum of all Arrears</code></pre>
+
+<h2>Colours</h2>
+
+<p>A Proposed box turns <b>light green</b> when its value is different from the Current value next to it. A table row turns light green when its status is "Updated". The Current Promotion Date box turns <b>yellow</b> when it is empty.</p>
+
+<h2>Four things that will bite you</h2>
+
+<div class="gotcha">
+<strong>1. Infinite loops</strong>
+Net Increment is typed by the user, but it is also written back by the calculation. Same for Increment % and Bonus %. If your code watches the value instead of watching for user input, it will trigger itself over and over. Make sure your own writes do not fire the handler.
+</div>
+
+<div class="gotcha">
+<strong>2. Divide by zero</strong>
+Increment % divides by Current Gross. If an employee has all zeros, this crashes. The old code crashes too. Show blank or zero instead.
+</div>
+
+<div class="gotcha">
+<strong>3. The old percentages are wrong</strong>
+The legacy code rounds before multiplying by 100, so 5.67% shows up as 6.00%. Do it properly — multiply first, then round to two decimals. Warn whoever compares the old screen to the new one, because the numbers will not match.
+</div>
+
+<div class="gotcha">
+<strong>4. The four CTC boxes have no formula</strong>
+Monthly CTC and Yearly CTC, both Current and New, are shown on the screen but nothing on the front end calculates them. They come from the server. Leave them read-only until someone tells you where they are worked out.
+</div>
+
+<div class="warn">
+<b>Also worth knowing:</b> Arrears and Status do not appear on the edit form at all — they are grid-only columns. The edit panel writes them, the grid displays them.
+</div>
+
+<footer>
+Source: ASGPayrollViewController — AppraisalPage.jsff, HRAppraisalBean.java &nbsp;·&nbsp; Batch update, salary-master push and arrears recalculation are handled by Oracle stored procedures and are out of scope for the frontend.
+</footer>
+
+</body>
+</html>
