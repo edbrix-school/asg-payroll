@@ -20,6 +20,7 @@ public class SalaryDetailRequest {
     
     private BigDecimal basicSalary;
     private BigDecimal registeredSalary; // Gosi Salary
+    private BigDecimal gosiSalary; // Alias for Gosi Salary sent by FE
     private String gosiType;
     
     private String paymentMethod;

@@ -3,6 +3,7 @@ package com.asg.payroll.salarydetails.service.impl;
 import com.asg.common.lib.dto.DeleteReasonDto;
 import com.asg.common.lib.dto.FilterDto;
 import com.asg.common.lib.dto.FilterRequestDto;
+import com.asg.common.lib.dto.LovGetListDto;
 import com.asg.common.lib.dto.RawSearchResult;
 import com.asg.common.lib.dto.request.LogRequestDto;
 import com.asg.common.lib.enums.LogDetailsEnum;
@@ -68,7 +69,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
     private final GlobalParameterService globalParameterService;
     private final LovDataService lovDataService;
 
-    private static final String DESIGNATION_LOV = "DESIGNATION_NAME";
+    private static final String DESIGNATION_LOV = "DESIGNATION";
 
     private static final String SALARY_POID = "SALARY_POID";
     private static final String EMPLOYEE_POID = "EMPLOYEE_POID";
@@ -246,20 +247,30 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         // resolve designation LOV and CR number for each history entry
         if (response.getHistory() != null) {
             Set<Long> crPoids = new HashSet<>();
-            history.stream()
-                    .map(HrEmployeeSalaryHist::getCrPoid)
-                    .filter(Objects::nonNull)
-                    .forEach(crPoids::add);
+            Set<Long> designationPoids = new HashSet<>();
+            history.forEach(h -> {
+                if (h.getCrPoid() != null) {
+                    crPoids.add(h.getCrPoid());
+                }
+                if (h.getDesignationPoid() != null) {
+                    designationPoids.add(h.getDesignationPoid());
+                }
+            });
+
             Map<Long, String> crNumbers = procRepository.getCrNumbers(crPoids);
             final Map<Long, String> crNumberByPoid = crNumbers != null ? crNumbers : Collections.emptyMap();
+
+            Map<Long, LovGetListDto> designationMap = designationPoids.isEmpty()
+                    ? Collections.emptyMap()
+                    : lovDataService.getDetailsByPoidsAndLovName(new ArrayList<>(designationPoids), DESIGNATION_LOV);
+            final Map<Long, LovGetListDto> desMap = designationMap != null ? designationMap : Collections.emptyMap();
 
             history.forEach(h -> response.getHistory().stream()
                     .filter(dto -> h.getDetRowId() != null && h.getDetRowId().equals(dto.getDetRowId()))
                     .findFirst()
                     .ifPresent(dto -> {
                         if (h.getDesignationPoid() != null) {
-                            dto.setDesignationDet(lovDataService.getDetailsByPoidAndLovNameFast(
-                                    h.getDesignationPoid(), DESIGNATION_LOV));
+                            dto.setDesignationDet(desMap.get(h.getDesignationPoid()));
                         }
                         if (h.getCrPoid() != null) {
                             dto.setCrNumber(crNumberByPoid.get(h.getCrPoid()));

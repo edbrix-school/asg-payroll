@@ -41,6 +41,19 @@ class SalaryDetailsMapperTest {
     }
 
     @Test
+    void testMapToEntity_GosiSalary() {
+        SalaryDetailRequest request = SalaryDetailRequest.builder()
+                .employeePoid(100L)
+                .gosiSalary(BigDecimal.valueOf(150))
+                .build();
+
+        HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
+        SalaryDetailsMapper.mapToEntity(request, entity);
+
+        assertEquals(BigDecimal.valueOf(150), entity.getRegisteredSalary());
+    }
+
+    @Test
     void testMapToEntity_NullRequest() {
         HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
         entity.setEmployeePoid(1L);
@@ -76,7 +89,7 @@ class SalaryDetailsMapperTest {
         List<HrEmployeeSalaryAlwDtl> allowances = List.of(alw);
 
         HrEmployeeSalaryHist hist = HrEmployeeSalaryHist.builder()
-                .basicSalary(900L)
+                .basicSalary(BigDecimal.valueOf(900))
                 .build();
         List<HrEmployeeSalaryHist> history = List.of(hist);
 

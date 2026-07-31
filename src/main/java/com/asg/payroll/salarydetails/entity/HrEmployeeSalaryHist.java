@@ -4,6 +4,7 @@ import com.asg.common.lib.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -28,28 +29,28 @@ public class HrEmployeeSalaryHist extends BaseEntity {
     private LocalDate lastIncrementDate;
 
     @Column(name = "BASIC_SALARY")
-    private Long basicSalary;
+    private BigDecimal basicSalary;
 
     @Column(name = "REGISTERED_SALARY")
-    private Long registeredSalary;
+    private BigDecimal registeredSalary;
 
     @Column(name = "FA_ALW")
-    private Long faAlw;
+    private BigDecimal faAlw;
 
     @Column(name = "TA_ALW")
-    private Long taAlw;
+    private BigDecimal taAlw;
 
     @Column(name = "HRA_ALW")
-    private Long hraAlw;
+    private BigDecimal hraAlw;
 
     @Column(name = "FIXOT_ALW")
-    private Long fixotAlw;
+    private BigDecimal fixotAlw;
 
     @Column(name = "SPL_ALW")
-    private Long splAlw;
+    private BigDecimal splAlw;
 
     @Column(name = "GROSS_PAY")
-    private Long grossPay;
+    private BigDecimal grossPay;
 
     @Column(name = "REMARKS", length = 100)
     private String remarks;
