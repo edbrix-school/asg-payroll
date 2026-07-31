@@ -104,7 +104,7 @@ public class LoansAdvancesController {
             @Valid @RequestBody HrRecurringPayDeductRequest requestDto) {
 
         HrRecurringPayDeductResponse updatedPoid = service.update(transactionPoid, requestDto);
-        return success("Loans/Advances updated successfully", Map.of("transactionPoid", updatedPoid));
+        return success("Loans/Advances updated successfully",(updatedPoid));
     }
 
     @Operation(
