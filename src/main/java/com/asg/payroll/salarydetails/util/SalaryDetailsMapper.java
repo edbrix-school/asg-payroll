@@ -24,7 +24,8 @@ public class SalaryDetailsMapper {
         entity.setNextIncrementDate(request.getNextIncrementDate());
         entity.setIndemnityDueFrom(request.getIndemnityDueFrom());
         entity.setBasicSalary(request.getBasicSalary());
-        entity.setRegisteredSalary(request.getRegisteredSalary());
+        BigDecimal regSalary = request.getRegisteredSalary() != null ? request.getRegisteredSalary() : request.getGosiSalary();
+        entity.setRegisteredSalary(regSalary);
         entity.setGosiType(request.getGosiType());
         entity.setPaymentMethod(request.getPaymentMethod());
         entity.setBankPoid(request.getBankPoid());
@@ -55,6 +56,7 @@ public class SalaryDetailsMapper {
                 .indemnityDueFrom(entity.getIndemnityDueFrom())
                 .basicSalary(entity.getBasicSalary())
                 .registeredSalary(entity.getRegisteredSalary())
+                .gosiSalary(entity.getRegisteredSalary())
                 .gosiType(entity.getGosiType())
                 .grossSalary(entity.getGrossSalary())
                 .netSalary(entity.getNetSalary())
