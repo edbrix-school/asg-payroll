@@ -391,7 +391,7 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
     @Override
     public PayrollActionResponse processPayroll(Long transactionPoid, PayrollActionRequest request) {
         validateActionRequest(transactionPoid, request);
-        String suppressArrears = Boolean.TRUE.equals(request.getSuppressArrearsValidation()) ? Y : N;
+        String suppressArrears = "Y".equalsIgnoreCase(request.getSuppressArrearsValidation()) ? Y : N;
         Map<String, Object> result = execute(
                 "PROC_HR_PAYROLL_PROCESS",
                 List.of(
