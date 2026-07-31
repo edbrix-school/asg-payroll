@@ -16,7 +16,7 @@ public class PayrollActionRequest {
 
     private LocalDate payrollMonth;
 
-    private Boolean suppressArrearsValidation;
+    private String suppressArrearsValidation;
 
     private LocalDateTime scheduleOn;
 
