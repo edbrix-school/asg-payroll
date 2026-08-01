@@ -588,9 +588,11 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         entity.setDeleted("N");
         mapDetail(request, entity);
         HrAppraisalLegacyRecalculation.applyRecalculateGross(entity, hdr.getPeriodFrom(), today);
-        HrAppraisalDtl saved = dtlRepository.save(entity);
+        dtlRepository.save(entity);
         loggingService.createLogSummaryEntry(UserContext.getDocumentId(), String.valueOf(transactionPoid),
-                String.format("Row Created on [Employee Appraisal Details] with DetRowId: %s", saved.getDetRowId()));
+                String.format("Row Created on [Employee Appraisal Details] with DetRowId: %s", entity.getDetRowId()));
+        loggingService.createLog(null, entity, HrAppraisalDtl.class, UserContext.getDocumentId(), transactionPoid.toString(),
+                String.format("KeyId = TRANSACTION_POID %s: DET_ROW_ID %s", transactionPoid, entity.getDetRowId()));
     }
 
     private void deleteDetail(Long transactionPoid, HrAppraisalDtlRequest request) {
@@ -609,9 +611,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         BeanUtils.copyProperties(existing, oldEntity);
         mapDetail(request, existing);
         HrAppraisalLegacyRecalculation.applyRecalculateGross(existing, hdr.getPeriodFrom(), today);
-        HrAppraisalDtl saved = dtlRepository.save(existing);
+        dtlRepository.save(existing);
         loggingService.createLog(oldEntity, existing, HrAppraisalDtl.class, UserContext.getDocumentId(), transactionPoid.toString(),
-                String.format("KeyId = TRANSACTION_POID %s: DET_ROW_ID %s", saved.getTransactionPoid(), saved.getDetRowId()));
+                String.format("KeyId = TRANSACTION_POID %s: DET_ROW_ID %s", transactionPoid, existing.getDetRowId()));
     }
 
     private HrAppraisalDtlId buildDtlId(Long transactionPoid, Long detRowId) {

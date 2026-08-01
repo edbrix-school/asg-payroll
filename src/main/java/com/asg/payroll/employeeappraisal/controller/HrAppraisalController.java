@@ -51,8 +51,9 @@ public class HrAppraisalController {
     @AllowedAction(UserRolesRightsEnum.VIEW)
     @GetMapping("/{transactionPoid}")
     public ResponseEntity<?> getAppraisalById(@PathVariable Long transactionPoid) {
+        Map<String, Object> response = hrAppraisalService.getAppraisalById(transactionPoid);
         loggingService.createLogSummaryEntry(LogDetailsEnum.VIEWED, UserContext.getDocumentId(), transactionPoid.toString());
-        return success("Employee appraisal retrieved successfully", hrAppraisalService.getAppraisalById(transactionPoid));
+        return success("Employee appraisal retrieved successfully", response);
     }
 
     @AllowedAction(UserRolesRightsEnum.CREATE)

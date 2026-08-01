@@ -417,6 +417,32 @@ class HrAppraisalServiceImplTest {
     }
 
     @Test
+    void upsertDetails_IsCreated_LogsSummaryAndFieldValues() {
+        HrAppraisalDtlRequest dtlReq = new HrAppraisalDtlRequest();
+        dtlReq.setActionType(ActionType.isCreated);
+        dtlReq.setEmployeePoid(100L);
+
+        when(hdrRepository.findById(1L)).thenReturn(Optional.of(mockHdr));
+        when(hdrRepository.save(any())).thenReturn(mockHdr);
+        when(dtlRepository.findMaxDetRowIdByTransactionPoid(1L)).thenReturn(0L);
+        when(dtlRepository.save(any())).thenReturn(mockDtl);
+        when(self.getAppraisalById(1L)).thenReturn(Map.of());
+        when(jdbcTemplate.queryForObject(anyString(), eq(String.class), eq(100L))).thenReturn("Y");
+
+        try (MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+
+            service.updateAppraisal(1L, validRequest(List.of(dtlReq)));
+        }
+
+        verify(loggingService).createLogSummaryEntry(eq("DOC123"), eq("1"), contains("DetRowId: 1"));
+        // a null pre-image makes createLog write every populated field, so the
+        // Details tab shows the inserted values rather than a bare summary line
+        verify(loggingService).createLog(isNull(), any(HrAppraisalDtl.class), eq(HrAppraisalDtl.class),
+                eq("DOC123"), eq("1"), contains("DET_ROW_ID 1"));
+    }
+
+    @Test
     void upsertDetails_IsDeleted_Success() {
         HrAppraisalDtlRequest dtlReq = new HrAppraisalDtlRequest();
         dtlReq.setActionType(ActionType.isDeleted);
