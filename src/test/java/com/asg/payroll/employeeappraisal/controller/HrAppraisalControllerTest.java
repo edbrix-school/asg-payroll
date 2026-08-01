@@ -10,6 +10,7 @@ import com.asg.payroll.employeeappraisal.dto.HrAppraisalActionRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRecalculationRequest;
 import com.asg.payroll.employeeappraisal.dto.HrAppraisalRequest;
 import com.asg.payroll.employeeappraisal.service.HrAppraisalService;
+import com.asg.payroll.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -81,6 +82,20 @@ class HrAppraisalControllerTest {
             assertEquals(200, response.getStatusCode().value());
             verify(loggingService).createLogSummaryEntry(any(LogDetailsEnum.class), anyString(), anyString());
         }
+    }
+
+    @Test
+    void getAppraisalById_NotFound_WritesNoViewLog() {
+        Long id = 1L;
+        when(hrAppraisalService.getAppraisalById(id))
+                .thenThrow(new ResourceNotFoundException("Appraisal not found with id: " + id));
+
+        assertThrows(ResourceNotFoundException.class, () -> controller.getAppraisalById(id));
+
+        // VIEWED must be logged after the service call so a 404 does not record a view.
+        // any() rather than anyString(): an unauthenticated UserContext yields a null
+        // docId, which anyString() would not match, making the check pass vacuously.
+        verify(loggingService, never()).createLogSummaryEntry(any(LogDetailsEnum.class), any(), any());
     }
 
     @Test
