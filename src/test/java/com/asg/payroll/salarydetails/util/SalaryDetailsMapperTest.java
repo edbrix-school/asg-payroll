@@ -54,6 +54,20 @@ class SalaryDetailsMapperTest {
     }
 
     @Test
+    void testMapToEntity_GosiSalaryPrecedence() {
+        SalaryDetailRequest request = SalaryDetailRequest.builder()
+                .employeePoid(100L)
+                .registeredSalary(BigDecimal.valueOf(14))
+                .gosiSalary(BigDecimal.valueOf(500))
+                .build();
+
+        HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
+        SalaryDetailsMapper.mapToEntity(request, entity);
+
+        assertEquals(BigDecimal.valueOf(500), entity.getRegisteredSalary());
+    }
+
+    @Test
     void testMapToEntity_NullRequest() {
         HrEmployeeSalaryMaster entity = new HrEmployeeSalaryMaster();
         entity.setEmployeePoid(1L);
