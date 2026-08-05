@@ -16,6 +16,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
@@ -166,11 +167,30 @@ class HrPayrollProcessControllerTest {
     @Test
     void revertPayroll_Success() {
         Long id = 1L;
-        when(hrPayrollProcessService.revertPayroll(id)).thenReturn(new PayrollActionResponse());
+
+        PayrollActionResponse payrollActionResponse = new PayrollActionResponse();
+        payrollActionResponse.setStatus("SUCCESS");
+
+        when(hrPayrollProcessService.revertPayroll(id)).thenReturn(payrollActionResponse);
 
         ResponseEntity<?> response = controller.revertPayroll(id);
 
-        assertEquals(200, response.getStatusCode().value());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void revertPayroll_Failure() {
+        Long id = 1L;
+
+        PayrollActionResponse payrollActionResponse = new PayrollActionResponse();
+        payrollActionResponse.setStatus("FAILURE");
+        payrollActionResponse.setMessage("Payroll revert failed");
+
+        when(hrPayrollProcessService.revertPayroll(id)).thenReturn(payrollActionResponse);
+
+        ResponseEntity<?> response = controller.revertPayroll(id);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test

@@ -465,7 +465,14 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_PAYROLL_TRANS_POID, transactionPoid)
         );
         logProcedureResult(transactionPoid, result, "Payroll reverted / cancelled...", "Payroll revert completed with warning.");
-        return new PayrollActionResponse((String) result.get(P_STATUS), "Payroll revert completed");
+        PayrollActionResponse response = new PayrollActionResponse();
+        String message = (String) result.get(P_STATUS);
+        response.setMessage(message);
+        response.setStatus("SUCCESS");
+        if (!message.isBlank() && message.contains(ERROR)) {
+            response.setStatus("FAILURE");
+        }
+        return response;
     }
 
     @Override

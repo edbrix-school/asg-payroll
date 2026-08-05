@@ -8,10 +8,7 @@ import com.asg.common.lib.enums.UserRolesRightsEnum;
 import com.asg.common.lib.security.util.UserContext;
 import com.asg.common.lib.service.DocumentDownloadHeaderService;
 import com.asg.common.lib.service.LoggingService;
-import com.asg.payroll.payrollprocess.dto.HrPayrollHdrRequest;
-import com.asg.payroll.payrollprocess.dto.LoadLoansAdvancesRequest;
-import com.asg.payroll.payrollprocess.dto.LoadVariablesRequest;
-import com.asg.payroll.payrollprocess.dto.PayrollActionRequest;
+import com.asg.payroll.payrollprocess.dto.*;
 import com.asg.payroll.payrollprocess.entity.HrPayrollHdr;
 import com.asg.payroll.payrollprocess.service.HrPayrollProcessService;
 import jakarta.validation.Valid;
@@ -110,7 +107,11 @@ public class HrPayrollProcessController {
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/{transactionPoid}/revert")
     public ResponseEntity<?> revertPayroll(@PathVariable Long transactionPoid) {
-        return success("Payroll reverted successfully", hrPayrollProcessService.revertPayroll(transactionPoid));
+        PayrollActionResponse response = hrPayrollProcessService.revertPayroll(transactionPoid);
+        if ("FAILURE".equalsIgnoreCase(response.getStatus())) {
+            return error(response.getMessage(), 400);
+        }
+        return success("Payroll reverted successfully", response);
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
