@@ -188,42 +188,42 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
     <detail>
         <band height="96" splitType="Stretch">
             <textField textAdjust="StretchHeight">
-                <reportElement x="0" y="15" width="350" height="20" uuid="d2507295-6ec4-4a37-99ba-2932bccdf53d"/>
+                <reportElement x="0" y="15" width="364" height="20" uuid="d2507295-6ec4-4a37-99ba-2932bccdf53d"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Dear  " + $F{EMPLOYEE_NAME}]]></textFieldExpression>
             </textField>
             <staticText>
-                <reportElement x="356" y="15" width="48" height="20" uuid="307dbb80-4dad-4a81-82e6-9fdc9f80a81b"/>
+                <reportElement x="370" y="15" width="44" height="20" uuid="307dbb80-4dad-4a81-82e6-9fdc9f80a81b"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Date]]></text>
             </staticText>
             <textField pattern="dd-MMM-yyyy">
-                <reportElement x="410" y="15" width="92" height="20" uuid="82e59e0d-54d2-454e-9078-1549caa691d2"/>
-                <textElement textAlignment="Left" verticalAlignment="Middle">
+                <reportElement x="418" y="15" width="84" height="20" uuid="82e59e0d-54d2-454e-9078-1549caa691d2"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$F{PERIOD_FROM}]]></textFieldExpression>
             </textField>
             <staticText>
-                <reportElement x="400" y="15" width="10" height="20" uuid="73165874-a3c1-46a2-9d5f-b51a02739076"/>
+                <reportElement x="410" y="15" width="10" height="20" uuid="73165874-a3c1-46a2-9d5f-b51a02739076"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true" pdfFontName="Helvetica-Bold"/>
                 </textElement>
                 <text><![CDATA[:]]></text>
             </staticText>
             <textField>
-                <reportElement x="0" y="72" width="502" height="20" uuid="666f2a1c-dbed-41c3-a94b-6bfd88c82f88"/>
+                <reportElement positionType="Float" x="0" y="72" width="502" height="20" uuid="666f2a1c-dbed-41c3-a94b-6bfd88c82f88"/>
                 <textElement>
                     <font size="14" isBold="true" pdfFontName="Helvetica-Bold"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Congratulations to You."]]></textFieldExpression>
             </textField>
             <textField>
-                <reportElement x="0" y="35" width="280" height="20" uuid="b79041a2-ab12-4bf1-bc32-2fbeab5df4fb"/>
+                <reportElement positionType="Float" x="0" y="35" width="364" height="20" uuid="b79041a2-ab12-4bf1-bc32-2fbeab5df4fb"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="10"/>
                 </textElement>
