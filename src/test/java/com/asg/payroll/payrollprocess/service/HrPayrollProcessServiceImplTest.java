@@ -933,7 +933,7 @@ class HrPayrollProcessServiceImplTest {
             when(mock.withProcedureName(anyString())).thenReturn(mock);
             when(mock.declareParameters(any(org.springframework.jdbc.core.SqlParameter[].class))).thenReturn(mock);
             Map<String, Object> result = new HashMap<>();
-            result.put("P_STATUS", "SUCCESS");
+            result.put("P_STATUS", null);
             result.put("VARIABLES_REC", new ArrayList<>());
             result.put("ATT_REC", new ArrayList<>());
             when(mock.execute(anyMap())).thenReturn(result);
