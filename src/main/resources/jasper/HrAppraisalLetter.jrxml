@@ -169,7 +169,7 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
         <groupHeader>
             <band height="61">
                 <subreport>
-                    <reportElement x="0" y="0" width="503" height="61" uuid="11dd97b8-4c92-45fe-85bb-3b9358474446"/>
+                    <reportElement x="0" y="0" width="502" height="61" uuid="11dd97b8-4c92-45fe-85bb-3b9358474446"/>
                     <subreportParameter name="LOGIN_COMP_POID">
                         <subreportParameterExpression><![CDATA[$F{COMPANY_POID}]]></subreportParameterExpression>
                     </subreportParameter>
@@ -187,29 +187,29 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
     </pageHeader>
     <detail>
         <band height="96" splitType="Stretch">
-            <textField>
-                <reportElement x="0" y="15" width="280" height="20" uuid="d2507295-6ec4-4a37-99ba-2932bccdf53d"/>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="15" width="350" height="20" uuid="d2507295-6ec4-4a37-99ba-2932bccdf53d"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA["Dear  " + $F{EMPLOYEE_NAME}]]></textFieldExpression>
             </textField>
             <staticText>
-                <reportElement x="378" y="15" width="48" height="20" uuid="307dbb80-4dad-4a81-82e6-9fdc9f80a81b"/>
+                <reportElement x="356" y="15" width="48" height="20" uuid="307dbb80-4dad-4a81-82e6-9fdc9f80a81b"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Date]]></text>
             </staticText>
             <textField pattern="dd-MMM-yyyy">
-                <reportElement x="426" y="15" width="76" height="20" uuid="82e59e0d-54d2-454e-9078-1549caa691d2"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
+                <reportElement x="410" y="15" width="92" height="20" uuid="82e59e0d-54d2-454e-9078-1549caa691d2"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$F{PERIOD_FROM}]]></textFieldExpression>
             </textField>
             <staticText>
-                <reportElement x="422" y="15" width="10" height="20" uuid="73165874-a3c1-46a2-9d5f-b51a02739076"/>
+                <reportElement x="400" y="15" width="10" height="20" uuid="73165874-a3c1-46a2-9d5f-b51a02739076"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true" pdfFontName="Helvetica-Bold"/>
                 </textElement>
@@ -230,7 +230,7 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                 <textFieldExpression><![CDATA["Staff No : " + $F{EMPLOYEE_CODE}]]></textFieldExpression>
             </textField>
             <line>
-                <reportElement positionType="FixRelativeToBottom" x="1" y="0" width="502" height="1"
+                <reportElement positionType="FixRelativeToBottom" x="0" y="0" width="502" height="1"
                                uuid="44e0d8fc-5bda-44a3-8735-6db36eada590"/>
                 <graphicElement>
                     <pen lineWidth="0.5" lineColor="#999999"/>
@@ -239,8 +239,8 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
         </band>
         <band height="58">
             <printWhenExpression><![CDATA[(!$F{CUR_DESIGNATION}.equals($F{NEW_DESIGNATION}))]]></printWhenExpression>
-            <textField>
-                <reportElement x="1" y="0" width="502" height="56" uuid="d5e8dcf5-5a29-4e2b-bd2a-acb8e1847846">
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="0" width="502" height="56" uuid="d5e8dcf5-5a29-4e2b-bd2a-acb8e1847846">
                     <printWhenExpression><![CDATA[($F{NET_INCREMENT} > "0".toInteger())]]></printWhenExpression>
                 </reportElement>
                 <textElement textAlignment="Justified" verticalAlignment="Middle" markup="styled">
@@ -249,8 +249,8 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                 <textFieldExpression>
                     <![CDATA["After thorough review of your performance, the management has decided to promote you as <style isBold=\"true\" isUnderline=\"true\" >  \"" + $F{NEW_DESIGNATION} + "\" </style> and pleased to revise your salary by <style isBold=\"true\" > BD " + $F{NET_INCREMENT} + "/- </style>  from "  +  $F{PERIOD_FROM} +  " and the revised structure is given below :- "]]></textFieldExpression>
             </textField>
-            <textField>
-                <reportElement x="1" y="12" width="502" height="30" uuid="c6b199d6-0503-4e3d-9c18-b39f8ca60fa7">
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="12" width="502" height="30" uuid="c6b199d6-0503-4e3d-9c18-b39f8ca60fa7">
                     <printWhenExpression><![CDATA[($F{NET_INCREMENT} == "0".toInteger())]]></printWhenExpression>
                 </reportElement>
                 <textElement textAlignment="Justified" verticalAlignment="Middle" markup="styled">
@@ -263,8 +263,8 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
         <band height="46">
             <printWhenExpression><![CDATA[($F{CUR_DESIGNATION}.equals($F{NEW_DESIGNATION}) && $F{NET_INCREMENT} > "0".toInteger()
 )]]></printWhenExpression>
-            <textField>
-                <reportElement x="1" y="0" width="502" height="39" uuid="126f616d-0ae9-41a5-b780-1da81db22f27"/>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="0" width="502" height="39" uuid="126f616d-0ae9-41a5-b780-1da81db22f27"/>
                 <textElement textAlignment="Justified" verticalAlignment="Middle" markup="styled">
                     <font fontName="Arial" size="12"/>
                 </textElement>
@@ -275,7 +275,7 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
         <band height="50">
             <printWhenExpression><![CDATA[$F{NET_INCREMENT} > "0".toInteger()]]></printWhenExpression>
             <componentElement>
-                <reportElement key="table" style="table" x="1" y="0" width="500" height="50"
+                <reportElement key="table" style="table" x="0" y="0" width="502" height="50"
                                isPrintInFirstWholeBand="true" uuid="617c6642-fabc-4a8e-ae8e-a5c65ff17678"/>
                 <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
                           xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
@@ -288,10 +288,10 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                         </datasetParameter>
                         <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
                     </datasetRun>
-                    <jr:column width="321" uuid="674677ea-bc9e-4eb3-b86f-07f770b2253a">
+                    <jr:column width="322" uuid="674677ea-bc9e-4eb3-b86f-07f770b2253a">
                         <jr:tableFooter style="table_TH" height="30" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="321" height="30"
+                                <reportElement x="0" y="0" width="322" height="30"
                                                uuid="2b921e2f-2294-412d-8be8-74be5f48cb94"/>
                                 <textElement verticalAlignment="Middle">
                                     <font size="12" isBold="true" pdfFontName="Helvetica-Bold"/>
@@ -302,7 +302,7 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                         </jr:tableFooter>
                         <jr:columnHeader style="table_CH" height="26" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="321" height="26"
+                                <reportElement x="0" y="0" width="322" height="26"
                                                uuid="7534a28f-1510-4c9f-b784-23e033e8b473"/>
                                 <textElement verticalAlignment="Middle">
                                     <font isBold="true" pdfFontName="Helvetica-Bold"/>
@@ -313,7 +313,7 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                         </jr:columnHeader>
                         <jr:detailCell style="table_TD" height="20" rowSpan="1">
                             <textField>
-                                <reportElement x="0" y="0" width="321" height="20"
+                                <reportElement x="0" y="0" width="322" height="20"
                                                uuid="fcbc11c3-52e6-4cf4-90c7-9261a081aee8"/>
                                 <textElement verticalAlignment="Middle">
                                     <paragraph leftIndent="3" rightIndent="3"/>
@@ -322,10 +322,10 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
-                    <jr:column width="178" uuid="108a9254-85ba-42ad-b4d9-06a5901369d4">
+                    <jr:column width="180" uuid="108a9254-85ba-42ad-b4d9-06a5901369d4">
                         <jr:tableFooter style="table_TH" height="30" rowSpan="1">
                             <textField pattern="###,###.000" isBlankWhenNull="false">
-                                <reportElement mode="Transparent" x="0" y="0" width="178" height="30"
+                                <reportElement mode="Transparent" x="0" y="0" width="180" height="30"
                                                forecolor="#000000" backcolor="#FFFFFF"
                                                uuid="6c6ce906-cfe0-4f1d-baa6-cf9f413c164e"/>
                                 <textElement textAlignment="Right" verticalAlignment="Middle" rotation="None"
@@ -340,7 +340,7 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                         </jr:tableFooter>
                         <jr:columnHeader style="table_CH" height="26" rowSpan="1">
                             <staticText>
-                                <reportElement x="0" y="0" width="178" height="26"
+                                <reportElement x="0" y="0" width="180" height="26"
                                                uuid="c80c9702-e75a-418f-a16c-334df9db9686"/>
                                 <textElement textAlignment="Right" verticalAlignment="Middle">
                                     <font isBold="true" pdfFontName="Helvetica-Bold"/>
@@ -351,7 +351,7 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                         </jr:columnHeader>
                         <jr:detailCell style="table_TD" height="20" rowSpan="1">
                             <textField pattern="###,###.000">
-                                <reportElement x="0" y="0" width="178" height="20"
+                                <reportElement x="0" y="0" width="180" height="20"
                                                uuid="614eeb6a-4900-4575-95ac-168259516beb"/>
                                 <textElement textAlignment="Right" verticalAlignment="Middle">
                                     <paragraph leftIndent="3" rightIndent="3"/>
@@ -365,8 +365,8 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
         </band>
         <band height="74">
             <printWhenExpression><![CDATA[$F{NEW_BONUS} > "0".toInteger()]]></printWhenExpression>
-            <textField>
-                <reportElement x="1" y="8" width="502" height="65" uuid="3454e4aa-9fbc-468a-8bc8-d23234fdcbd0"/>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="8" width="502" height="65" uuid="3454e4aa-9fbc-468a-8bc8-d23234fdcbd0"/>
                 <textElement textAlignment="Justified" verticalAlignment="Middle" markup="styled">
                     <font fontName="Arial" size="12"/>
                 </textElement>
@@ -377,8 +377,8 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
         <band height="39">
             <printWhenExpression>
                 <![CDATA[(!$F{CUR_TICKET_ENTITLEMENT}.equals($F{NEW_TICKET_ENTITLEMENT}))]]></printWhenExpression>
-            <textField>
-                <reportElement x="1" y="0" width="502" height="35" uuid="afa351e0-99bf-42fb-956c-dc5c150f9be5"/>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="0" y="0" width="502" height="35" uuid="afa351e0-99bf-42fb-956c-dc5c150f9be5"/>
                 <textElement textAlignment="Justified" verticalAlignment="Middle" markup="styled">
                     <font fontName="Arial" size="12"/>
                 </textElement>
@@ -386,9 +386,9 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                     <![CDATA["Also your air ticket entitlement has been revised as <style isBold=\"true\" isUnderline=\"true\" >  \"" + $F{NEW_TICKET_ENTITLEMENT} + "\" </style>  "]]></textFieldExpression>
             </textField>
         </band>
-        <band height="147">
+        <band height="163">
             <staticText>
-                <reportElement x="1" y="5" width="502" height="134" uuid="609d2758-7ee9-40b1-b807-bce08fca19a5"/>
+                <reportElement x="0" y="5" width="502" height="150" uuid="609d2758-7ee9-40b1-b807-bce08fca19a5"/>
                 <textElement textAlignment="Justified">
                     <font fontName="Arial" size="12" isItalic="false"/>
                     <paragraph lineSpacing="Single"/>
