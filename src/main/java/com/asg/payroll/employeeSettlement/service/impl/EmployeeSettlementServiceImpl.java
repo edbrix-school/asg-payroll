@@ -77,6 +77,7 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
         String isDeleted = documentService.resolveIsDeleted(request);
         List<FilterDto> filters = documentService.resolveDateFilters(request, "TRANSACTION_DATE", startDate, endDate);
         RawSearchResult raw = documentService.search(docId, filters, operator, pageable, isDeleted, "DOC_REF", "TRANSACTION_POID");
+        com.asg.payroll.common.util.SearchResultUtil.normalizeDates(raw);
         Page<Map<String, Object>> page = new PageImpl<>(raw.records(), pageable, raw.totalRecords());
         return PaginationUtil.wrapPage(page, raw.displayFields());
     }
