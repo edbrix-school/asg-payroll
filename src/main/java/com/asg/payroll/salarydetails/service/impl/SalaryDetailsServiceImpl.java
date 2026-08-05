@@ -130,6 +130,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
         RawSearchResult raw = documentSearchService.search(UserContext.getDocumentId(), filterList, operator, pageable,
                 isDeleted, "EMPLOYEE_NAME", SALARY_POID);
+        com.asg.payroll.common.util.SearchResultUtil.normalizeDates(raw);
 
         Page<Map<String, Object>> page = new PageImpl<>(raw.records(), pageable, raw.totalRecords());
         return PaginationUtil.wrapPage(page, raw.displayFields());
