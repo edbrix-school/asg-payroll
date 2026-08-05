@@ -235,7 +235,12 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         response.setPayrollReleased(hdr.getPayrollReleased());
         
         // Set detail lists (these would need proper mapping if entities differ from DTOs)
-        response.setPayrollDetails(mapToPayrollDtlResponse(dtlRepository.findByTransactionPoid(transactionPoid)));
+        List<HrPayrollDtlResponse> payrollDtlResponses = mapToPayrollDtlResponse(dtlRepository.findByTransactionPoid(transactionPoid));
+        response.setPayrollDetails(payrollDtlResponses);
+        response.setTotalNetSal(payrollDtlResponses.stream()
+                .map(HrPayrollDtlResponse::getNetSalary)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
         response.setVariableDetails(mapToVarAlwdedDtlResponse(varDetails));
         response.setProvisionDetails(mapToProvisionDtlResponse(provisionDtlRepository.findByTransactionPoid(transactionPoid)));
         response.setRecurringDetails(mapToRecurringDtlResponse(recurDetails));
@@ -416,8 +421,14 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
                         P_SUPPRESS_ARREARS_VALIDATION, suppressArrears
                 )
         );
-        logProcedureResult(transactionPoid, result, "Payroll processed...", "Payroll processing completed with warning.");
-        return new PayrollActionResponse((String) result.get(P_STATUS), "Payroll processing completed");
+        String status = (String) result.get(P_STATUS);
+        // ERROR: blocking — processing failed.
+        if (status != null && status.toUpperCase().contains(ERROR)) {
+            throw new ValidationException(status);
+        }
+        // WARNING: processing succeeded but user must be informed (legacy shows message + refreshes UI).
+        logProcedureResult(transactionPoid, result, "Payroll processed...", "Payroll processed with warning.");
+        return new PayrollActionResponse(status, "Payroll process completed");
     }
 
     @Override
@@ -464,8 +475,16 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
                 ),
                 params(P_COMPANYID, UserContext.getCompanyPoid(), P_PAYROLL_TRANS_POID, transactionPoid)
         );
-        logProcedureResult(transactionPoid, result, "Payroll reverted / cancelled...", "Payroll revert completed with warning.");
-        return new PayrollActionResponse((String) result.get(P_STATUS), "Payroll revert completed");
+        String status = (String) result.get(P_STATUS);
+        // Legacy always calls showMessage(status) in both the ERROR and non-ERROR branches.
+        // Any non-null status from the proc is a message the user must see (e.g.
+        // "Some vouchers are already created for this payroll...").
+        // Throw so the GlobalExceptionHandler surfaces it as a 400 — matching legacy blocking popup.
+        if (status != null) {
+            throw new ValidationException(status);
+        }
+        logProcedureResult(transactionPoid, result, "Payroll reverted / cancelled...", null);
+        return new PayrollActionResponse(null, "Payroll revert completed");
     }
 
     @Override
