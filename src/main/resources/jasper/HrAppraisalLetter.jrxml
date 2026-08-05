@@ -195,21 +195,21 @@ ORDER BY dept.dept_code , TO_NUMBER(EM.EMPLOYEE_CODE)]]>
                 <textFieldExpression><![CDATA["Dear  " + $F{EMPLOYEE_NAME}]]></textFieldExpression>
             </textField>
             <staticText>
-                <reportElement x="370" y="15" width="44" height="20" uuid="307dbb80-4dad-4a81-82e6-9fdc9f80a81b"/>
+                <reportElement x="364" y="15" width="34" height="20" uuid="307dbb80-4dad-4a81-82e6-9fdc9f80a81b"/>
                 <textElement verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true"/>
                 </textElement>
                 <text><![CDATA[Date]]></text>
             </staticText>
             <textField pattern="dd-MMM-yyyy">
-                <reportElement x="418" y="15" width="84" height="20" uuid="82e59e0d-54d2-454e-9078-1549caa691d2"/>
+                <reportElement x="406" y="15" width="96" height="20" uuid="82e59e0d-54d2-454e-9078-1549caa691d2"/>
                 <textElement textAlignment="Right" verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true"/>
                 </textElement>
                 <textFieldExpression><![CDATA[$F{PERIOD_FROM}]]></textFieldExpression>
             </textField>
             <staticText>
-                <reportElement x="410" y="15" width="10" height="20" uuid="73165874-a3c1-46a2-9d5f-b51a02739076"/>
+                <reportElement x="398" y="15" width="8" height="20" uuid="73165874-a3c1-46a2-9d5f-b51a02739076"/>
                 <textElement textAlignment="Center" verticalAlignment="Middle">
                     <font fontName="Arial" size="12" isBold="true" pdfFontName="Helvetica-Bold"/>
                 </textElement>
