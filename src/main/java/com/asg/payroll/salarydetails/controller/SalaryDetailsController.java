@@ -110,7 +110,7 @@ public class SalaryDetailsController {
     @GetMapping("/employee/{empPoid}/ctc")
     public ResponseEntity<?> calculateCTC(@PathVariable Long empPoid) {
         String ctc = service.calculateCTC(empPoid);
-        return success("CTC calculated successfully", Map.of("ctc", ctc));
+        return success("CTC calculated successfully", Map.of("ctc", ctc, "ctcAmount", ctc));
     }
 
     @Operation(summary = "Print Offer Letter")
