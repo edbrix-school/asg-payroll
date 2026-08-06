@@ -152,15 +152,19 @@ public class HrEmployeeSalaryProcRepositoryImpl implements HrEmployeeSalaryProcR
 
     @Override
     public String calculateCTC(Long groupPoid, Long companyPoid, Long employeePoid) {
+        if (employeePoid == null) {
+            return "0";
+        }
         try {
-            // FUNC_EMPLOYEE_RPT_CTC is a function, not a procedure
-            // Using native query to call function
+            Long gPoid = (groupPoid != null && groupPoid > 0) ? groupPoid : (companyPoid != null && companyPoid > 0 ? companyPoid : 1L);
+            Long cPoid = (companyPoid != null && companyPoid > 0) ? companyPoid : gPoid;
+
             Object result = entityManager.createNativeQuery("SELECT FUNC_EMPLOYEE_RPT_CTC(?, ?, ?) FROM DUAL")
-                    .setParameter(1, groupPoid)
-                    .setParameter(2, companyPoid)
+                    .setParameter(1, gPoid)
+                    .setParameter(2, cPoid)
                     .setParameter(3, employeePoid)
                     .getSingleResult();
-            return result != null ? result.toString() : "0";
+            return result != null ? result.toString().trim() : "0";
         } catch (Exception e) {
             log.error("Error calling FUNC_EMPLOYEE_RPT_CTC: {}", e.getMessage());
             return "0";
