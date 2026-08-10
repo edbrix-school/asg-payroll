@@ -18,6 +18,8 @@ public interface HrEmployeeSalaryProcRepository {
      */
     Map<Long, String> getCrNumbers(Collection<Long> poids);
 
+    Map<Long, String> getFullEmployeeNamesBySalaryPoids(Collection<Long> salaryPoids);
+
     String addToSalaryHistory(Long companyId, Long loginUserPoid, Long salaryPoid);
 
     String syncHRData();

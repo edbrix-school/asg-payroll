@@ -132,8 +132,46 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
                 isDeleted, "EMPLOYEE_NAME", SALARY_POID);
         com.asg.payroll.common.util.SearchResultUtil.normalizeDates(raw);
 
+        enrichFullEmployeeNames(raw);
+
         Page<Map<String, Object>> page = new PageImpl<>(raw.records(), pageable, raw.totalRecords());
         return PaginationUtil.wrapPage(page, raw.displayFields());
+    }
+
+    private void enrichFullEmployeeNames(RawSearchResult raw) {
+        if (raw == null || raw.records() == null || raw.records().isEmpty()) {
+            return;
+        }
+
+        List<Long> salaryPoids = new ArrayList<>();
+        for (Map<String, Object> record : raw.records()) {
+            if (record == null) continue;
+            Object poidObj = record.get(SALARY_POID);
+            if (poidObj instanceof Number num) {
+                salaryPoids.add(num.longValue());
+            }
+        }
+
+        if (salaryPoids.isEmpty()) {
+            return;
+        }
+
+        Map<Long, String> fullNames = procRepository.getFullEmployeeNamesBySalaryPoids(salaryPoids);
+        if (fullNames == null || fullNames.isEmpty()) {
+            return;
+        }
+
+        for (Map<String, Object> record : raw.records()) {
+            if (record == null) continue;
+            Object poidObj = record.get(SALARY_POID);
+            if (poidObj instanceof Number num) {
+                String fullName = fullNames.get(num.longValue());
+                if (fullName != null && !fullName.isBlank()) {
+                    record.put("EMPLOYEE_NAME", fullName);
+                    record.put("label", fullName);
+                }
+            }
+        }
     }
 
     @Override
@@ -282,6 +320,13 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         // Fetch read-only fields
         Map<String, Object> employeeDetails =
                 procRepository.getEmployeeDetails(entity.getEmployeePoid());
+
+        if (entity.getSalaryPoid() != null) {
+            Map<Long, String> empFullNames = procRepository.getFullEmployeeNamesBySalaryPoids(List.of(entity.getSalaryPoid()));
+            if (empFullNames != null && empFullNames.containsKey(entity.getSalaryPoid())) {
+                response.setEmployeeName(empFullNames.get(entity.getSalaryPoid()));
+            }
+        }
 
         if (employeeDetails != null) {
             response.setTicketDetails((String) employeeDetails.get("TICKET_DETAILS"));

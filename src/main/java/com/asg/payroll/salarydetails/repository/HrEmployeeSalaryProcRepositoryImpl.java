@@ -116,6 +116,39 @@ public class HrEmployeeSalaryProcRepositoryImpl implements HrEmployeeSalaryProcR
     }
 
     @Override
+    public Map<Long, String> getFullEmployeeNamesBySalaryPoids(Collection<Long> salaryPoids) {
+        if (salaryPoids == null || salaryPoids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = entityManager.createNativeQuery(
+                            "SELECT s.SALARY_POID, TRIM(e.EMPLOYEE_NAME || ' ' || NVL(e.EMPLOYEE_NAME2, '')) "
+                                    + "FROM HR_EMPLOYEE_SALARY_MASTER s "
+                                    + "JOIN HR_EMPLOYEE_MASTER e ON s.EMPLOYEE_POID = e.EMPLOYEE_POID "
+                                    + "WHERE s.SALARY_POID IN (:poids)")
+                    .setParameter("poids", salaryPoids)
+                    .getResultList();
+
+            Map<Long, String> fullNamesByPoid = new HashMap<>();
+            for (Object[] row : rows) {
+                if (row[0] == null) {
+                    continue;
+                }
+                Long poid = ((Number) row[0]).longValue();
+                String fullName = row[1] != null ? row[1].toString().trim() : null;
+                if (fullName != null && !fullName.isEmpty()) {
+                    fullNamesByPoid.put(poid, fullName);
+                }
+            }
+            return fullNamesByPoid;
+        } catch (Exception e) {
+            log.error("Error fetching full employee names by salary poids: {}", e.getMessage());
+            return Collections.emptyMap();
+        }
+    }
+
+    @Override
     public String addToSalaryHistory(Long companyId, Long loginUserPoid, Long salaryPoid) {
         try {
             StoredProcedureQuery query = entityManager.createStoredProcedureQuery("PROC_HR_SALARY_TO_HISTORY");
