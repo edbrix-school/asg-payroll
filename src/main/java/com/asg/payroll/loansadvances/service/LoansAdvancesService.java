@@ -6,6 +6,7 @@ import com.asg.payroll.loansadvances.dto.HrRecurringPayDeductRequest;
 import com.asg.payroll.loansadvances.dto.HrRecurringPayDeductResponse;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 public interface LoansAdvancesService {
@@ -17,5 +18,5 @@ public interface LoansAdvancesService {
 
     void delete(Long id, DeleteReasonDto deleteReasonDto);
 
-    Map<String, Object> list(FilterRequestDto filterRequest, Pageable pageable);
+    Map<String, Object> list(FilterRequestDto filterRequest, Pageable pageable, LocalDate periodFrom, LocalDate periodTo);
 }
