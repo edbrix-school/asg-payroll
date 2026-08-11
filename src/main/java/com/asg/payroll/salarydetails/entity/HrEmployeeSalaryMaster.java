@@ -69,9 +69,6 @@ public class HrEmployeeSalaryMaster extends BaseEntity{
     @Column(name = "BANK_POID")
     private Long bankPoid;
 
-    @Column(name = "IBAN_ACCOUNT_NO", length = 30)
-    private String ibanAccountNo;
-
     @Column(name = "HOLD_SALARY", length = 1)
     private String holdSalary;
 
@@ -83,6 +80,9 @@ public class HrEmployeeSalaryMaster extends BaseEntity{
 
     @Column(name = "INDEMNITY_DUE_FROM")
     private LocalDate indemnityDueFrom;
+
+    @Column(name = "IBAN_ACCOUNT_NO", length = 30)
+    private String ibanAccountNo;
 
     @Column(name = "BANK_GUARANTEE", length = 1)
     private String bankGuarantee;

@@ -178,13 +178,17 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
     public String addToHistory(Long salaryPoid) {
         repository.findById(salaryPoid)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, SALARY_POID, salaryPoid));
-        return procRepository.addToSalaryHistory(UserContext.getCompanyPoid(), UserContext.getUserPoid(), salaryPoid);
+        String status = procRepository.addToSalaryHistory(UserContext.getCompanyPoid(), UserContext.getUserPoid(), salaryPoid);
+        if (status != null && status.startsWith("SUCCESS")) {
+            loggingService.createLogSummaryEntry(UserContext.getDocumentId(), salaryPoid.toString(), "Salary details added to history...");
+        }
+        return status;
     }
 
     @Override
     public String syncHRData() {
         String status = procRepository.syncHRData();
-        loggingService.createLogSummaryEntry(LogDetailsEnum.MODIFIED, UserContext.getDocumentId(), "Sync HR Data");
+        loggingService.createLogSummaryEntry(LogDetailsEnum.MODIFIED, UserContext.getDocumentId(), "Sync HR Data clicked...");
         return status;
     }
 

@@ -282,6 +282,7 @@ class SalaryDetailsServiceImplTest {
         when(procRepository.addToSalaryHistory(any(), any(), any())).thenReturn("SUCCESS");
         String result = service.addToHistory(1L);
         assertEquals("SUCCESS", result);
+        verify(loggingService).createLogSummaryEntry(anyString(), eq("1"), eq("Salary details added to history..."));
     }
 
     @Test
