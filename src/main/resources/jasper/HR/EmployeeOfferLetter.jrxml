@@ -285,62 +285,62 @@ In case if the employee is found to be arrogant, indifferent, uncooperative and 
 The appointment letter is enclosed in duplicate. The Employee is required to sign and submit a copy of this letter of appointment as a token of your acceptance of the employment terms and conditions.]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="9" width="12" height="20" uuid="a7c4dcb4-79cf-4946-b8ca-d31950812851"/>
+                <reportElement x="4" y="9" width="16" height="20" uuid="a7c4dcb4-79cf-4946-b8ca-d31950812851"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[b)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="38" width="12" height="20" uuid="2df7f37f-7ccc-42aa-8561-2d2362253f68"/>
+                <reportElement x="4" y="38" width="16" height="20" uuid="2df7f37f-7ccc-42aa-8561-2d2362253f68"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[c)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="68" width="12" height="20" uuid="2f7f3195-1f8c-4dd4-a6ce-c715b387d148"/>
+                <reportElement x="4" y="68" width="16" height="20" uuid="2f7f3195-1f8c-4dd4-a6ce-c715b387d148"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[d)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="97" width="12" height="20" uuid="3009ccae-b3a6-43dc-840c-af12346f9158"/>
+                <reportElement x="4" y="97" width="16" height="20" uuid="3009ccae-b3a6-43dc-840c-af12346f9158"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[e)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="118" width="12" height="20" uuid="ed2b5630-976b-4081-890f-d59ba47dc3b3"/>
+                <reportElement x="4" y="118" width="16" height="20" uuid="ed2b5630-976b-4081-890f-d59ba47dc3b3"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[f)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="147" width="12" height="20" uuid="07ff5eb4-51b5-4efc-bcfe-0eeabf5073e3"/>
+                <reportElement x="4" y="147" width="16" height="20" uuid="07ff5eb4-51b5-4efc-bcfe-0eeabf5073e3"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[g)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="180" width="12" height="20" uuid="70d9c454-86d8-40ed-94e0-1d268d7e9f3c"/>
+                <reportElement x="4" y="180" width="16" height="20" uuid="70d9c454-86d8-40ed-94e0-1d268d7e9f3c"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[h)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="209" width="12" height="20" uuid="7dab29ed-4d31-4c4f-8725-c41d6aad5efb"/>
+                <reportElement x="4" y="209" width="16" height="20" uuid="7dab29ed-4d31-4c4f-8725-c41d6aad5efb"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[i)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="229" width="12" height="20" uuid="3ff5dfc1-b357-4c25-8b1b-7e1c553f557e"/>
+                <reportElement x="4" y="229" width="16" height="20" uuid="3ff5dfc1-b357-4c25-8b1b-7e1c553f557e"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[j)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="279" width="12" height="20" uuid="5def4291-0983-4068-b4c4-cf4006c497ac"/>
+                <reportElement x="4" y="279" width="16" height="20" uuid="5def4291-0983-4068-b4c4-cf4006c497ac"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[k)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="310" width="12" height="20" uuid="396d05ac-0e76-4263-a27a-6cb135ab49a5"/>
+                <reportElement x="4" y="310" width="16" height="20" uuid="396d05ac-0e76-4263-a27a-6cb135ab49a5"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[l)]]></text>
             </staticText>
             <staticText>
-                <reportElement x="4" y="359" width="14" height="20" uuid="84ee758e-a1f9-4b14-adf7-83192a4046f5"/>
+                <reportElement x="4" y="359" width="16" height="20" uuid="84ee758e-a1f9-4b14-adf7-83192a4046f5"/>
                 <textElement verticalAlignment="Top"/>
                 <text><![CDATA[m)]]></text>
             </staticText>
