@@ -100,13 +100,29 @@ class LoansAdvancesControllerTest {
         Pageable pageable = PageRequest.of(0, 10);
         FilterRequestDto filterRequest = new FilterRequestDto("AND", "N", List.of());
         Map<String, Object> mockResult = Map.of("data", "test");
-        when(service.list(any(), any())).thenReturn(mockResult);
+        when(service.list(any(), any(), any(), any())).thenReturn(mockResult);
 
-        ResponseEntity<?> responseEntity = controller.listLoans(pageable, filterRequest);
+        ResponseEntity<?> responseEntity = controller.listLoans(pageable, filterRequest, null, null);
 
         assertNotNull(responseEntity);
         assertEquals(200, responseEntity.getStatusCode().value());
-        verify(service, times(1)).list(filterRequest, pageable);
+        verify(service, times(1)).list(filterRequest, pageable, null, null);
+    }
+
+    @Test
+    void testListLoans_WithPeriodDates() {
+        Pageable pageable = PageRequest.of(0, 10);
+        FilterRequestDto filterRequest = new FilterRequestDto("AND", "N", List.of());
+        Map<String, Object> mockResult = Map.of("data", "test");
+        java.time.LocalDate periodFrom = java.time.LocalDate.of(2025, 1, 1);
+        java.time.LocalDate periodTo = java.time.LocalDate.of(2025, 1, 31);
+        when(service.list(any(), any(), any(), any())).thenReturn(mockResult);
+
+        ResponseEntity<?> responseEntity = controller.listLoans(pageable, filterRequest, periodFrom, periodTo);
+
+        assertNotNull(responseEntity);
+        assertEquals(200, responseEntity.getStatusCode().value());
+        verify(service, times(1)).list(filterRequest, pageable, periodFrom, periodTo);
     }
 
     @Test
