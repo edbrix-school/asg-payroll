@@ -209,7 +209,7 @@ Between parties:]]></text>
         <band height="196" splitType="Prevent">
             <staticText>
                 <reportElement x="30" y="72" width="500" height="77" uuid="b5bf0482-5b55-4d48-8f92-006fbf4f0725"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[This contract has been concluded between the two parties hereto for the purpose of the performing the work specified below at the standard set by the First Party and shown in the attached description of the job to be filled by the Second Party.
@@ -262,7 +262,7 @@ The Second Party therefore, declares that it is fully cognizant of this fact and
             </staticText>
             <staticText>
                 <reportElement x="30" y="67" width="500" height="57" uuid="5df886bb-4532-4baa-b54f-851841e21a63"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10" isBold="false"/>
                 </textElement>
                 <text><![CDATA[The Employer shall have the right to assign to the employee any other work within the nature of the Second Party’s qualifications or which work he / she may become qualified for through experience and training by the First Party, and/or from time to time to carry out other duties in any place in Bahrain owned by the Employer or related directly or indirectly to the First Party as per the Labour Law of Bahrain.
@@ -270,7 +270,7 @@ The Second Party therefore, declares that it is fully cognizant of this fact and
             </staticText>
             <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                 <reportElement x="30" y="24" width="500" height="33" uuid="b67f1331-c067-4722-b0df-fe6448331056"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <textFieldExpression><![CDATA["The Employee shall be employed in the position of " + $F{DESIGNATION_NAME}  + " in our " + $F{DEPT_NAME} + " department and the main duties of this position shall enclose in Annex No.(1) together with this contract."]]></textFieldExpression>
@@ -286,7 +286,7 @@ The Second Party therefore, declares that it is fully cognizant of this fact and
             </staticText>
             <staticText>
                 <reportElement x="30" y="28" width="500" height="120" uuid="ee2c10ae-afb8-4fed-8a3d-bac4e59470ca"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[a. The Second Party agrees to use his/her best endeavors to promote the interests of the First Party and diligently discharge his/her duties.
@@ -310,7 +310,7 @@ d. Daily Working Hours:- From: 8 am to 1 pm and from 2 pm to 5:30 pm]]></text>
             </staticText>
             <staticText>
                 <reportElement x="30" y="209" width="500" height="74" uuid="bebb1cc5-707e-419f-9c40-87e9ac95e806"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[f. The Labour, GOSI and LMRA Laws and relevant executive orders & regulations along with the company’s inter-company policies, all shall be an integral part of this contract.
@@ -319,7 +319,7 @@ g. The Second Party shall not, without written permission from the Employer, eng
             </staticText>
             <staticText>
                 <reportElement x="30" y="286" width="500" height="92" uuid="2f8fb93f-a82e-4fd9-9ef2-83aab48e1a13"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[h. The Second Party undertakes to observe all orders and instructions issued to him/her by the Company’s Management and shall accurately implement the Company’s regulations and always observe good conduct, behavior and reputation.
@@ -337,7 +337,7 @@ i. The Second Party hereby declares that its covenants in the present contract a
             </staticText>
             <staticText>
                 <reportElement x="30" y="73" width="500" height="87" uuid="7390c64a-3851-4284-8fb0-c0db598972d5"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[b. The Second Party shall be on probation for period of three (3) months starts from the date he/she commences employment, during which the First Party shall assess and review the work performance and suitability of the Second Party at its discretion.
@@ -347,7 +347,7 @@ d. Subject to satisfactory completion of the probationary period, this contract 
             </staticText>
             <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                 <reportElement x="30" y="30" width="500" height="43" uuid="9178bfd2-d4ec-441c-aeef-6f4d2f311ad6"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <textFieldExpression><![CDATA["a.The period of this contract shall be One (1) year, from " +  $F{CONTRACT_START} + " till " +  $F{CONTRACT_END} + " and this contract may be renewed for the same period upon the desire of both parties by signing a new contract."]]></textFieldExpression>
@@ -370,7 +370,7 @@ d. Subject to satisfactory completion of the probationary period, this contract 
             </staticText>
             <textField isStretchWithOverflow="true" isBlankWhenNull="true">
                 <reportElement x="30" y="27" width="500" height="30" uuid="02ef63cf-51f8-40cc-a94f-52b56ebf4395"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <textFieldExpression><![CDATA["a. The First Party agrees to pay the Second Party Basic Salary along with social allowance of BHD " +  $F{BASIC_SALARY} + "/- (" +  $F{NET_SALARY_IN_WORDS} + ")."]]></textFieldExpression>
@@ -386,7 +386,7 @@ d. Subject to satisfactory completion of the probationary period, this contract 
             </staticText>
             <staticText>
                 <reportElement x="30" y="26" width="500" height="103" uuid="f31d3121-1487-4153-a275-203d0d9ea28e"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[a. The Second Party shall be entitled to a full paid annual leave of (30 days) after completing one full year of service with the First Party. And shall be entitled for the fraction of the year in proportion to the duration of employment, pursuant of Article (58) of the Labour Law.
@@ -406,7 +406,7 @@ c. The Second Party shall be entitled for a paid leave as per the mentioned situ
             </staticText>
             <staticText>
                 <reportElement x="30" y="20" width="500" height="93" uuid="0d3d335a-1de5-4ea3-9fa7-8e5768f6b2d1"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[a. Either party may notify the other party at least 30 days in advance for all matters affecting this contract. The contract of employment shall continue during the notice periods and both parties shall perform all the obligations there under.
@@ -425,7 +425,7 @@ c. If this Contract is terminated in cases other than those specified under Arti
             </staticText>
             <staticText>
                 <reportElement x="30" y="24" width="500" height="87" uuid="f7590092-8d04-4585-a8d8-b39e4e61ec40"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[a. The First Party regards the Second Party’s emoluments as strictly confidential matters. Any know-how, other information, contacts, advice or assistance made available during the course of the Second Party’s employment shall be retained in the strictest confidence and shall not, without prior written consent of the First Party, be disclosed to anyone or made use of or employed directly or indirectly in any respect or to any extent and whether before or after the termination of this contract hereof for whatsoever cause.
@@ -443,7 +443,7 @@ b. Any disclosure or usage by the Second Party contrary to this will be consider
             </staticText>
             <staticText>
                 <reportElement x="30" y="28" width="500" height="102" uuid="3365a960-4aee-441b-942d-097cb6f789be"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[a. During the course of his/her employment the Second Party shall not introduce to any other individual, firm or company a business deal of any kind, major or minor with which the First Party is able to perform.
@@ -462,7 +462,7 @@ c. The Second Party agrees not to compete or engage with any of the First Party�
             </staticText>
             <staticText>
                 <reportElement x="30" y="28" width="500" height="87" uuid="ca929a34-2546-47b8-824a-dbc562d86485"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[a. During the course of his/her employment and for a period of Two (2) years thereafter the termination, the Second Party shall not solicit the interest, encourage or accept for whatsoever reasons any approach pertaining to an employment opportunity in any form or type, directly or indirectly, by any of the current clients and customers of the First Party.
@@ -480,7 +480,7 @@ b. In this regard, current clients or customers are identified as those that wer
             </staticText>
             <staticText>
                 <reportElement x="30" y="27" width="500" height="163" uuid="b2dba929-1cf5-4827-b201-2e5479b2d4ca"/>
-                <textElement textAlignment="Justified">
+                <textElement textAlignment="Left">
                     <font fontName="Arial" size="10"/>
                 </textElement>
                 <text><![CDATA[a. In the event of the Second Party’s failure to report to work on the effective date of his/her engagement, the First Party reserves the right to consider the Employment Contract as withdrawn.
