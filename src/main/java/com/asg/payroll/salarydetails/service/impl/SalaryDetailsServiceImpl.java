@@ -188,7 +188,7 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
     @Override
     public String syncHRData() {
         String status = procRepository.syncHRData();
-        loggingService.createLogSummaryEntry(LogDetailsEnum.MODIFIED, UserContext.getDocumentId(), "Sync HR Data clicked...");
+        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), null, "Sync HR Data clicked...");
         return status;
     }
 
@@ -267,8 +267,8 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
     @Override
     public void enableSalaryEdit(Long id) {
-        loggingService.createLogSummaryEntry(LogDetailsEnum.MODIFIED, UserContext.getDocumentId(),
-                "Edit Salary For Other Reasons clicked for salary id: " + id);
+        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), id != null ? id.toString() : null,
+                "Edit Salary For Other Reasons clicked...");
     }
 
     private SalaryDetailResponse buildSalaryResponse(HrEmployeeSalaryMaster entity) {

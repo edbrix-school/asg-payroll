@@ -296,7 +296,7 @@ class SalaryDetailsServiceImplTest {
         when(procRepository.syncHRData()).thenReturn("SUCCESS");
         String result = service.syncHRData();
         assertEquals("SUCCESS", result);
-        verify(loggingService).createLogSummaryEntry(eq(LogDetailsEnum.MODIFIED), any(), any());
+        verify(loggingService).createLogSummaryEntry(anyString(), nullable(String.class), eq("Sync HR Data clicked..."));
     }
 
     @Test
@@ -415,7 +415,7 @@ class SalaryDetailsServiceImplTest {
     @Test
     void testEnableSalaryEdit_LogsEntry() {
         service.enableSalaryEdit(1L);
-        verify(loggingService).createLogSummaryEntry(eq(LogDetailsEnum.MODIFIED), eq("DOC-123"), contains("1"));
+        verify(loggingService).createLogSummaryEntry(eq("DOC-123"), eq("1"), eq("Edit Salary For Other Reasons clicked..."));
     }
 
     @Test
