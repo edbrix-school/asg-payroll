@@ -24,9 +24,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import static com.asg.common.lib.dto.response.ApiResponse.success;
@@ -166,9 +168,13 @@ public class LoansAdvancesController {
     @PostMapping("/search")
     public ResponseEntity<?> listLoans(
             @ParameterObject Pageable pageable,
-            @RequestBody(required = false) FilterRequestDto filterRequest
+            @RequestBody(required = false) FilterRequestDto filterRequest,
+            @Parameter(description = "Period From (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodFrom,
+            @Parameter(description = "Period To (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodTo
     ) {
-        Map<String, Object> result = service.list(filterRequest, pageable);
+        Map<String, Object> result = service.list(filterRequest, pageable, periodFrom, periodTo);
         return success("Loans/Advances fetched successfully", result);
     }
 

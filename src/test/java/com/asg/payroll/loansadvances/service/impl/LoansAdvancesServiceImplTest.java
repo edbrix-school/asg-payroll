@@ -267,7 +267,8 @@ class LoansAdvancesServiceImplTest {
         when(documentSearchService.resolveOperator(filterRequest)).thenReturn("AND");
         when(documentSearchService.resolveIsDeleted(filterRequest)).thenReturn("N");
         List<FilterDto> mockFilters = Collections.emptyList();
-        when(documentSearchService.resolveFilters(filterRequest)).thenReturn(mockFilters);
+        when(documentSearchService.resolveDateFilters(eq(filterRequest), eq("TRANSACTION_DATE"), isNull(), isNull()))
+                .thenReturn(mockFilters);
 
         List<Map<String, Object>> records = List.of(Map.of("id", 1));
         Map<String, String> displayFields = Map.of("id", "ID");
@@ -276,10 +277,56 @@ class LoansAdvancesServiceImplTest {
         when(documentSearchService.search(eq("DOC-123"), eq(mockFilters), eq("AND"), eq(pageable), eq("N"), eq("DESCRIPTION"), eq("TRANSACTION_POID")))
                 .thenReturn(rawResult);
 
-        Map<String, Object> result = service.list(filterRequest, pageable);
+        Map<String, Object> result = service.list(filterRequest, pageable, null, null);
 
         assertNotNull(result);
         assertTrue(result.containsKey("content"));
         verify(documentSearchService, times(1)).search(any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void testList_WithPeriodDates() {
+        FilterRequestDto filterRequest = new FilterRequestDto("AND", "N", List.of());
+        Pageable pageable = PageRequest.of(0, 10);
+        LocalDate periodFrom = LocalDate.of(2025, 1, 1);
+        LocalDate periodTo = LocalDate.of(2025, 1, 31);
+
+        when(documentSearchService.resolveOperator(filterRequest)).thenReturn("AND");
+        when(documentSearchService.resolveIsDeleted(filterRequest)).thenReturn("N");
+        List<FilterDto> mockFilters = Collections.emptyList();
+        when(documentSearchService.resolveDateFilters(filterRequest, "TRANSACTION_DATE", periodFrom, periodTo))
+                .thenReturn(mockFilters);
+
+        List<Map<String, Object>> records = List.of(Map.of("id", 1));
+        Map<String, String> displayFields = Map.of("id", "ID");
+        RawSearchResult rawResult = new RawSearchResult(records, displayFields, 1L);
+
+        when(documentSearchService.search(eq("DOC-123"), eq(mockFilters), eq("AND"), eq(pageable), eq("N"), eq("DESCRIPTION"), eq("TRANSACTION_POID")))
+                .thenReturn(rawResult);
+
+        Map<String, Object> result = service.list(filterRequest, pageable, periodFrom, periodTo);
+
+        assertNotNull(result);
+        assertTrue(result.containsKey("content"));
+    }
+
+    @Test
+    void testList_OnlyPeriodFromGiven_ThrowsValidationException() {
+        FilterRequestDto filterRequest = new FilterRequestDto("AND", "N", List.of());
+        Pageable pageable = PageRequest.of(0, 10);
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> service.list(filterRequest, pageable, LocalDate.of(2025, 1, 1), null));
+        assertTrue(exception.getMessage().contains("periodFrom and periodTo"));
+    }
+
+    @Test
+    void testList_PeriodFromAfterPeriodTo_ThrowsValidationException() {
+        FilterRequestDto filterRequest = new FilterRequestDto("AND", "N", List.of());
+        Pageable pageable = PageRequest.of(0, 10);
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> service.list(filterRequest, pageable, LocalDate.of(2025, 2, 1), LocalDate.of(2025, 1, 1)));
+        assertTrue(exception.getMessage().contains("Period From must not be after Period To"));
     }
 }

@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -128,16 +129,26 @@ public class LoansAdvancesServiceImpl implements LoansAdvancesService {
     }
 
     @Override
-    public Map<String, Object> list(FilterRequestDto filterRequest, Pageable pageable) {
+    public Map<String, Object> list(FilterRequestDto filterRequest, Pageable pageable, LocalDate periodFrom, LocalDate periodTo) {
+        validatePeriodDates(periodFrom, periodTo);
         String operator = documentSearchService.resolveOperator(filterRequest);
         String isDeleted = documentSearchService.resolveIsDeleted(filterRequest);
-        List<FilterDto> filterList = documentSearchService.resolveFilters(filterRequest);
+        List<FilterDto> filterList = documentSearchService.resolveDateFilters(filterRequest, "TRANSACTION_DATE", periodFrom, periodTo);
 
         RawSearchResult raw = documentSearchService.search(UserContext.getDocumentId(), filterList, operator, pageable,
                 isDeleted, "DESCRIPTION", TRANSACTION_POID);
 
         Page<Map<String, Object>> page = new PageImpl<>(raw.records(), pageable, raw.totalRecords());
         return PaginationUtil.wrapPage(page, raw.displayFields());
+    }
+
+    private static void validatePeriodDates(LocalDate periodFrom, LocalDate periodTo) {
+        if ((periodFrom == null) != (periodTo == null)) {
+            throw new ValidationException("Both periodFrom and periodTo must be specified or both must be empty.");
+        }
+        if (periodFrom != null && periodFrom.isAfter(periodTo)) {
+            throw new ValidationException("Period From must not be after Period To");
+        }
     }
 
     // =========================  VALIDATION (From SRS)  =========================
