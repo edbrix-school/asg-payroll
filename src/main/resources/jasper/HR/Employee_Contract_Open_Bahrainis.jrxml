@@ -95,7 +95,7 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 			</staticText>
 			<textField>
 				<reportElement x="32" y="190" width="300" height="43" uuid="9301316e-57ef-411b-ac72-f429884fbed4"/>
-				<textFieldExpression><![CDATA[$F{COMPANY_DIV_ADDRESS}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COMPANY_DIV_ADDRESS} != null ? $F{COMPANY_DIV_ADDRESS}.replace("null\n", "").replace("null", "").trim() : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="12" y="114" width="120" height="20" uuid="3cc48816-4aaf-450e-9336-f6c14a7be7b2"/>
@@ -205,7 +205,7 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				<textFieldExpression><![CDATA[$F{CONTRACT_START}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="35" y="271" width="62" height="15" uuid="ba7fe5da-a398-4269-b963-39c44ec2befc"/>
+				<reportElement x="35" y="271" width="68" height="15" uuid="ba7fe5da-a398-4269-b963-39c44ec2befc"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="10"/>
 				</textElement>

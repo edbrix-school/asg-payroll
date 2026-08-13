@@ -176,14 +176,14 @@ Kingdom of Bahrain.]]></text>
 Between parties:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="80" y="324" width="102" height="15" uuid="779967c2-fd20-487f-8cb2-2fe79bd886bb"/>
+				<reportElement x="100" y="324" width="82" height="15" uuid="779967c2-fd20-487f-8cb2-2fe79bd886bb"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NATIONALITY_DESCRIPTION}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="30" y="324" width="50" height="15" uuid="e23b01e1-a804-4ed7-b19e-0f622458733e"/>
+				<reportElement x="30" y="324" width="70" height="15" uuid="e23b01e1-a804-4ed7-b19e-0f622458733e"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="10"/>
 				</textElement>

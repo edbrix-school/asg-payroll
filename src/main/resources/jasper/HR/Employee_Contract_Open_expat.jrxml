@@ -169,14 +169,14 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				<text><![CDATA[This contract is made on :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="97" y="268" width="90" height="15" uuid="779967c2-fd20-487f-8cb2-2fe79bd886bb"/>
+				<reportElement x="103" y="268" width="84" height="15" uuid="779967c2-fd20-487f-8cb2-2fe79bd886bb"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NATIONALITY_DESCRIPTION}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="35" y="268" width="62" height="15" uuid="e23b01e1-a804-4ed7-b19e-0f622458733e"/>
+				<reportElement x="35" y="268" width="68" height="15" uuid="e23b01e1-a804-4ed7-b19e-0f622458733e"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="10"/>
 				</textElement>
@@ -202,7 +202,7 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 			</staticText>
 			<textField>
 				<reportElement x="32" y="187" width="300" height="43" uuid="57034bd3-29ba-43d0-8739-98373ad2a4d6"/>
-				<textFieldExpression><![CDATA[$F{COMPANY_DIV_ADDRESS}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COMPANY_DIV_ADDRESS} != null ? $F{COMPANY_DIV_ADDRESS}.replace("null\n", "").replace("null", "").trim() : ""]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd-MMM-yyyy">
 				<reportElement x="99" y="301" width="100" height="15" uuid="3bb345c0-6d32-4c18-981f-ecf8dfd0add5"/>

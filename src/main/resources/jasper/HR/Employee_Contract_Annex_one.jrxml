@@ -176,9 +176,7 @@ $F{PERMANENT_ADDRESS}]]></textFieldExpression>
 				<textElement>
 					<font fontName="Arial"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COMPANY_NAME}
-+ "\n" +
-$F{COMPANY_DIV_ADDRESS}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COMPANY_NAME} + ($F{COMPANY_DIV_ADDRESS} != null ? "\n" + $F{COMPANY_DIV_ADDRESS}.replace("null\n", "").replace("null", "").trim() : "")]]></textFieldExpression>
 			</textField>
 			<subreport>
 				<reportElement x="0" y="0" width="530" height="66" uuid="11dd97b8-4c92-45fe-85bb-3b9358474446"/>
