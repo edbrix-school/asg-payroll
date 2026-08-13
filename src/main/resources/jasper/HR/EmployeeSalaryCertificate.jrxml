@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="EmployeeSalaryCertificate" language="groovy" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5e997071-2028-4b85-8571-5f873696e15a">
-    <property name="ireport.zoom" value="1.4641000000000006"/>
-    <property name="ireport.x" value="0"/>
-    <property name="ireport.y" value="0"/>
-    <parameter name="LOGIN_GROUP_POID" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-    </parameter>
-    <parameter name="LOGIN_COMP_POID" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-    </parameter>
-    <parameter name="LOGIN_USER_POID" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA[82]]></defaultValueExpression>
-    </parameter>
-    <parameter name="DOC_ID" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA["800-103"]]></defaultValueExpression>
-    </parameter>
-    <parameter name="DOC_KEY_POID" class="java.lang.String">
-        <defaultValueExpression><![CDATA[382]]></defaultValueExpression>
-    </parameter>
-    <parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA["\\\\shippingbahrain.com\\data\\ERP_REPORTS\\Reports\\"]]></defaultValueExpression>
-    </parameter>
-    <queryString>
-        <![CDATA[SELECT EMP.EMPLOYEE_POID,  DDM.DEPT_NAME, EMP.EMPLOYEE_CODE, DESIGNATION_NAME as DESIGNATION,
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="LOGIN_GROUP_POID" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="LOGIN_COMP_POID" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="LOGIN_USER_POID" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[82]]></defaultValueExpression>
+	</parameter>
+	<parameter name="DOC_ID" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["800-103"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="DOC_KEY_POID" class="java.lang.String">
+		<defaultValueExpression><![CDATA[382]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["\\\\shippingbahrain.com\\data\\ERP_REPORTS\\Reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT EMP.EMPLOYEE_POID,  DDM.DEPT_NAME, EMP.EMPLOYEE_CODE, DESIGNATION_NAME as DESIGNATION,
 	EMP.EMPLOYEE_NAME || ' ' || EMP.EMPLOYEE_NAME2 as EMPLOYEE_NAME, EMP.JOIN_DATE, EMP.CPR_NO, SM.BASIC_SALARY, EMP.PASSPORT_NO,
 	SM.FIXED_ALLOWANCE, SM.FIXED_OT, SM.TRANSPORT_ALLOWANCE, SM.TEL_ALLOWANCE, SM.HRA_ALLOWANCE,
 	NVL(SM.BASIC_SALARY,0) + NVL(SM.FIXED_ALLOWANCE,0) + NVL(SM.FIXED_OT,0) + NVL( SM.TRANSPORT_ALLOWANCE,0) + NVL(SM.HRA_ALLOWANCE,0) AS GROSS_PAY,
@@ -57,51 +57,51 @@ LEFT JOIN GLOBAL_CUSTOMER_BANK_MASTER CBM ON CBM.BANK_POID   = SM.BANK_POID
 WHERE NVL(EMP.ACTIVE,'Y') = 'Y'
 AND SM.EMPLOYEE_POID = $P{DOC_KEY_POID}
 ORDER BY DDM.DEPT_NAME, TO_NUMBER(EMP.EMPLOYEE_CODE)]]>
-    </queryString>
-    <field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
-    <field name="DEPT_NAME" class="java.lang.String"/>
-    <field name="EMPLOYEE_CODE" class="java.lang.String"/>
-    <field name="DESIGNATION" class="java.lang.String"/>
-    <field name="EMPLOYEE_NAME" class="java.lang.String"/>
-    <field name="JOIN_DATE" class="java.sql.Timestamp"/>
-    <field name="CPR_NO" class="java.lang.String"/>
-    <field name="BASIC_SALARY" class="java.math.BigDecimal"/>
-    <field name="PASSPORT_NO" class="java.lang.String"/>
-    <field name="FIXED_ALLOWANCE" class="java.math.BigDecimal"/>
-    <field name="FIXED_OT" class="java.math.BigDecimal"/>
-    <field name="TRANSPORT_ALLOWANCE" class="java.math.BigDecimal"/>
-    <field name="TEL_ALLOWANCE" class="java.math.BigDecimal"/>
-    <field name="HRA_ALLOWANCE" class="java.math.BigDecimal"/>
-    <field name="GROSS_PAY" class="java.math.BigDecimal"/>
-    <field name="NATIONALITY" class="java.lang.String"/>
-    <background>
-        <band splitType="Stretch"/>
-    </background>
-    <title>
-        <band height="134" splitType="Stretch"/>
-    </title>
-    <pageHeader>
-        <band height="35" splitType="Stretch">
-            <textField>
-                <reportElement x="0" y="7" width="555" height="20" uuid="5fa1d320-bf03-42dc-827b-df6e204b203e"/>
-                <textElement textAlignment="Center">
-                    <font size="12" isBold="true" pdfFontName="Helvetica-Bold"/>
-                </textElement>
-                <textFieldExpression><![CDATA["CERTIFICATE OF EMPLOYMENT"]]></textFieldExpression>
-            </textField>
-        </band>
-    </pageHeader>
-    <detail>
-        <band height="231" splitType="Stretch">
-            <textField>
-                <reportElement x="0" y="0" width="555" height="125" uuid="da11889b-92c4-4842-902f-b33591a57ca7"/>
-                <textElement textAlignment="Justified"/>
-                <textFieldExpression><![CDATA[
+	</queryString>
+	<field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
+	<field name="DEPT_NAME" class="java.lang.String"/>
+	<field name="EMPLOYEE_CODE" class="java.lang.String"/>
+	<field name="DESIGNATION" class="java.lang.String"/>
+	<field name="EMPLOYEE_NAME" class="java.lang.String"/>
+	<field name="JOIN_DATE" class="java.sql.Timestamp"/>
+	<field name="CPR_NO" class="java.lang.String"/>
+	<field name="BASIC_SALARY" class="java.math.BigDecimal"/>
+	<field name="PASSPORT_NO" class="java.lang.String"/>
+	<field name="FIXED_ALLOWANCE" class="java.math.BigDecimal"/>
+	<field name="FIXED_OT" class="java.math.BigDecimal"/>
+	<field name="TRANSPORT_ALLOWANCE" class="java.math.BigDecimal"/>
+	<field name="TEL_ALLOWANCE" class="java.math.BigDecimal"/>
+	<field name="HRA_ALLOWANCE" class="java.math.BigDecimal"/>
+	<field name="GROSS_PAY" class="java.math.BigDecimal"/>
+	<field name="NATIONALITY" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="134" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="7" width="555" height="20" uuid="5fa1d320-bf03-42dc-827b-df6e204b203e"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CERTIFICATE OF EMPLOYMENT"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="231" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="125" uuid="da11889b-92c4-4842-902f-b33591a57ca7"/>
+				<textElement textAlignment="Justified"/>
+				<textFieldExpression><![CDATA[
 "This is to certify that  <style isBold=\"true\" > " + $F{EMPLOYEE_NAME} + " </style>," + $F{NATIONALITY} + " National, holder of  Passport No # " + $F{PASSPORT_NO} + " and CPR # " + $F{CPR_NO} + " has been working as a " + $F{DESIGNATION} + " in our establishment from " + $F{JOIN_DATE}]]></textFieldExpression>
-            </textField>
-        </band>
-    </detail>
-    <pageFooter>
-        <band height="54" splitType="Stretch"/>
-    </pageFooter>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
 </jasperReport>

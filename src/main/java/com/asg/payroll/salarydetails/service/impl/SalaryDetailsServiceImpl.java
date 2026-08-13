@@ -33,6 +33,7 @@ import com.asg.payroll.salarydetails.util.SalaryDetailsMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperReport;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,7 @@ import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -187,8 +189,16 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
     @Override
     public String syncHRData() {
+        return syncHRData(null);
+    }
+
+    @Override
+    public String syncHRData(String documentKeyPoid) {
         String status = procRepository.syncHRData();
-        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), null, "Sync HR Data clicked...");
+        String docId = (UserContext.getDocumentId() != null && !UserContext.getDocumentId().isBlank())
+                ? UserContext.getDocumentId()
+                : "800-012";
+        loggingService.createLogSummaryEntry(docId, documentKeyPoid, "Sync HR Data clicked...");
         return status;
     }
 
@@ -197,10 +207,42 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
         return procRepository.calculateCTC(UserContext.getGroupPoid(), UserContext.getCompanyPoid(), employeePoid);
     }
 
+    private static volatile String compiledSubreportDir;
+
+    private String getCompiledSubreportDir() throws JRException {
+        if (compiledSubreportDir != null) return compiledSubreportDir;
+        synchronized (SalaryDetailsServiceImpl.class) {
+            if (compiledSubreportDir != null) return compiledSubreportDir;
+            try {
+                java.nio.file.Path tempDir = java.nio.file.Files.createTempDirectory("jasper_root");
+                java.nio.file.Path templatesDir = tempDir.resolve("Templates");
+                java.nio.file.Files.createDirectories(templatesDir);
+                String[] subreports = {"DocHeaderSubReport", "DocFooterSubReport", "DocFooterSubReport-ISO"};
+                for (String name : subreports) {
+                    try (java.io.InputStream in = getClass().getClassLoader()
+                            .getResourceAsStream("jasper/Templates/" + name + ".jrxml")) {
+                        if (in != null) {
+                            net.sf.jasperreports.engine.JasperReport compiled =
+                                    net.sf.jasperreports.engine.JasperCompileManager.compileReport(in);
+                            net.sf.jasperreports.engine.util.JRSaver.saveObject(compiled,
+                                    templatesDir.resolve(name + ".jasper").toFile());
+                        }
+                    }
+                }
+                compiledSubreportDir = tempDir.toAbsolutePath() + java.io.File.separator;
+            } catch (Exception e) {
+                throw new JRException("Failed to compile subreports: " + e.getMessage(), e);
+            }
+        }
+        return compiledSubreportDir;
+    }
+
     @Override
     public byte[] printOfferLetter(Long id) throws Exception {
         String docId = UserContext.getDocumentId();
-        Map<String, Object> params = printService.buildBaseParams(id, docId);
+        Map<String, Object> base = printService.buildBaseParams(id, docId);
+        Map<String, Object> params = base != null ? new HashMap<>(base) : new HashMap<>();
+        params.put("SUBREPORT_DIR", getCompiledSubreportDir());
         JasperReport mainReport = printService.load("HR/EmployeeOfferLetter.jrxml");
         return printService.fillReportToPdf(mainReport, params, dataSource);
     }
@@ -208,7 +250,9 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
     @Override
     public byte[] printSalaryCertificate(Long id) throws Exception {
         String docId = UserContext.getDocumentId();
-        Map<String, Object> params = printService.buildBaseParams(id, docId);
+        Map<String, Object> base = printService.buildBaseParams(id, docId);
+        Map<String, Object> params = base != null ? new HashMap<>(base) : new HashMap<>();
+        params.put("SUBREPORT_DIR", getCompiledSubreportDir());
         JasperReport mainReport = printService.load("HR/EmployeeSalaryCertificate.jrxml");
         return printService.fillReportToPdf(mainReport, params, dataSource);
     }
@@ -219,7 +263,9 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
             throw new ValidationException("Contract print type is required");
         }
         String docId = UserContext.getDocumentId();
-        Map<String, Object> params = printService.buildBaseParams(id, docId);
+        Map<String, Object> base = printService.buildBaseParams(id, docId);
+        Map<String, Object> params = base != null ? new HashMap<>(base) : new HashMap<>();
+        params.put("SUBREPORT_DIR", getCompiledSubreportDir());
         String reportFileName;
         switch (contractPrintType.toUpperCase(Locale.ROOT)) {
             case "EXPAT_OPEN":
@@ -243,14 +289,18 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
     @Override
     public byte[] printAnnex(Long id) throws Exception {
-        Map<String, Object> params = printService.buildBaseParams(id, UserContext.getDocumentId());
+        Map<String, Object> base = printService.buildBaseParams(id, UserContext.getDocumentId());
+        Map<String, Object> params = base != null ? new HashMap<>(base) : new HashMap<>();
+        params.put("SUBREPORT_DIR", getCompiledSubreportDir());
         JasperReport report = printService.load("HR/Employee_Contract_Annex_one.jrxml");
         return printService.fillReportToPdf(report, params, dataSource);
     }
 
     @Override
     public byte[] printEmployeeDetails(Long id, boolean preview) throws Exception {
-        Map<String, Object> params = printService.buildBaseParams(id, UserContext.getDocumentId());
+        Map<String, Object> base = printService.buildBaseParams(id, UserContext.getDocumentId());
+        Map<String, Object> params = base != null ? new HashMap<>(base) : new HashMap<>();
+        params.put("SUBREPORT_DIR", getCompiledSubreportDir());
         params.put("PRINTED_FROM_MASTER", "FALSE");
         params.put("PREVIEW", preview ? "TRUE" : "FALSE");
         JasperReport report = printService.load("HR/EmployeeDetailsReportWithSalary.jrxml");
@@ -267,8 +317,11 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
 
     @Override
     public void enableSalaryEdit(Long id) {
-        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), id != null ? id.toString() : null,
-                "Edit Salary For Other Reasons clicked...");
+        String docId = (UserContext.getDocumentId() != null && !UserContext.getDocumentId().isBlank())
+                ? UserContext.getDocumentId()
+                : "800-012";
+        String keyPoid = id != null ? id.toString() : null;
+        loggingService.createLogSummaryEntry(docId, keyPoid, "Edit Salary For Other Reasons clicked...");
     }
 
     private SalaryDetailResponse buildSalaryResponse(HrEmployeeSalaryMaster entity) {
