@@ -22,6 +22,8 @@ public interface SalaryDetailsService {
 
     String syncHRData();
 
+    String syncHRData(String documentKeyPoid);
+
     String calculateCTC(Long employeePoid);
 
     byte[] printOfferLetter(Long id) throws Exception;

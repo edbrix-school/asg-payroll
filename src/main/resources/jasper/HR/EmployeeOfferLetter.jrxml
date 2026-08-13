@@ -1,36 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="EmployeeOfferLetter" language="groovy" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="14" bottomMargin="14" uuid="51f26c1c-332c-43f0-beb9-5722768520c7">
-    <property name="ireport.zoom" value="1.3310000000000004"/>
-    <property name="ireport.x" value="0"/>
-    <property name="ireport.y" value="0"/>
-    <style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
-    <style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
-    <style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true" pdfFontName="Helvetica-Bold"/>
-    <style name="Detail" fontName="Arial" fontSize="12"/>
-    <style name="Row" mode="Transparent">
-        <conditionalStyle>
-            <conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
-            <style backcolor="#E6DAC3"/>
-        </conditionalStyle>
-    </style>
-    <subDataset name="dataset1" uuid="7968d539-a4b5-4d1c-9dae-4f3591af0a4e"/>
-    <parameter name="LOGIN_GROUP_POID" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-    </parameter>
-    <parameter name="LOGIN_COMP_POID" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-    </parameter>
-    <parameter name="LOGIN_USER_POID" class="java.lang.String" isForPrompting="false"/>
-    <parameter name="DOC_ID" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA["000-000"]]></defaultValueExpression>
-    </parameter>
-    <parameter name="DOC_KEY_POID" class="java.lang.String"/>
-    <parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-        <defaultValueExpression><![CDATA["\\\\10.100.100.159\\ERP_Reports\\Reports\\"]]></defaultValueExpression>
-    </parameter>
-    <parameter name="SUB_HEADER" class="net.sf.jasperreports.engine.JasperReport"/>
-    <queryString>
-        <![CDATA[SELECT EMP.EMPLOYEE_POID, EMP.EMPLOYEE_CODE, EMP.EMPLOYEE_NAME, EMP.CONTRACT_START, DEP.DEPT_NAME, DES.JOB_DESCRIPTION, DES.DESIGNATION_NAME,
+	<property name="ireport.zoom" value="1.3310000000000004"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#E6DAC3"/>
+		</conditionalStyle>
+	</style>
+	<subDataset name="dataset1" uuid="7968d539-a4b5-4d1c-9dae-4f3591af0a4e"/>
+	<parameter name="LOGIN_GROUP_POID" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="LOGIN_COMP_POID" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<parameter name="LOGIN_USER_POID" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="DOC_ID" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["000-000"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="DOC_KEY_POID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["\\\\10.100.100.159\\ERP_Reports\\Reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT EMP.EMPLOYEE_POID, EMP.EMPLOYEE_CODE, EMP.EMPLOYEE_NAME, EMP.CONTRACT_START, DEP.DEPT_NAME, DES.JOB_DESCRIPTION, DES.DESIGNATION_NAME,
       EMP.DISPLAY_NAME, EMP.PERMANENT_ADDRESS, EMP.POSTAL_ADDRESS, SM.BASIC_SALARY, SM.FXALW, SM.TRNSP, SM.HRAALW, SM.FXOT
 FROM  HR_EMPLOYEE_MASTER EMP
 LEFT JOIN HR_DEPARTMENT_MASTER DEP  ON EMP.DEPARTMENT_POID =DEP.DEPT_POID
@@ -38,228 +37,228 @@ LEFT JOIN HR_DESIGNATION_MASTER DES ON EMP.DESIGNATION_POID=DES.DESIG_POID
 LEFT JOIN VIEW_HR_EMP_SALARY_MASTER SM ON EMP.EMPLOYEE_POID   = SM.EMPLOYEE_POID
 WHERE EMP.EMPLOYEE_POID                                    = $P{DOC_KEY_POID}
 ORDER BY EMP.EMPLOYEE_POID ]]>
-    </queryString>
-    <field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
-    <field name="EMPLOYEE_CODE" class="java.lang.String"/>
-    <field name="EMPLOYEE_NAME" class="java.lang.String"/>
-    <field name="CONTRACT_START" class="java.sql.Timestamp"/>
-    <field name="DEPT_NAME" class="java.lang.String"/>
-    <field name="JOB_DESCRIPTION" class="java.lang.String"/>
-    <field name="DESIGNATION_NAME" class="java.lang.String"/>
-    <field name="DISPLAY_NAME" class="java.lang.String"/>
-    <field name="PERMANENT_ADDRESS" class="java.lang.String"/>
-    <field name="POSTAL_ADDRESS" class="java.lang.String"/>
-    <field name="BASIC_SALARY" class="java.math.BigDecimal"/>
-    <field name="FXALW" class="java.math.BigDecimal"/>
-    <field name="TRNSP" class="java.math.BigDecimal"/>
-    <field name="HRAALW" class="java.math.BigDecimal"/>
-    <field name="FXOT" class="java.math.BigDecimal"/>
-    <background>
-        <band splitType="Stretch"/>
-    </background>
-    <title>
-        <band height="59" splitType="Stretch">
-            <subreport>
-                <reportElement x="0" y="0" width="555" height="59" uuid="11dd97b8-4c92-45fe-85bb-3b9358474446"/>
-                <subreportParameter name="LOGIN_COMP_POID">
-                    <subreportParameterExpression><![CDATA[$P{LOGIN_COMP_POID}]]></subreportParameterExpression>
-                </subreportParameter>
-                <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-                <subreportExpression><![CDATA[$P{SUB_HEADER}]]></subreportExpression>
-            </subreport>
-        </band>
-    </title>
-    <pageHeader>
-        <band height="44" splitType="Stretch">
-            <staticText>
-                <reportElement x="20" y="22" width="515" height="18" uuid="0b154f69-a8aa-4f0e-9017-e35c3ff6e105"/>
-                <textElement textAlignment="Center">
-                    <font size="12" isBold="true" pdfFontName="Helvetica-Bold"/>
-                </textElement>
-                <text><![CDATA[// C O N F I D E N T I A L //]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="422" y="2" width="37" height="20" uuid="c3b9dbcc-7ad0-4f11-9e57-140c83b0c063"/>
-                <textElement verticalAlignment="Middle">
-                    <font isBold="true" pdfFontName="Helvetica-Bold"/>
-                </textElement>
-                <text><![CDATA[Date :]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="20" y="1" width="38" height="20" uuid="ae875376-4a0b-4b94-9515-daa7aef845ae"/>
-                <text><![CDATA[Name :]]></text>
-            </staticText>
-            <textField>
-                <reportElement x="59" y="2" width="249" height="20" uuid="d853ed85-94f5-4d5b-b18b-3ee45a783b78"/>
-                <textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
-            </textField>
-            <textField pattern="dd-MMM-yyyy">
-                <reportElement x="459" y="2" width="80" height="20" uuid="19fbb039-fe4b-4c6c-85b1-aaab5fe44b40"/>
-                <textElement verticalAlignment="Middle">
-                    <font isBold="true" pdfFontName="Helvetica-Bold"/>
-                </textElement>
-                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
-            </textField>
-        </band>
-    </pageHeader>
-    <detail>
-        <band height="185" splitType="Stretch">
-            <staticText>
-                <reportElement x="20" y="0" width="22" height="18" uuid="99dcde57-ddaa-4152-bdd7-a7c5bfdc6797"/>
-                <textElement>
-                    <font size="9"/>
-                </textElement>
-                <text><![CDATA[Dear ]]></text>
-            </staticText>
-            <textField>
-                <reportElement x="20" y="19" width="418" height="18" uuid="a20a6fb3-fb99-4eb1-9ee8-dcb6d243ff0c"/>
-                <textElement>
-                    <font size="9"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Sub : Letter of Appointment for  the Position of "+$F{DESIGNATION_NAME}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="20" y="35" width="521" height="29" uuid="fbb67f46-6d03-4904-8b98-b0a3e01d0d3e"/>
-                <textElement>
-                    <font size="9"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Reference to your Curriculum Vitae and our subsequent interview with us, we hereby confirm our Offer of Employment for the position of "+$F{DESIGNATION_NAME}+" (Hereinafter referred as ‘Employee’). "]]></textFieldExpression>
-            </textField>
-            <staticText>
-                <reportElement x="20" y="64" width="501" height="38" uuid="98d293e4-bbbc-4bc1-a288-41d4549737bb"/>
-                <textElement>
-                    <font size="8"/>
-                </textElement>
-                <text><![CDATA[We append below the terms and conditions of Contract of Employment for your perusal and acceptance:
+	</queryString>
+	<field name="EMPLOYEE_POID" class="java.math.BigDecimal"/>
+	<field name="EMPLOYEE_CODE" class="java.lang.String"/>
+	<field name="EMPLOYEE_NAME" class="java.lang.String"/>
+	<field name="CONTRACT_START" class="java.sql.Timestamp"/>
+	<field name="DEPT_NAME" class="java.lang.String"/>
+	<field name="JOB_DESCRIPTION" class="java.lang.String"/>
+	<field name="DESIGNATION_NAME" class="java.lang.String"/>
+	<field name="DISPLAY_NAME" class="java.lang.String"/>
+	<field name="PERMANENT_ADDRESS" class="java.lang.String"/>
+	<field name="POSTAL_ADDRESS" class="java.lang.String"/>
+	<field name="BASIC_SALARY" class="java.math.BigDecimal"/>
+	<field name="FXALW" class="java.math.BigDecimal"/>
+	<field name="TRNSP" class="java.math.BigDecimal"/>
+	<field name="HRAALW" class="java.math.BigDecimal"/>
+	<field name="FXOT" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="59" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="555" height="59" uuid="11dd97b8-4c92-45fe-85bb-3b9358474446"/>
+				<subreportParameter name="LOGIN_COMP_POID">
+					<subreportParameterExpression><![CDATA[$P{LOGIN_COMP_POID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Templates/DocHeaderSubReport.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="44" splitType="Stretch">
+			<staticText>
+				<reportElement x="20" y="22" width="515" height="18" uuid="0b154f69-a8aa-4f0e-9017-e35c3ff6e105"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[// C O N F I D E N T I A L //]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="422" y="2" width="37" height="20" uuid="c3b9dbcc-7ad0-4f11-9e57-140c83b0c063"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="1" width="38" height="20" uuid="ae875376-4a0b-4b94-9515-daa7aef845ae"/>
+				<text><![CDATA[Name :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="59" y="2" width="249" height="20" uuid="d853ed85-94f5-4d5b-b18b-3ee45a783b78"/>
+				<textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd-MMM-yyyy">
+				<reportElement x="459" y="2" width="80" height="20" uuid="19fbb039-fe4b-4c6c-85b1-aaab5fe44b40"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="185" splitType="Stretch">
+			<staticText>
+				<reportElement x="20" y="0" width="22" height="18" uuid="99dcde57-ddaa-4152-bdd7-a7c5bfdc6797"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Dear ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="20" y="19" width="418" height="18" uuid="a20a6fb3-fb99-4eb1-9ee8-dcb6d243ff0c"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Sub : Letter of Appointment for  the Position of "+$F{DESIGNATION_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="35" width="521" height="29" uuid="fbb67f46-6d03-4904-8b98-b0a3e01d0d3e"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Reference to your Curriculum Vitae and our subsequent interview with us, we hereby confirm our Offer of Employment for the position of "+$F{DESIGNATION_NAME}+" (Hereinafter referred as ‘Employee’). "]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="64" width="501" height="38" uuid="98d293e4-bbbc-4bc1-a288-41d4549737bb"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[We append below the terms and conditions of Contract of Employment for your perusal and acceptance:
 
 The Employee will be entitled to an All-inclusive monthly emolument of Bahraini Dinars as follows
 ]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="82" width="12" height="20" uuid="b18bf968-2bf8-48e3-9972-de2b68998bde"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[a)]]></text>
-            </staticText>
-            <textField pattern="#,##0.000;#,##0.000-">
-                <reportElement x="306" y="153" width="53" height="15" uuid="9e1a225b-0a51-4771-9fa9-f4e214fd0eac"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font size="8"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{FXALW}]]></textFieldExpression>
-            </textField>
-            <staticText>
-                <reportElement x="277" y="121" width="29" height="15" uuid="b6d76e10-7e17-4427-8150-dd0cf47dca30"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[BHD : ]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="277" y="153" width="29" height="15" uuid="38151bed-fedf-4b67-8a22-c10782e5601d"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[BHD : ]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="84" y="137" width="191" height="15" uuid="4b9a22b2-efbd-49a8-b911-19c6e21b83ac"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[Transportation Allowance]]></text>
-            </staticText>
-            <textField pattern="#,##0.000;#,##0.000-">
-                <reportElement x="306" y="137" width="53" height="15" uuid="05c9630d-c8bc-4b86-b16f-c9b52ceb7833"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font size="8"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{TRNSP}]]></textFieldExpression>
-            </textField>
-            <staticText>
-                <reportElement x="85" y="153" width="190" height="15" uuid="6d7b17c5-5448-48fd-add0-60e6b973c6aa"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[Fixed Allowance]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="84" y="105" width="191" height="15" uuid="32af186f-712c-4b41-8d52-23a593225d0d"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[Basic Salary with the Social Allowance ]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="84" y="121" width="191" height="15" uuid="d8c7ac08-ec49-4623-b1e8-7261e1919086"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[Housing Allowance]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="85" y="170" width="190" height="15" uuid="2688c785-8318-458c-a4ef-fab29052b1c7"/>
-                <textElement verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[Fixed OT]]></text>
-            </staticText>
-            <textField pattern="#,##0.000;#,##0.000-">
-                <reportElement x="306" y="170" width="53" height="15" uuid="a4894147-5d8f-4518-9117-0e7b47190863"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font size="8"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{FXOT}]]></textFieldExpression>
-            </textField>
-            <staticText>
-                <reportElement x="277" y="137" width="29" height="15" uuid="c77ee78c-a735-4489-b934-c4d367e3f04d"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[BHD : ]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="277" y="170" width="29" height="15" uuid="5a394b60-0c5a-4055-9f99-252e2df82ca5"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[BHD : ]]></text>
-            </staticText>
-            <textField pattern="#,##0.000;#,##0.000-">
-                <reportElement x="306" y="121" width="53" height="15" uuid="51ccef14-5871-48d1-95f5-f67b47831fa9"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font size="8"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{HRAALW}]]></textFieldExpression>
-            </textField>
-            <staticText>
-                <reportElement x="277" y="105" width="29" height="15" uuid="9c891c3e-e8d9-4b61-b96a-05e18d90c3fb"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font fontName="Arial" size="8"/>
-                </textElement>
-                <text><![CDATA[BHD : ]]></text>
-            </staticText>
-            <textField pattern="#,##0.000;#,##0.000-">
-                <reportElement x="306" y="105" width="53" height="15" uuid="e0183c65-506b-4103-9293-39bdb191cc43"/>
-                <textElement textAlignment="Right" verticalAlignment="Middle">
-                    <font size="8"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{BASIC_SALARY}]]></textFieldExpression>
-            </textField>
-            <textField>
-                <reportElement x="45" y="0" width="283" height="18" uuid="39cf281d-0702-441a-b6aa-ef6698c724ec"/>
-                <textElement>
-                    <font size="9"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
-            </textField>
-        </band>
-        <band height="402">
-            <staticText>
-                <reportElement x="20" y="9" width="516" height="390" uuid="ec339717-dbc6-4436-9513-ccfc4b2d31a8"/>
-                <textElement textAlignment="Justified">
-                    <font size="8"/>
-                </textElement>
-                <text><![CDATA[Upon satisfactory completion of three  months probationary period, and after assessment of the Employee’s performance with the approval of the Management the Employee’s position will be confirmed accordingly.
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="82" width="12" height="20" uuid="b18bf968-2bf8-48e3-9972-de2b68998bde"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[a)]]></text>
+			</staticText>
+			<textField pattern="#,##0.000;#,##0.000-">
+				<reportElement x="306" y="153" width="53" height="15" uuid="9e1a225b-0a51-4771-9fa9-f4e214fd0eac"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FXALW}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="277" y="121" width="29" height="15" uuid="b6d76e10-7e17-4427-8150-dd0cf47dca30"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[BHD : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="277" y="153" width="29" height="15" uuid="38151bed-fedf-4b67-8a22-c10782e5601d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[BHD : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="84" y="137" width="191" height="15" uuid="4b9a22b2-efbd-49a8-b911-19c6e21b83ac"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Transportation Allowance]]></text>
+			</staticText>
+			<textField pattern="#,##0.000;#,##0.000-">
+				<reportElement x="306" y="137" width="53" height="15" uuid="05c9630d-c8bc-4b86-b16f-c9b52ceb7833"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRNSP}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="85" y="153" width="190" height="15" uuid="6d7b17c5-5448-48fd-add0-60e6b973c6aa"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Fixed Allowance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="84" y="105" width="191" height="15" uuid="32af186f-712c-4b41-8d52-23a593225d0d"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Basic Salary with the Social Allowance ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="84" y="121" width="191" height="15" uuid="d8c7ac08-ec49-4623-b1e8-7261e1919086"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Housing Allowance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="85" y="170" width="190" height="15" uuid="2688c785-8318-458c-a4ef-fab29052b1c7"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Fixed OT]]></text>
+			</staticText>
+			<textField pattern="#,##0.000;#,##0.000-">
+				<reportElement x="306" y="170" width="53" height="15" uuid="a4894147-5d8f-4518-9117-0e7b47190863"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FXOT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="277" y="137" width="29" height="15" uuid="c77ee78c-a735-4489-b934-c4d367e3f04d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[BHD : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="277" y="170" width="29" height="15" uuid="5a394b60-0c5a-4055-9f99-252e2df82ca5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[BHD : ]]></text>
+			</staticText>
+			<textField pattern="#,##0.000;#,##0.000-">
+				<reportElement x="306" y="121" width="53" height="15" uuid="51ccef14-5871-48d1-95f5-f67b47831fa9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{HRAALW}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="277" y="105" width="29" height="15" uuid="9c891c3e-e8d9-4b61-b96a-05e18d90c3fb"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[BHD : ]]></text>
+			</staticText>
+			<textField pattern="#,##0.000;#,##0.000-">
+				<reportElement x="306" y="105" width="53" height="15" uuid="e0183c65-506b-4103-9293-39bdb191cc43"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BASIC_SALARY}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="45" y="0" width="283" height="18" uuid="39cf281d-0702-441a-b6aa-ef6698c724ec"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="402">
+			<staticText>
+				<reportElement x="20" y="9" width="516" height="390" uuid="ec339717-dbc6-4436-9513-ccfc4b2d31a8"/>
+				<textElement textAlignment="Justified">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Upon satisfactory completion of three  months probationary period, and after assessment of the Employee’s performance with the approval of the Management the Employee’s position will be confirmed accordingly.
 
 A Return Economy class Air Passage will be provided to the Employee, wife and two children to the closest international airport in the country of domicile after completion of two years service with the company.
 
@@ -283,101 +282,101 @@ In view of employee being found inefficient as per company’s standards require
 In case if the employee is found to be arrogant, indifferent, uncooperative and with a negative attitude towards work, colleagues, customers & or principals in specific cases or in general, the employment will be terminated on the spot and without any notice and or any compensation. In such cases even the normal notice period 1 calendar month will NOT apply and the employee will be asked to vacate the premises and the country at once.
 
 The appointment letter is enclosed in duplicate. The Employee is required to sign and submit a copy of this letter of appointment as a token of your acceptance of the employment terms and conditions.]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="9" width="16" height="20" uuid="a7c4dcb4-79cf-4946-b8ca-d31950812851"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[b)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="38" width="16" height="20" uuid="2df7f37f-7ccc-42aa-8561-2d2362253f68"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[c)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="68" width="16" height="20" uuid="2f7f3195-1f8c-4dd4-a6ce-c715b387d148"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[d)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="97" width="16" height="20" uuid="3009ccae-b3a6-43dc-840c-af12346f9158"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[e)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="118" width="16" height="20" uuid="ed2b5630-976b-4081-890f-d59ba47dc3b3"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[f)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="147" width="16" height="20" uuid="07ff5eb4-51b5-4efc-bcfe-0eeabf5073e3"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[g)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="180" width="16" height="20" uuid="70d9c454-86d8-40ed-94e0-1d268d7e9f3c"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[h)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="209" width="16" height="20" uuid="7dab29ed-4d31-4c4f-8725-c41d6aad5efb"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[i)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="229" width="16" height="20" uuid="3ff5dfc1-b357-4c25-8b1b-7e1c553f557e"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[j)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="279" width="16" height="20" uuid="5def4291-0983-4068-b4c4-cf4006c497ac"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[k)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="310" width="16" height="20" uuid="396d05ac-0e76-4263-a27a-6cb135ab49a5"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[l)]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="4" y="359" width="16" height="20" uuid="84ee758e-a1f9-4b14-adf7-83192a4046f5"/>
-                <textElement verticalAlignment="Top"/>
-                <text><![CDATA[m)]]></text>
-            </staticText>
-        </band>
-    </detail>
-    <columnFooter>
-        <band splitType="Stretch"/>
-    </columnFooter>
-    <pageFooter>
-        <band height="93" splitType="Stretch">
-            <staticText>
-                <reportElement x="14" y="1" width="110" height="55" uuid="647f2fdd-e12c-42d4-978b-0a8807329f3b"/>
-                <text><![CDATA[Thanking you.
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="9" width="12" height="20" uuid="a7c4dcb4-79cf-4946-b8ca-d31950812851"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[b)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="38" width="12" height="20" uuid="2df7f37f-7ccc-42aa-8561-2d2362253f68"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[c)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="68" width="12" height="20" uuid="2f7f3195-1f8c-4dd4-a6ce-c715b387d148"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[d)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="97" width="12" height="20" uuid="3009ccae-b3a6-43dc-840c-af12346f9158"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[e)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="118" width="12" height="20" uuid="ed2b5630-976b-4081-890f-d59ba47dc3b3"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[f)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="147" width="12" height="20" uuid="07ff5eb4-51b5-4efc-bcfe-0eeabf5073e3"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[g)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="180" width="12" height="20" uuid="70d9c454-86d8-40ed-94e0-1d268d7e9f3c"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[h)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="209" width="12" height="20" uuid="7dab29ed-4d31-4c4f-8725-c41d6aad5efb"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[i)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="229" width="12" height="20" uuid="3ff5dfc1-b357-4c25-8b1b-7e1c553f557e"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[j)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="279" width="12" height="20" uuid="5def4291-0983-4068-b4c4-cf4006c497ac"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[k)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="310" width="12" height="20" uuid="396d05ac-0e76-4263-a27a-6cb135ab49a5"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[l)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="359" width="14" height="20" uuid="84ee758e-a1f9-4b14-adf7-83192a4046f5"/>
+				<textElement verticalAlignment="Top"/>
+				<text><![CDATA[m)]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="93" splitType="Stretch">
+			<staticText>
+				<reportElement x="14" y="1" width="110" height="55" uuid="647f2fdd-e12c-42d4-978b-0a8807329f3b"/>
+				<text><![CDATA[Thanking you.
 
 
 Yours faithfully,
 ]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="278" y="1" width="263" height="32" uuid="6036ca7f-fd87-4fe0-8ae9-14d07783869f"/>
-                <text><![CDATA[I have read, understood and accepted the above terms and conditions of employment.]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="15" y="56" width="100" height="20" uuid="bbda854c-9bfd-4fc5-a0b1-bf2065eee376"/>
-                <text><![CDATA[General Manager]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="307" y="56" width="229" height="20" uuid="9e30c6f4-5264-4077-bc38-fbc972e69616"/>
-                <text><![CDATA[Signature :..................................................]]></text>
-            </staticText>
-            <staticText>
-                <reportElement x="308" y="76" width="100" height="16" uuid="5a8d56bd-f95b-4672-8a77-b459c81ce190"/>
-                <text><![CDATA[Date        :]]></text>
-            </staticText>
-        </band>
-    </pageFooter>
-    <summary>
-        <band splitType="Stretch"/>
-    </summary>
+			</staticText>
+			<staticText>
+				<reportElement x="278" y="1" width="263" height="32" uuid="6036ca7f-fd87-4fe0-8ae9-14d07783869f"/>
+				<text><![CDATA[I have read, understood and accepted the above terms and conditions of employment.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="15" y="56" width="100" height="20" uuid="bbda854c-9bfd-4fc5-a0b1-bf2065eee376"/>
+				<text><![CDATA[General Manager]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="307" y="56" width="229" height="20" uuid="9e30c6f4-5264-4077-bc38-fbc972e69616"/>
+				<text><![CDATA[Signature :..................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="308" y="76" width="100" height="16" uuid="5a8d56bd-f95b-4672-8a77-b459c81ce190"/>
+				<text><![CDATA[Date        :]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
 </jasperReport>

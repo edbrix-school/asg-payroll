@@ -96,13 +96,21 @@ public class SalaryDetailsController {
     @Operation(summary = "Sync HR Data from Production to Payroll")
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/sync-hr-data")
-    public ResponseEntity<?> syncHRData() {
-        String status = service.syncHRData();
+    public ResponseEntity<?> syncHRData(
+            @RequestParam(value = "documentKeyPoid", required = false) String docKeyPoid,
+            @RequestParam(value = "documentId", required = false) String docId) {
+        String status = (docKeyPoid != null && !docKeyPoid.isBlank())
+                ? service.syncHRData(docKeyPoid)
+                : service.syncHRData();
         if (status != null && status.startsWith("SUCCESS")) {
             return success(status);
         } else {
             return ResponseEntity.badRequest().body(Map.of("message", status != null ? status : "Unknown error"));
         }
+    }
+
+    public ResponseEntity<?> syncHRData() {
+        return syncHRData(null, null);
     }
 
     @Operation(summary = "Calculate CTC for Employee")
