@@ -83,7 +83,7 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font fontName="Arial" size="14" isBold="false"/>
 				</textElement>
-				<text><![CDATA[EMPLOYMENT CONTRACT ]]></text>
+				<text><![CDATA[EMPLOYMENT CONTRACT]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="30" y="213" width="302" height="76" uuid="49f60a13-eebf-470f-a87e-351300a1bd14"/>
@@ -212,8 +212,7 @@ Between parties:]]></text>
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["""This contract has been concluded between the two parties hereto for the purpose of the performing the work specified below at the standard set by the First Party and shown in the attached description of the job to be filled by the Second Party.
-The Second Party therefore, declares that it is fully cognizant of this fact and accepts to enter into this contract on the understanding that it feels fully capable of performing this work at the standards required by the First Party and therefore, undertakes to fulfill the obligations contained herein.
-"""]]></textFieldExpression>
+The Second Party therefore, declares that it is fully cognizant of this fact and accepts to enter into this contract on the understanding that it feels fully capable of performing this work at the standards required by the First Party and therefore, undertakes to fulfill the obligations contained herein."""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement positionType="Float" x="30" y="152" width="279" height="20" uuid="c0b24bc8-6548-45ce-89f9-c20f2cd8455c"/>
@@ -264,8 +263,7 @@ The Second Party therefore, declares that it is fully cognizant of this fact and
 				<textElement textAlignment="Justified">
 					<font fontName="Arial" size="10" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["""The Employer shall have the right to assign to the employee any other work within the nature of the Second Party’s qualifications or which work he / she may become qualified for through experience and training by the First Party, and/or from time to time to carry out other duties in any place in Bahrain owned by the Employer or related directly or indirectly to the First Party as per the Labour Law of Bahrain.
-"""]]></textFieldExpression>
+				<textFieldExpression><![CDATA["""The Employer shall have the right to assign to the employee any other work within the nature of the Second Party’s qualifications or which work he / she may become qualified for through experience and training by the First Party, and/or from time to time to carry out other duties in any place in Bahrain owned by the Employer or related directly or indirectly to the First Party as per the Labour Law of Bahrain."""]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="30" y="24" width="500" height="33" uuid="b67f1331-c067-4722-b0df-fe6448331056"/>
@@ -313,8 +311,7 @@ d. Daily Working Hours:- From: 8 am to 1 pm and from 2 pm to 5:30 pm"""]]></text
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["""f. The Labour, GOSI and LMRA Laws and relevant executive orders & regulations along with the company’s inter-company policies, all shall be an integral part of this contract.
-g. The Second Party shall not, without written permission from the Employer, engage in any work for a third Party with or without remuneration even outside official working hours, or participate, directly or indirectly, in an activity or business indirect conflict with the Employer’s interest, or in any concern having transactions with the First   Party.
-"""]]></textFieldExpression>
+g. The Second Party shall not, without written permission from the Employer, engage in any work for a third Party with or without remuneration even outside official working hours, or participate, directly or indirectly, in an activity or business indirect conflict with the Employer’s interest, or in any concern having transactions with the First   Party."""]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement positionType="Float" x="30" y="286" width="500" height="92" uuid="2f8fb93f-a82e-4fd9-9ef2-83aab48e1a13"/>
@@ -322,8 +319,7 @@ g. The Second Party shall not, without written permission from the Employer, eng
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["""h. The Second Party undertakes to observe all orders and instructions issued to him/her by the Company’s Management and shall accurately implement the Company’s regulations and always observe good conduct, behavior and reputation.
-i. The Second Party hereby declares that its covenants in the present contract are an integral part of its fundamental obligations, and that the accurate implementation thereof is one of the basic conditions of this employment Contract. Should the Second Party breach any of such obligations, the Employer shall have the right to terminate its services forthwith without indemnity in accordance with Article (107) of Labor Law NO. (36) of 2012.
-"""]]></textFieldExpression>
+i. The Second Party hereby declares that its covenants in the present contract are an integral part of its fundamental obligations, and that the accurate implementation thereof is one of the basic conditions of this employment Contract. Should the Second Party breach any of such obligations, the Employer shall have the right to terminate its services forthwith without indemnity in accordance with Article (107) of Labor Law NO. (36) of 2012."""]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="166" splitType="Prevent">
@@ -341,8 +337,7 @@ i. The Second Party hereby declares that its covenants in the present contract a
 				</textElement>
 				<textFieldExpression><![CDATA["""b. The Second Party shall be on probation for period of three (3) months starts from the date he/she commences employment, during which the First Party shall assess and review the work performance and suitability of the Second Party at its discretion.
 c. During the said probationary period either party shall have the right to terminate this employment contract by giving one day’s written notice to the other party.
-d. Subject to satisfactory completion of the probationary period, this contract shall be in force for a period as mentioned above.
-"""]]></textFieldExpression>
+d. Subject to satisfactory completion of the probationary period, this contract shall be in force for a period as mentioned above."""]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="30" y="30" width="500" height="43" uuid="9178bfd2-d4ec-441c-aeef-6f4d2f311ad6"/>
@@ -390,8 +385,7 @@ d. Subject to satisfactory completion of the probationary period, this contract 
 				</textElement>
 				<textFieldExpression><![CDATA["""a. The Second Party shall be entitled to a full paid annual leave of (30 days) after completing one full year of service with the First Party. And shall be entitled for the fraction of the year in proportion to the duration of employment, pursuant of Article (58) of the Labour Law.
 b. In accordance with Article (65) of the Bahrain Labour Law, the Second Party shall be entitled for a paid sick leave after completing three months of service with the First Party. The sick leave shall not be adjusted against the annual leave.
-c. The Second Party shall be entitled for a paid leave as per the mentioned situations in Article (63) of the Labour Law.
-"""]]></textFieldExpression>
+c. The Second Party shall be entitled for a paid leave as per the mentioned situations in Article (63) of the Labour Law."""]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="200" splitType="Prevent">
@@ -408,15 +402,14 @@ c. The Second Party shall be entitled for a paid leave as per the mentioned situ
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["""b. The First Party shall undertake to pay to the Second party, a ONE-WAY economy class air passage to the closest international airport in the country of domicile upon the expiry date of the Labour Contract.
-c. If the Second Party joins another employer before his/her departure from the Kingdom, the obligation to return the Second Party shifts to the new employer.
-"""]]></textFieldExpression>
+c. If the Second Party joins another employer before his/her departure from the Kingdom, the obligation to return the Second Party shifts to the new employer."""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="30" y="2" width="500" height="20" uuid="05dbe614-e168-4725-bfd8-613eb8740748"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="10" isBold="true"/>
 				</textElement>
-				<text><![CDATA[7. Air Tickets :-  ]]></text>
+				<text><![CDATA[7. Air Tickets :-]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="30" y="24" width="500" height="48" uuid="3cacb167-828e-4f0e-b48d-ca0018a9ca63"/>
@@ -441,8 +434,7 @@ c. If the Second Party joins another employer before his/her departure from the 
 				</textElement>
 				<textFieldExpression><![CDATA["""a. Either party may notify the other party at least 30 days in advance for all matters affecting this contract. The contract of employment shall continue during the notice periods and both parties shall perform all the obligations there under.
 b. The First Party may dismiss the Second Party without notice and without payment of the end of service gratuity in few instances in accordance with Article No. (107) of the Bahraini Labour Law.
-c. If this Contract is terminated in cases other than those specified under Article No. )107( of the Labour Law, or if the provisions of the Social Insurance Law are not applicable to the Employee, the Employer shall pay the expat Employee leaving indemnity in accordance with the provisions of Article No. (116) of the Labour Law.
-"""]]></textFieldExpression>
+c. If this Contract is terminated in cases other than those specified under Article No. )107( of the Labour Law, or if the provisions of the Social Insurance Law are not applicable to the Employee, the Employer shall pay the expat Employee leaving indemnity in accordance with the provisions of Article No. (116) of the Labour Law."""]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="115" splitType="Prevent">
@@ -459,8 +451,7 @@ c. If this Contract is terminated in cases other than those specified under Arti
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["""a. The First Party regards the Second Party’s emoluments as strictly confidential matters. Any know-how, other information, contacts, advice or assistance made available during the course of the Second Party’s employment shall be retained in the strictest confidence and shall not, without prior written consent of the First Party, be disclosed to anyone or made use of or employed directly or indirectly in any respect or to any extent and whether before or after the termination of this contract hereof for whatsoever cause.
-b. Any disclosure or usage by the Second Party contrary to this will be considered a violation of confidentiality and liability to consequential damages.
-"""]]></textFieldExpression>
+b. Any disclosure or usage by the Second Party contrary to this will be considered a violation of confidentiality and liability to consequential damages."""]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="134" splitType="Prevent">
@@ -478,8 +469,7 @@ b. Any disclosure or usage by the Second Party contrary to this will be consider
 				</textElement>
 				<textFieldExpression><![CDATA["""a. During the course of his/her employment the Second Party shall not introduce to any other individual, firm or company a business deal of any kind, major or minor with which the First Party is able to perform.
 b. The Second Party agrees not to have any financial interest or any other benefits from contracts to transactions made by the First Party with Third Party without first disclosing such interest and benefit to the First Party and second obtaining its prior written approval thereto.
-c. The Second Party agrees not to compete or engage with any of the First Party’s competitors in Bahrain which may jeopardize the legitimate interests of the First Party and for (2) consecutive years after the termination of this contract without obtaining its prior written approval thereto.
-"""]]></textFieldExpression>
+c. The Second Party agrees not to compete or engage with any of the First Party’s competitors in Bahrain which may jeopardize the legitimate interests of the First Party and for (2) consecutive years after the termination of this contract without obtaining its prior written approval thereto."""]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="126" splitType="Prevent">
@@ -496,8 +486,7 @@ c. The Second Party agrees not to compete or engage with any of the First Party�
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["""a. During the course of his/her employment and for a period of Two (2) years thereafter the termination, the Second Party shall not solicit the interest, encourage or accept for whatsoever reasons any approach pertaining to an employment opportunity in any form or type, directly or indirectly, by any of the current clients and customers of the First Party.
-b. In this regard, current clients or customers are identified as those that were engaged in professional advice or service furnished by the First Party and those clients or customers, and the termination date of the Employment Contract therein by either Party does not exceed Two (2) consecutive years.
-"""]]></textFieldExpression>
+b. In this regard, current clients or customers are identified as those that were engaged in professional advice or service furnished by the First Party and those clients or customers, and the termination date of the Employment Contract therein by either Party does not exceed Two (2) consecutive years."""]]></textFieldExpression>
 			</textField>
 		</band>
 		<band height="192" splitType="Prevent">
@@ -558,8 +547,7 @@ Name:
 
 Signature: ………………………………..
 
-Date:
-]]></text>
+Date:]]></text>
 			</staticText>
 		</band>
 	</detail>
