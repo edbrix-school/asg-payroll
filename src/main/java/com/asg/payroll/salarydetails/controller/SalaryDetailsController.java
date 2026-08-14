@@ -98,9 +98,11 @@ public class SalaryDetailsController {
     @PostMapping("/sync-hr-data")
     public ResponseEntity<?> syncHRData(
             @RequestParam(value = "documentKeyPoid", required = false) String docKeyPoid,
-            @RequestParam(value = "documentId", required = false) String docId) {
-        String status = (docKeyPoid != null && !docKeyPoid.isBlank())
-                ? service.syncHRData(docKeyPoid)
+            @RequestParam(value = "documentId", required = false) String docId,
+            @RequestHeader(value = "X-Document-Key-Poid", required = false) String headerDocKeyPoid) {
+        String keyPoid = (docKeyPoid != null && !docKeyPoid.isBlank()) ? docKeyPoid : headerDocKeyPoid;
+        String status = (keyPoid != null && !keyPoid.isBlank())
+                ? service.syncHRData(keyPoid)
                 : service.syncHRData();
         if (status != null && status.startsWith("SUCCESS")) {
             return success(status);
@@ -110,7 +112,7 @@ public class SalaryDetailsController {
     }
 
     public ResponseEntity<?> syncHRData() {
-        return syncHRData(null, null);
+        return syncHRData(null, null, null);
     }
 
     @Operation(summary = "Calculate CTC for Employee")
