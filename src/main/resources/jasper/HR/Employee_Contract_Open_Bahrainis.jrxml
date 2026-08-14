@@ -112,11 +112,11 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				<textFieldExpression><![CDATA[$F{PRESENT_ADDRESS}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="99" y="271" width="88" height="15" uuid="1207463d-3c1d-4ff5-867d-8374353007d6"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<reportElement x="97" y="271" width="270" height="15" uuid="1207463d-3c1d-4ff5-867d-8374353007d6"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Arial" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NATIONALITY_DESCRIPTION}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{NATIONALITY_DESCRIPTION} ?: "") + "          Passport No: " + ($F{PASSPORT_NO} ?: "")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="32" y="174" width="167" height="15" uuid="769bf216-86dd-4608-940a-c574ba86746d"/>
@@ -126,15 +126,15 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				<textFieldExpression><![CDATA[$F{CR_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="99" y="289" width="102" height="15" uuid="c7eb369e-8049-4866-93c5-56c25e660e10"/>
+				<reportElement x="97" y="289" width="102" height="15" uuid="c7eb369e-8049-4866-93c5-56c25e660e10"/>
 				<textElement>
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CPR_NO}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="35" y="255" width="50" height="15" uuid="e7484717-1bed-4cd8-ae44-61f5805231fa"/>
-				<textElement>
+				<reportElement x="35" y="255" width="58" height="15" uuid="e7484717-1bed-4cd8-ae44-61f5805231fa"/>
+				<textElement textAlignment="Right">
 					<font fontName="Arial" size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Name :]]></text>
@@ -146,13 +146,6 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				</textElement>
 				<text><![CDATA[Hereinafter referred to as the Second Party /Employee.]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="245" y="271" width="84" height="15" uuid="af7961c6-1fed-4d43-b906-34b1590c22e2"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{PASSPORT_NO}]]></textFieldExpression>
-			</textField>
 			<staticText>
 				<reportElement x="2" y="83" width="547" height="23" uuid="be715f17-60ee-4856-bfa7-e014b7d0bfe3"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -161,15 +154,15 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				<text><![CDATA[EMPLOYMENT RENEWAL CONTRACT ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="35" y="289" width="62" height="15" uuid="35d5095a-acd7-4780-8601-c6329598499f"/>
-				<textElement>
+				<reportElement x="35" y="289" width="58" height="15" uuid="35d5095a-acd7-4780-8601-c6329598499f"/>
+				<textElement textAlignment="Right">
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<text><![CDATA[CPR No:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="35" y="304" width="62" height="15" uuid="e55bad76-7733-4b38-b2c7-e169c566aa60"/>
-				<textElement>
+				<reportElement x="35" y="304" width="58" height="15" uuid="e55bad76-7733-4b38-b2c7-e169c566aa60"/>
+				<textElement textAlignment="Right">
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<text><![CDATA[Date of Join:]]></text>
@@ -190,23 +183,16 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				<textFieldExpression><![CDATA[$F{COMPANY_NAME}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd-MMM-yyyy">
-				<reportElement x="99" y="304" width="100" height="15" uuid="c7cc0cce-037f-4d02-a129-f9d3528b2dfd"/>
+				<reportElement x="97" y="304" width="100" height="15" uuid="c7cc0cce-037f-4d02-a129-f9d3528b2dfd"/>
 				<textFieldExpression><![CDATA[$F{JOIN_DATE}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="187" y="271" width="58" height="15" uuid="589ddecc-909d-4c34-af83-b89b698048aa"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="10"/>
-				</textElement>
-				<text><![CDATA[Passport No:]]></text>
-			</staticText>
 			<textField pattern="dd-MMM-yyyy">
 				<reportElement x="147" y="114" width="100" height="20" uuid="1a3ae566-6d0d-4aba-8ead-e2f834dbbfff"/>
 				<textFieldExpression><![CDATA[$F{CONTRACT_START}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="35" y="271" width="62" height="15" uuid="ba7fe5da-a398-4269-b963-39c44ec2befc"/>
-				<textElement verticalAlignment="Middle">
+				<reportElement x="35" y="271" width="58" height="15" uuid="ba7fe5da-a398-4269-b963-39c44ec2befc"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<text><![CDATA[Nationality :]]></text>
@@ -219,7 +205,7 @@ ORDER BY EMP.EMPLOYEE_POID]]>
 				<text><![CDATA[Hereinafter referred to as the First Party /Employer]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="81" y="255" width="249" height="15" uuid="bca94282-7db7-445e-b4dc-a607678d2c37"/>
+				<reportElement x="97" y="255" width="249" height="15" uuid="bca94282-7db7-445e-b4dc-a607678d2c37"/>
 				<textElement>
 					<font fontName="Arial" size="10" isBold="true"/>
 				</textElement>
@@ -284,7 +270,7 @@ The Second Party therefore, declares that it is fully cognizant of this fact and
 			</staticText>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="30" y="24" width="500" height="33" uuid="b67f1331-c067-4722-b0df-fe6448331056"/>
-				<textElement textAlignment="Justified">
+				<textElement textAlignment="Left">
 					<font fontName="Arial" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA["The Employee shall be employed in the position of " + $F{DESIGNATION_NAME}  + " in our " + $F{DEPT_NAME} + " department."]]></textFieldExpression>
