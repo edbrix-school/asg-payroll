@@ -110,135 +110,142 @@ ORDER BY EMP.EMPLOYEE_POID ]]>
 				</textElement>
 				<text><![CDATA[Dear ]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="20" y="19" width="418" height="18" uuid="a20a6fb3-fb99-4eb1-9ee8-dcb6d243ff0c"/>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="20" y="19" width="515" height="18" uuid="a20a6fb3-fb99-4eb1-9ee8-dcb6d243ff0c"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Sub : Letter of Appointment for  the Position of "+$F{DESIGNATION_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="20" y="35" width="521" height="29" uuid="fbb67f46-6d03-4904-8b98-b0a3e01d0d3e"/>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="20" y="37" width="515" height="29" uuid="fbb67f46-6d03-4904-8b98-b0a3e01d0d3e"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Reference to your Curriculum Vitae and our subsequent interview with us, we hereby confirm our Offer of Employment for the position of "+$F{DESIGNATION_NAME}+" (Hereinafter referred as ‘Employee’). "]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="20" y="64" width="501" height="38" uuid="98d293e4-bbbc-4bc1-a288-41d4549737bb"/>
+				<reportElement positionType="Float" x="20" y="70" width="515" height="12" uuid="98d293e4-bbbc-4bc1-a288-41d4549737bb"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<text><![CDATA[We append below the terms and conditions of Contract of Employment for your perusal and acceptance:
-
-The Employee will be entitled to an All-inclusive monthly emolument of Bahraini Dinars as follows
-]]></text>
+				<text><![CDATA[We append below the terms and conditions of Contract of Employment for your perusal and acceptance:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="4" y="82" width="12" height="20" uuid="b18bf968-2bf8-48e3-9972-de2b68998bde"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="88" width="531" height="12" uuid="b18bf968-2bf8-48e3-9972-de2b68998bde"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[a)]]></text>
 			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="4" y="88" width="531" height="12" uuid="3f2c0a91-7d64-4b0e-9c11-2a5f8d1e4a77"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<text><![CDATA[The Employee will be entitled to an All-inclusive monthly emolument of Bahraini Dinars as follows]]></text>
+			</staticText>
 			<textField pattern="#,##0.000;#,##0.000-">
-				<reportElement x="306" y="153" width="53" height="15" uuid="9e1a225b-0a51-4771-9fa9-f4e214fd0eac"/>
+				<reportElement positionType="Float" x="306" y="153" width="53" height="15" uuid="9e1a225b-0a51-4771-9fa9-f4e214fd0eac"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{FXALW}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="277" y="121" width="29" height="15" uuid="b6d76e10-7e17-4427-8150-dd0cf47dca30"/>
+				<reportElement positionType="Float" x="277" y="121" width="29" height="15" uuid="b6d76e10-7e17-4427-8150-dd0cf47dca30"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[BHD : ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="277" y="153" width="29" height="15" uuid="38151bed-fedf-4b67-8a22-c10782e5601d"/>
+				<reportElement positionType="Float" x="277" y="153" width="29" height="15" uuid="38151bed-fedf-4b67-8a22-c10782e5601d"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[BHD : ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="84" y="137" width="191" height="15" uuid="4b9a22b2-efbd-49a8-b911-19c6e21b83ac"/>
+				<reportElement positionType="Float" x="84" y="137" width="191" height="15" uuid="4b9a22b2-efbd-49a8-b911-19c6e21b83ac"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[Transportation Allowance]]></text>
 			</staticText>
 			<textField pattern="#,##0.000;#,##0.000-">
-				<reportElement x="306" y="137" width="53" height="15" uuid="05c9630d-c8bc-4b86-b16f-c9b52ceb7833"/>
+				<reportElement positionType="Float" x="306" y="137" width="53" height="15" uuid="05c9630d-c8bc-4b86-b16f-c9b52ceb7833"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TRNSP}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="85" y="153" width="190" height="15" uuid="6d7b17c5-5448-48fd-add0-60e6b973c6aa"/>
+				<reportElement positionType="Float" x="84" y="153" width="191" height="15" uuid="6d7b17c5-5448-48fd-add0-60e6b973c6aa"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[Fixed Allowance]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="84" y="105" width="191" height="15" uuid="32af186f-712c-4b41-8d52-23a593225d0d"/>
+				<reportElement positionType="Float" x="84" y="105" width="191" height="15" uuid="32af186f-712c-4b41-8d52-23a593225d0d"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[Basic Salary with the Social Allowance ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="84" y="121" width="191" height="15" uuid="d8c7ac08-ec49-4623-b1e8-7261e1919086"/>
+				<reportElement positionType="Float" x="84" y="121" width="191" height="15" uuid="d8c7ac08-ec49-4623-b1e8-7261e1919086"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[Housing Allowance]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="85" y="170" width="190" height="15" uuid="2688c785-8318-458c-a4ef-fab29052b1c7"/>
+				<reportElement positionType="Float" x="84" y="170" width="191" height="15" uuid="2688c785-8318-458c-a4ef-fab29052b1c7"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[Fixed OT]]></text>
 			</staticText>
 			<textField pattern="#,##0.000;#,##0.000-">
-				<reportElement x="306" y="170" width="53" height="15" uuid="a4894147-5d8f-4518-9117-0e7b47190863"/>
+				<reportElement positionType="Float" x="306" y="170" width="53" height="15" uuid="a4894147-5d8f-4518-9117-0e7b47190863"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{FXOT}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="277" y="137" width="29" height="15" uuid="c77ee78c-a735-4489-b934-c4d367e3f04d"/>
+				<reportElement positionType="Float" x="277" y="137" width="29" height="15" uuid="c77ee78c-a735-4489-b934-c4d367e3f04d"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[BHD : ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="277" y="170" width="29" height="15" uuid="5a394b60-0c5a-4055-9f99-252e2df82ca5"/>
+				<reportElement positionType="Float" x="277" y="170" width="29" height="15" uuid="5a394b60-0c5a-4055-9f99-252e2df82ca5"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[BHD : ]]></text>
 			</staticText>
 			<textField pattern="#,##0.000;#,##0.000-">
-				<reportElement x="306" y="121" width="53" height="15" uuid="51ccef14-5871-48d1-95f5-f67b47831fa9"/>
+				<reportElement positionType="Float" x="306" y="121" width="53" height="15" uuid="51ccef14-5871-48d1-95f5-f67b47831fa9"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{HRAALW}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="277" y="105" width="29" height="15" uuid="9c891c3e-e8d9-4b61-b96a-05e18d90c3fb"/>
+				<reportElement positionType="Float" x="277" y="105" width="29" height="15" uuid="9c891c3e-e8d9-4b61-b96a-05e18d90c3fb"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="8"/>
 				</textElement>
 				<text><![CDATA[BHD : ]]></text>
 			</staticText>
 			<textField pattern="#,##0.000;#,##0.000-">
-				<reportElement x="306" y="105" width="53" height="15" uuid="e0183c65-506b-4103-9293-39bdb191cc43"/>
+				<reportElement positionType="Float" x="306" y="105" width="53" height="15" uuid="e0183c65-506b-4103-9293-39bdb191cc43"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
@@ -252,97 +259,187 @@ The Employee will be entitled to an All-inclusive monthly emolument of Bahraini 
 				<textFieldExpression><![CDATA[$F{EMPLOYEE_NAME}]]></textFieldExpression>
 			</textField>
 		</band>
-		<band height="402">
+		<band height="323" splitType="Stretch">
 			<staticText>
-				<reportElement x="20" y="9" width="516" height="390" uuid="ec339717-dbc6-4436-9513-ccfc4b2d31a8"/>
-				<textElement textAlignment="Justified">
+				<reportElement positionType="Float" x="4" y="9" width="531" height="12" uuid="696774ff-2102-400d-94ec-db345a3aeb22"/>
+				<textElement verticalAlignment="Top">
 					<font size="8"/>
 				</textElement>
-				<text><![CDATA[Upon satisfactory completion of three  months probationary period, and after assessment of the Employee’s performance with the approval of the Management the Employee’s position will be confirmed accordingly.
-
-A Return Economy class Air Passage will be provided to the Employee, wife and two children to the closest international airport in the country of domicile after completion of two years service with the company.
-
-Medical Insurance will be provided to the employee as per the medical insurance policy of the company.
-
-
-Office working hours would be from 0800 hrs. to 1300 hrs. and 1400 hrs. to 17:30 hrs. from Sunday to Thursday.
-
-The Employee will be required to carry out all duties related to the field entrusted by the Management and / or any authorized Officer in the organization.
-
-When and if required, the Employee may have to work after normal hours and on Fridays and holidays depending on the requirements of the company. This is position of continuous responsibility and does not entail payment of extra time or over time.
-
-The Employee will be entitled to 30 days Annual Leave on completion of 12 months for every calendar year. All other terms and conditions within the framework of the Kingdom of Bahrain Labour Laws.
-
-All matters pertaining to the Employee’s appointment and compensation are strictly confidential and it should be treated as such.
-
-During the period of employment, the Employee will be required to abide strictly by the company’s general standards regarding attendance, punctuality and most important discipline. The Employee will work honestly, faithfully, diligently and efficiently for the growth of the company. The employee is expected to maintain utmost secrecy in regard to the affairs of the company and shall keep confidential any information, instruments, documents etc., relating to the company that may come to your professional knowledge.
-
-In view of employee being found inefficient as per company’s standards requirement, the company reserves the right to terminate your services by giving one calendar month’s notice. In such cases no compensation will be granted for the remaining period of the contract.
-
-In case if the employee is found to be arrogant, indifferent, uncooperative and with a negative attitude towards work, colleagues, customers & or principals in specific cases or in general, the employment will be terminated on the spot and without any notice and or any compensation. In such cases even the normal notice period 1 calendar month will NOT apply and the employee will be asked to vacate the premises and the country at once.
-
-The appointment letter is enclosed in duplicate. The Employee is required to sign and submit a copy of this letter of appointment as a token of your acceptance of the employment terms and conditions.]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="4" y="9" width="12" height="20" uuid="a7c4dcb4-79cf-4946-b8ca-d31950812851"/>
-				<textElement verticalAlignment="Top"/>
 				<text><![CDATA[b)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="9" width="531" height="20" uuid="dfe88e9b-a156-41b5-a51e-bda17b3467e4"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Upon satisfactory completion of three  months probationary period, and after assessment of the Employee’s performance with the approval of the Management the Employee’s position will be confirmed accordingly."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="38" width="12" height="20" uuid="2df7f37f-7ccc-42aa-8561-2d2362253f68"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="35" width="531" height="12" uuid="b957b197-465f-49d4-bf69-14093bb310d4"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[c)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="35" width="531" height="20" uuid="1f29f568-5303-431b-861c-1279209709d2"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["A Return Economy class Air Passage will be provided to the Employee, wife and two children to the closest international airport in the country of domicile after completion of two years service with the company."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="68" width="12" height="20" uuid="2f7f3195-1f8c-4dd4-a6ce-c715b387d148"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="61" width="531" height="12" uuid="fa10232a-8e79-4312-b10e-f0482a94a5f6"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[d)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="61" width="531" height="10" uuid="ce5843d7-68f1-4763-a8d2-157413fa7c09"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Medical Insurance will be provided to the employee as per the medical insurance policy of the company."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="97" width="12" height="20" uuid="3009ccae-b3a6-43dc-840c-af12346f9158"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="77" width="531" height="12" uuid="aead3749-f5dd-4770-b3c5-791569c55141"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[e)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="77" width="531" height="10" uuid="bb1f80b9-907e-4cab-88ab-ca54e8d5790a"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Office working hours would be from 0800 hrs. to 1300 hrs. and 1400 hrs. to 17:30 hrs. from Sunday to Thursday."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="118" width="12" height="20" uuid="ed2b5630-976b-4081-890f-d59ba47dc3b3"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="93" width="531" height="12" uuid="af163c9b-aa6e-402b-b98c-699bdffed3e0"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[f)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="93" width="531" height="20" uuid="9506c20b-a91e-48a9-87f9-8666de9cb0d4"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["The Employee will be required to carry out all duties related to the field entrusted by the Management and / or any authorized Officer in the organization."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="147" width="12" height="20" uuid="07ff5eb4-51b5-4efc-bcfe-0eeabf5073e3"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="119" width="531" height="12" uuid="c1c8f0cf-2de6-492d-afa5-070478b9de27"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[g)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="119" width="531" height="20" uuid="2dfea854-55c7-40c6-a4d3-e9d48a7f90f5"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["When and if required, the Employee may have to work after normal hours and on Fridays and holidays depending on the requirements of the company. This is position of continuous responsibility and does not entail payment of extra time or over time."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="180" width="12" height="20" uuid="70d9c454-86d8-40ed-94e0-1d268d7e9f3c"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="145" width="531" height="12" uuid="17167dfc-9301-448a-8979-957935bae66e"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[h)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="145" width="531" height="20" uuid="8b5352d7-8ab2-409d-8a57-08d1b50be940"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["The Employee will be entitled to 30 days Annual Leave on completion of 12 months for every calendar year. All other terms and conditions within the framework of the Kingdom of Bahrain Labour Laws."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="209" width="12" height="20" uuid="7dab29ed-4d31-4c4f-8725-c41d6aad5efb"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="171" width="531" height="12" uuid="61d1e7fc-be4c-4e9f-8972-5c25a033c841"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[i)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="171" width="531" height="10" uuid="c2499092-7220-46c4-811f-0b32caf69653"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["All matters pertaining to the Employee’s appointment and compensation are strictly confidential and it should be treated as such."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="229" width="12" height="20" uuid="3ff5dfc1-b357-4c25-8b1b-7e1c553f557e"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="187" width="531" height="12" uuid="df5c5144-bb31-46cf-b8a3-257714be865d"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[j)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="187" width="531" height="40" uuid="1c9ee657-55c1-4f4d-8121-368a19ca8f24"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["During the period of employment, the Employee will be required to abide strictly by the company’s general standards regarding attendance, punctuality and most important discipline. The Employee will work honestly, faithfully, diligently and efficiently for the growth of the company. The employee is expected to maintain utmost secrecy in regard to the affairs of the company and shall keep confidential any information, instruments, documents etc., relating to the company that may come to your professional knowledge."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="279" width="12" height="20" uuid="5def4291-0983-4068-b4c4-cf4006c497ac"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="233" width="531" height="12" uuid="919dca84-a192-463d-9065-2238cbd51dce"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[k)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="233" width="531" height="20" uuid="24b49386-75f3-4042-91b6-63861baf7d3d"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["In view of employee being found inefficient as per company’s standards requirement, the company reserves the right to terminate your services by giving one calendar month’s notice. In such cases no compensation will be granted for the remaining period of the contract."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="310" width="12" height="20" uuid="396d05ac-0e76-4263-a27a-6cb135ab49a5"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="259" width="531" height="12" uuid="de49abd2-421e-4b84-bbf9-b3c6ccd04533"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[l)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="259" width="531" height="30" uuid="1e189125-ab70-4b71-b9bc-68457aa57846"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["In case if the employee is found to be arrogant, indifferent, uncooperative and with a negative attitude towards work, colleagues, customers & or principals in specific cases or in general, the employment will be terminated on the spot and without any notice and or any compensation. In such cases even the normal notice period 1 calendar month will NOT apply and the employee will be asked to vacate the premises and the country at once."]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="4" y="359" width="14" height="20" uuid="84ee758e-a1f9-4b14-adf7-83192a4046f5"/>
-				<textElement verticalAlignment="Top"/>
+				<reportElement positionType="Float" x="4" y="295" width="531" height="12" uuid="33e2faa4-3ac0-4d0b-b5a7-3da8ac0d6bd9"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
 				<text><![CDATA[m)]]></text>
 			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement positionType="Float" x="4" y="295" width="531" height="20" uuid="f23ad077-a1bc-47a6-b0f0-4ce501b7f7c8"/>
+				<textElement textAlignment="Justified" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["The appointment letter is enclosed in duplicate. The Employee is required to sign and submit a copy of this letter of appointment as a token of your acceptance of the employment terms and conditions."]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<columnFooter>
