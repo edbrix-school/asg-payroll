@@ -25,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.asg.common.lib.dto.response.ApiResponse.error;
 import static com.asg.common.lib.dto.response.ApiResponse.success;
@@ -98,9 +100,20 @@ public class SalaryDetailsController {
     @PostMapping("/sync-hr-data")
     public ResponseEntity<?> syncHRData(
             @RequestParam(value = "documentKeyPoid", required = false) String docKeyPoid,
+            @RequestParam(value = "documentKey", required = false) String docKey,
+            @RequestParam(value = "keyPoid", required = false) String keyPoidParam,
+            @RequestParam(value = "id", required = false) String idParam,
             @RequestParam(value = "documentId", required = false) String docId,
-            @RequestHeader(value = "X-Document-Key-Poid", required = false) String headerDocKeyPoid) {
-        String keyPoid = (docKeyPoid != null && !docKeyPoid.isBlank()) ? docKeyPoid : headerDocKeyPoid;
+            @RequestHeader(value = "X-Document-Key-Poid", required = false) String headerDocKeyPoid,
+            @RequestHeader(value = "X-Doc-Key-Poid", required = false) String headerXDocKeyPoid,
+            @RequestHeader(value = "X-Document-Key", required = false) String headerDocKey,
+            @RequestHeader(value = "X-Doc-Key", required = false) String headerXDocKey) {
+        String keyPoid = Stream.of(docKeyPoid, docKey, keyPoidParam, idParam, headerDocKeyPoid, headerXDocKeyPoid, headerDocKey, headerXDocKey)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .findFirst()
+                .orElse(null);
         String status = (keyPoid != null && !keyPoid.isBlank())
                 ? service.syncHRData(keyPoid)
                 : service.syncHRData();
@@ -112,7 +125,7 @@ public class SalaryDetailsController {
     }
 
     public ResponseEntity<?> syncHRData() {
-        return syncHRData(null, null, null);
+        return syncHRData(null, null, null, null, null, null, null, null, null);
     }
 
     @Operation(summary = "Calculate CTC for Employee")
