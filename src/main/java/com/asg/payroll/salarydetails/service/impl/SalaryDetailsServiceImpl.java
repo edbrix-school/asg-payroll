@@ -397,7 +397,14 @@ public class SalaryDetailsServiceImpl implements SalaryDetailsService {
             }
         }
 
-        response.setCtcAmount(calculateCTC(entity.getEmployeePoid()));
+        String ctcVal = calculateCTC(entity.getEmployeePoid());
+        if (ctcVal == null || ctcVal.isBlank() || "0".equals(ctcVal) || "0.000".equals(ctcVal) || ".000".equals(ctcVal)) {
+            java.math.BigDecimal gross = entity.getGrossSalary() != null ? entity.getGrossSalary() : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal accom = entity.getAccommodationCost() != null ? entity.getAccommodationCost() : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal total = gross.add(accom);
+            ctcVal = String.format(java.util.Locale.US, "%,.3f", total);
+        }
+        response.setCtcAmount(ctcVal);
 
         return response;
     }
