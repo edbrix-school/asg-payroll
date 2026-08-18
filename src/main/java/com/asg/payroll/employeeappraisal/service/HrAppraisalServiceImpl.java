@@ -28,6 +28,7 @@ import com.asg.payroll.employeeappraisal.repository.HrAppraisalDtlRepository;
 import com.asg.payroll.employeeappraisal.repository.HrAppraisalHdrRepository;
 import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryMasterRepository;
 import com.asg.payroll.employeeappraisal.repository.HrPayrollVarAlwdedDtlRepository;
+import com.asg.payroll.exceptions.CustomException;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
 import com.asg.payroll.exceptions.ValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.CallableStatement;
@@ -51,6 +53,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -105,6 +109,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private static final String TRANSACTION_POID = "TRANSACTION_POID";
     private static final String APPRAISAL_NOT_FOUND = "Employee appraisal not found with ID: ";
     private static final String P_STATUS = "P_STATUS";
+    private static final String P_FILE_NAME = "P_FILE_NAME";
     private static final String BASE_DETAIL_SQL =
             "SELECT d.TRANSACTION_POID, d.DET_ROW_ID, d.EMPLOYEE_POID, d.DESIGNATION_POID, d.JOIN_DATE, " +
             "d.CUR_AIR_ENTITLE, d.CUR_BONUS, d.CUR_INCREMENT, d.CUR_BASIC_SALARY, d.CUR_FA_ALW, " +
@@ -415,7 +420,7 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     }
 
     @Override
-    public Map<String, Object> bankFileSp(Long transactionPoid) {
+    public byte[] bankFileSp(Long transactionPoid) {
 
         boolean hasBonusEmployees = dtlRepository.findByTransactionPoid(transactionPoid).stream()
                 .anyMatch(dtl -> dtl.getNewBonus() != null && dtl.getNewBonus().compareTo(BigDecimal.ZERO) > 0);
@@ -423,11 +428,48 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
         if (!hasBonusEmployees) {
             throw new ValidationException("No employees with bonus amount found for bank file generation.");
         }
-        return execute(
+        Map<String, Object> result = execute(
                 "PROC_HR_APPRAISAL_BANK_FILE",
-                List.of(new SqlParameter("P_COMPANY_POID", Types.NUMERIC), new SqlParameter("P_TRNNO", Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlOutParameter("P_FILE_NAME", Types.VARCHAR)),
+                List.of(new SqlParameter("P_COMPANY_POID", Types.NUMERIC), new SqlParameter("P_TRNNO", Types.NUMERIC), new SqlParameter(P_LOGIN_USER_POID, Types.NUMERIC), new SqlOutParameter(P_FILE_NAME, Types.VARCHAR)),
                 params("P_COMPANY_POID", UserContext.getCompanyPoid(), "P_TRNNO", transactionPoid, P_LOGIN_USER_POID, UserContext.getUserPoid())
         );
+
+        // The SP reports failure by returning an empty P_FILE_NAME rather than an ERROR status,
+        // so execute()'s ERROR check never fires. Without this guard the caller gets a success
+        // response carrying no file. Legacy HRAppraisalBean.CreateBankFile checked the same way.
+        String fileName = (String) result.get(P_FILE_NAME);
+        if (fileName == null || fileName.isBlank()) {
+            throw new ValidationException("Some error occurred, file not generated for download.");
+        }
+
+        byte[] content = readGeneratedFile(fileName.trim());
+
+        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), transactionPoid.toString(),
+                "Appraisal bank file generated...");
+        return content;
+    }
+
+    /**
+     * Reads the file the SP wrote through UTL_FILE. The path is the one the SP reports, so it is
+     * resolved on the filesystem the application server sees: this requires the Oracle directory
+     * to be local to the app server or mounted on it. Legacy ADF served the same path from the web
+     * tier, so the deployment already assumes that.
+     */
+    private byte[] readGeneratedFile(String fileName) {
+        Path path = Path.of(fileName);
+        try {
+            byte[] content = Files.readAllBytes(path);
+            if (content.length == 0) {
+                throw new ValidationException("Bank file " + path.getFileName() + " was generated but is empty.");
+            }
+            return content;
+        } catch (IOException e) {
+            // The SP writes on the database host; if that path is not visible here the deployment
+            // is misconfigured rather than the request being bad, hence 500 and not 400.
+            log.error("Bank file generated at {} could not be read by the application server", path, e);
+            throw new CustomException("Bank file was generated at " + path
+                    + " but is not readable by the application server.", e);
+        }
     }
 
     @Override

@@ -19,6 +19,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -256,11 +257,16 @@ class HrAppraisalControllerTest {
     @Test
     void bankFile_Success() {
         Long id = 1L;
-        when(hrAppraisalService.bankFileSp(id)).thenReturn(emptyResponse());
+        byte[] content = "0001,ACME,1500.00\n".getBytes();
+        when(hrAppraisalService.bankFileSp(id)).thenReturn(content);
 
-        ResponseEntity<?> response = controller.bankFile(id);
+        ResponseEntity<byte[]> response = controller.bankFile(id);
 
         assertEquals(200, response.getStatusCode().value());
+        assertArrayEquals(content, response.getBody());
+        assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
+        assertTrue(response.getHeaders().getContentDisposition().isAttachment());
+        assertTrue(response.getHeaders().getContentDisposition().getFilename().endsWith(".txt"));
     }
 
     @Test
