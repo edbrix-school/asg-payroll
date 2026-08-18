@@ -151,8 +151,13 @@ public class HrAppraisalController {
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
     @PostMapping("/{transactionPoid}/bank-file")
-    public ResponseEntity<?> bankFile(@PathVariable Long transactionPoid) {
-        return success("Bank file generated successfully", hrAppraisalService.bankFileSp(transactionPoid));
+    public ResponseEntity<byte[]> bankFile(@PathVariable Long transactionPoid) {
+        byte[] bankFile = hrAppraisalService.bankFileSp(transactionPoid);
+        return ResponseEntity.ok()
+                .headers(downloadHeaderService.buildAttachmentHeaders(
+                        HrAppraisalHdr.class, transactionPoid, "appraisal-bank-file", "txt"))
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(bankFile);
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)

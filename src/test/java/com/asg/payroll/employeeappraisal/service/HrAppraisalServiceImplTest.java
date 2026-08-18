@@ -21,12 +21,14 @@ import com.asg.payroll.employeeappraisal.repository.HrAppraisalHdrRepository;
 import com.asg.payroll.salarydetails.repository.HrEmployeeSalaryMasterRepository;
 import com.asg.payroll.employeeappraisal.repository.HrPayrollVarAlwdedDtlRepository;
 import com.asg.payroll.exceptions.ResourceNotFoundException;
+import com.asg.payroll.exceptions.CustomException;
 import com.asg.payroll.exceptions.ValidationException;
 import jakarta.persistence.EntityManager;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperReport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -1114,10 +1116,14 @@ class HrAppraisalServiceImplTest {
     // ── Point 4: stored procedure happy paths ─────────────────────────────
 
     private MockedConstruction<SimpleJdbcCall> mockSp() {
+        return mockSp(Map.of("P_STATUS", "SUCCESS"));
+    }
+
+    private MockedConstruction<SimpleJdbcCall> mockSp(Map<String, Object> outParams) {
         return mockConstruction(SimpleJdbcCall.class, (mock, ctx) -> {
             when(mock.withProcedureName(anyString())).thenReturn(mock);
             when(mock.declareParameters(any(org.springframework.jdbc.core.SqlParameter[].class))).thenReturn(mock);
-            when(mock.execute(anyMap())).thenReturn(Map.of("P_STATUS", "SUCCESS"));
+            when(mock.execute(anyMap())).thenReturn(outParams);
         });
     }
 
@@ -1240,17 +1246,70 @@ class HrAppraisalServiceImplTest {
         }
     }
 
-    @Test
-    void bankFileSp_Success() {
+    /** Stubs the bonus row bankFileSp requires before it will call the SP. */
+    private void stubBonusEmployee() {
         HrAppraisalDtl dtlWithBonus = new HrAppraisalDtl();
         dtlWithBonus.setNewBonus(BigDecimal.valueOf(500));
         when(dtlRepository.findByTransactionPoid(1L)).thenReturn(List.of(dtlWithBonus));
-        try (MockedConstruction<SimpleJdbcCall> sp = mockSp();
+    }
+
+    @Test
+    void bankFileSp_Success(@TempDir java.nio.file.Path tempDir) throws Exception {
+        stubBonusEmployee();
+        byte[] expected = "0001,ACME BANK,1500.00\n".getBytes();
+        java.nio.file.Path generated = tempDir.resolve("AppraisalExport_APR-1.txt");
+        java.nio.file.Files.write(generated, expected);
+
+        byte[] content;
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp(Map.of("P_FILE_NAME", generated.toString()));
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
-            assertDoesNotThrow(() -> service.bankFileSp(1L));
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            content = service.bankFileSp(1L);
         }
+        assertArrayEquals(expected, content);
+        verify(loggingService).createLogSummaryEntry(eq("DOC123"), eq("1"), contains("bank file generated"));
+    }
+
+    // SP signals failure with an empty P_FILE_NAME, not an ERROR status
+    @Test
+    void bankFileSp_NoFileGenerated_ThrowsException() {
+        stubBonusEmployee();
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp(Map.of("P_FILE_NAME", "  "));
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            assertThrows(ValidationException.class, () -> service.bankFileSp(1L));
+        }
+        verifyNoInteractions(loggingService);
+    }
+
+    // SP wrote to a path this server cannot see (Oracle host not mounted here) -> 500, not 400
+    @Test
+    void bankFileSp_FileNotReadable_ThrowsCustomException(@TempDir java.nio.file.Path tempDir) {
+        stubBonusEmployee();
+        String missing = tempDir.resolve("never-written.txt").toString();
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp(Map.of("P_FILE_NAME", missing));
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            assertThrows(CustomException.class, () -> service.bankFileSp(1L));
+        }
+        verifyNoInteractions(loggingService);
+    }
+
+    @Test
+    void bankFileSp_EmptyFile_ThrowsValidationException(@TempDir java.nio.file.Path tempDir) throws Exception {
+        stubBonusEmployee();
+        java.nio.file.Path empty = java.nio.file.Files.createFile(tempDir.resolve("empty.txt"));
+        try (MockedConstruction<SimpleJdbcCall> sp = mockSp(Map.of("P_FILE_NAME", empty.toString()));
+             MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
+            ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
+            ctx.when(UserContext::getUserPoid).thenReturn(5L);
+            assertThrows(ValidationException.class, () -> service.bankFileSp(1L));
+        }
+        verifyNoInteractions(loggingService);
     }
 
     @Test
