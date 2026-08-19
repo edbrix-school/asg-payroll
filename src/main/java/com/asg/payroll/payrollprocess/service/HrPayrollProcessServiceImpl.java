@@ -233,6 +233,8 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         response.setVerified(hdr.getVerified());
         response.setApproved(hdr.getApproved());
         response.setPayrollReleased(hdr.getPayrollReleased());
+        response.setCreatedBy(hdr.getCreatedBy());
+        response.setCreatedDate(hdr.getCreatedDate());
         
         // Set detail lists (these would need proper mapping if entities differ from DTOs)
         List<HrPayrollDtlResponse> payrollDtlResponses = mapToPayrollDtlResponse(dtlRepository.findByTransactionPoid(transactionPoid));

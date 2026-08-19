@@ -39,6 +39,8 @@ public class HrPayrollHdrResponse {
     // Edit permission driven by PROC_HR_PAYROLL_VALIDATE (BEFORE_EDIT)
     private Boolean allowEdit;
     private String infoMessage;
+    private String createdBy;
+    private LocalDateTime createdDate;
 
     private List<HrPayrollDtlResponse> payrollDetails;
     private List<HrPayrollVarAlwdedDtlResponse> variableDetails;
