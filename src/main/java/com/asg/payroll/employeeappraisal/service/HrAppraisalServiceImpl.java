@@ -458,11 +458,9 @@ public class HrAppraisalServiceImpl implements HrAppraisalService {
     private byte[] readGeneratedFile(String fileName) {
         Path path = Path.of(fileName);
         try {
-            byte[] content = Files.readAllBytes(path);
-            if (content.length == 0) {
-                throw new ValidationException("Bank file " + path.getFileName() + " was generated but is empty.");
-            }
-            return content;
+            // A zero-byte file is returned as-is: the SP reports genuine failure through an empty
+            // P_FILE_NAME, which is checked before we get here.
+            return Files.readAllBytes(path);
         } catch (IOException e) {
             // The SP writes on the database host; if that path is not visible here the deployment
             // is misconfigured rather than the request being bad, hence 500 and not 400.

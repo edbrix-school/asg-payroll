@@ -1299,17 +1299,22 @@ class HrAppraisalServiceImplTest {
         verifyNoInteractions(loggingService);
     }
 
+    // An empty generated file is a valid download: only a blank P_FILE_NAME means the SP failed.
     @Test
-    void bankFileSp_EmptyFile_ThrowsValidationException(@TempDir java.nio.file.Path tempDir) throws Exception {
+    void bankFileSp_EmptyFile_ReturnsEmptyContent(@TempDir java.nio.file.Path tempDir) throws Exception {
         stubBonusEmployee();
         java.nio.file.Path empty = java.nio.file.Files.createFile(tempDir.resolve("empty.txt"));
+
+        byte[] content;
         try (MockedConstruction<SimpleJdbcCall> sp = mockSp(Map.of("P_FILE_NAME", empty.toString()));
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getCompanyPoid).thenReturn(20L);
             ctx.when(UserContext::getUserPoid).thenReturn(5L);
-            assertThrows(ValidationException.class, () -> service.bankFileSp(1L));
+            ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
+            content = service.bankFileSp(1L);
         }
-        verifyNoInteractions(loggingService);
+        assertEquals(0, content.length);
+        verify(loggingService).createLogSummaryEntry(eq("DOC123"), eq("1"), contains("bank file generated"));
     }
 
     @Test
