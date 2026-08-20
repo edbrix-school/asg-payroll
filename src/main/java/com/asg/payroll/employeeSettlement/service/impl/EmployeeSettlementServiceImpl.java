@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,7 +116,8 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
         if ("Y".equals(existingEntity.getDeleted())) {
             throw new ResourceNotFoundException(EMPLOYEE_SettleMENT, TRANSACTION_POID, transactionPoid.toString());
         }
-        EmployeeSettlementDtl oldEntity = existingEntity.builder().build();
+        EmployeeSettlementDtl oldEntity = new EmployeeSettlementDtl();
+        BeanUtils.copyProperties(existingEntity, oldEntity);
         EmployeeSettlementMapper.mapUpdateDtoToEntity(dto, existingEntity);
         employeeSettlementDtlRepository.save(existingEntity);
         saveLoanDeductionDetails(transactionPoid, dto);
