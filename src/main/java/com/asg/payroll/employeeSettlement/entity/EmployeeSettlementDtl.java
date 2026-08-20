@@ -83,7 +83,7 @@ public class EmployeeSettlementDtl extends BaseEntity {
     private Long ticketIssuedCount;
 
     @Column(name = "TICKET_ENCASHMENT")
-    private Long ticketEncashment;
+    private BigDecimal ticketEncashment;
 
     @Column(name = "AIR_SECTOR_POID")
     private Long airSectorPoid;

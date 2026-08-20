@@ -37,7 +37,7 @@ public class EmployeeSettlementDto {
     private String ticketEligiblity;
     private String ticketIssueType;
     private Long ticketIssuedCount;
-    private Long ticketEncashment;
+    private BigDecimal ticketEncashment;
     private Long airSectorPoid;
     private Long attendancePoid;
     private BigDecimal basicSalary;
