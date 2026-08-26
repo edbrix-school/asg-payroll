@@ -664,7 +664,7 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
     }
 
     @Override
-    public PayrollActionResponse syncHrData() {
+    public PayrollActionResponse syncHrData(Long transactionPoid) {
         Map<String, Object> result = execute(
                 "SYNC_HR_PRODUCTION_TO_PAYROLL",
                 List.of(new SqlOutParameter(P_STATUS, Types.VARCHAR)),
@@ -672,7 +672,14 @@ public class HrPayrollProcessServiceImpl implements HrPayrollProcessService {
         );
         String status = (String) result.get(P_STATUS);
         String logMsg = (status != null) ? "Sync HR Data: " + status : "Sync HR Data executed...";
-        loggingService.createLogSummaryEntry(UserContext.getDocumentId(), null, logMsg);
+
+        // Transaction poid is never 0, if it's coming as 0 that means the entity
+        // is not yet created in DB so no need to log the operations before it is created.
+        // As log is only enabled after entity creation.
+        if (0L != transactionPoid) {
+            loggingService.createLogSummaryEntry(UserContext.getDocumentId(), transactionPoid.toString(), logMsg);
+        }
+
         return new PayrollActionResponse(status, "HR Data sync completed");
     }
 
