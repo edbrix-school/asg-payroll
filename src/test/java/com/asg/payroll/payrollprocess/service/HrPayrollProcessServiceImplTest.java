@@ -773,7 +773,7 @@ class HrPayrollProcessServiceImplTest {
              MockedStatic<UserContext> ctx = mockStatic(UserContext.class)) {
             ctx.when(UserContext::getDocumentId).thenReturn("DOC123");
 
-            assertDoesNotThrow(() -> service.syncHrData());
+            assertDoesNotThrow(() -> service.syncHrData(1L));
         }
     }
 

@@ -153,9 +153,9 @@ public class HrPayrollProcessController {
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)
-    @PostMapping("/sync-hr-data")
-    public ResponseEntity<?> syncHrData() {
-        return success("HR data sync completed successfully", hrPayrollProcessService.syncHrData());
+    @PostMapping("/{transactionPoid}/sync-hr-data")
+    public ResponseEntity<?> syncHrData(@PathVariable Long transactionPoid) {
+        return success("HR data sync completed successfully", hrPayrollProcessService.syncHrData(transactionPoid));
     }
 
     @AllowedAction(UserRolesRightsEnum.EDIT)

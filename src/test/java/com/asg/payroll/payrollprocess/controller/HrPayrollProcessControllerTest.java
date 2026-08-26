@@ -260,9 +260,9 @@ class HrPayrollProcessControllerTest {
 
     @Test
     void syncHrData_Success() {
-        when(hrPayrollProcessService.syncHrData()).thenReturn(new PayrollActionResponse());
+        when(hrPayrollProcessService.syncHrData(any())).thenReturn(new PayrollActionResponse());
 
-        ResponseEntity<?> response = controller.syncHrData();
+        ResponseEntity<?> response = controller.syncHrData(1L);
 
         assertEquals(200, response.getStatusCode().value());
     }

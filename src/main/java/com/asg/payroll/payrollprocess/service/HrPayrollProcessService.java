@@ -39,7 +39,7 @@ public interface HrPayrollProcessService {
 
     BankFileResponse hsbcApiTransfer(Long transactionPoid);
 
-    PayrollActionResponse syncHrData();
+    PayrollActionResponse syncHrData(Long transactionPoid);
 
     PayrollActionResponse sendEmail(Long transactionPoid, PayrollActionRequest request);
 
