@@ -95,6 +95,7 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
     @Transactional
     public EmployeeSettlementDto createEmployeeSettlement(EmployeeSettlementDto dto) {
         log.info("Creating employee settlement for employeePoid: {}", dto.getEmployeePoid());
+        validateDateOverlap(null, dto);
         EmployeeSettlementDtl entity = new EmployeeSettlementDtl();
         EmployeeSettlementMapper.mapCreateDtoToEntity(dto, entity);
         EmployeeSettlementDtl saved = employeeSettlementDtlRepository.saveAndFlush(entity);
@@ -116,6 +117,7 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
         if ("Y".equals(existingEntity.getDeleted())) {
             throw new ResourceNotFoundException(EMPLOYEE_SettleMENT, TRANSACTION_POID, transactionPoid.toString());
         }
+        validateDateOverlap(transactionPoid, dto);
         EmployeeSettlementDtl oldEntity = new EmployeeSettlementDtl();
         BeanUtils.copyProperties(existingEntity, oldEntity);
         EmployeeSettlementMapper.mapUpdateDtoToEntity(dto, existingEntity);
@@ -546,6 +548,77 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
         if (!dto.getLoanDeductionDetails().isEmpty()) {
             List<LoanDeductionDtl> loanDetails = EmployeeSettlementMapper.mapLoanDtlListFromDto(dto.getLoanDeductionDetails(), transactionPoid);
             loanDeductionDtlRepository.saveAll(loanDetails);
+        }
+    }
+
+    private void validateDateOverlap(Long transactionPoid, EmployeeSettlementDto dto) {
+        if (dto == null || !"LEAVE".equalsIgnoreCase(dto.getSettlementType())) {
+            return;
+        }
+
+        LocalDate startDate = dto.getLeaveStartDate();
+        LocalDate endDate = dto.getLeaveEndDate();
+
+        if (startDate != null && endDate == null) {
+            throw new ValidationException("ToDateFieldValue parameter required for overlap checking...");
+        }
+
+        if (startDate != null && endDate != null) {
+            if (startDate.isAfter(endDate)) {
+                throw new ValidationException("Leave Starting Date should be before the rejoin date...");
+            }
+
+            if (dto.getEmployeePoid() != null) {
+                Long groupPoid = UserContext.getGroupPoid() != null ? UserContext.getGroupPoid() : 1L;
+                Long companyPoid = UserContext.getCompanyPoid() != null ? UserContext.getCompanyPoid() : 1L;
+                String customWhereClause = "EMPLOYEE_POID = '" + dto.getEmployeePoid() + "' ";
+                Long poidVal = transactionPoid != null ? transactionPoid : 0L;
+
+                checkOverlapStoredProc(groupPoid, companyPoid, "HR_LEAVE_SETTLEMENT_HDR", "LEAVE_START_DATE", "LEAVE_END_DATE",
+                        startDate, endDate, "TRANSACTION_POID", poidVal, customWhereClause);
+
+                String docId = UserContext.getDocumentId() != null ? UserContext.getDocumentId() : "800-103";
+                String historyWhereClause = customWhereClause + " AND SOURCE_DOC_ID <> '" + docId + "' ";
+                checkOverlapStoredProc(groupPoid, companyPoid, "HR_EMPLOYEE_LEAVE_HISTORY", "LEAVE_START_DATE", "REJOIN_DATE",
+                        startDate, endDate, "SOURCE_DOC_POID", poidVal, historyWhereClause);
+            }
+        }
+    }
+
+    private void checkOverlapStoredProc(Long groupPoid, Long companyPoid, String tableName, String fromDateField, String toDateField,
+                                        LocalDate fromDate, LocalDate toDate, String poidField, Long poidValue, String scope) {
+        if (dataSource == null) {
+            return;
+        }
+        String sql = "{? = call FUNC_GLOB_DATE_OVERLAP_CHECK(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        try (Connection conn = dataSource.getConnection()) {
+            if (conn == null) {
+                return;
+            }
+            try (CallableStatement stmt = conn.prepareCall(sql)) {
+                if (stmt == null) {
+                    return;
+                }
+                stmt.registerOutParameter(1, Types.VARCHAR);
+                stmt.setObject(2, groupPoid);
+                stmt.setObject(3, companyPoid);
+                stmt.setString(4, tableName);
+                stmt.setString(5, fromDateField);
+                stmt.setString(6, toDateField);
+                stmt.setDate(7, java.sql.Date.valueOf(fromDate));
+                stmt.setDate(8, java.sql.Date.valueOf(toDate));
+                stmt.setString(9, poidField);
+                stmt.setLong(10, poidValue);
+                stmt.setString(11, scope);
+
+                stmt.execute();
+                String result = stmt.getString(1);
+                if (result != null && !result.toUpperCase().contains("SUCCESS")) {
+                    throw new ValidationException("Period selected is overlapping with some existing period, please check...");
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error executing FUNC_GLOB_DATE_OVERLAP_CHECK for table {}", tableName, e);
         }
     }
 }
