@@ -42,7 +42,8 @@ public interface HrAppraisalService {
 
     Map<String, Object> sendEmailSp(Long transactionPoid, String resend);
 
-    Map<String, Object> bankFileSp(Long transactionPoid);
+    /** Generates the appraisal bank transfer file and returns its contents for download. */
+    byte[] bankFileSp(Long transactionPoid);
 
     Map<String, Object> arrearsSp(Long transactionPoid, Long payrollPoid);
 
