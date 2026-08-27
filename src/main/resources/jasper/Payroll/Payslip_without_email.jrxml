@@ -43,6 +43,7 @@ AND EMPLOYEE_POID = $P{EMPLOYEE_POID}]]>
     <parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
         <defaultValueExpression><![CDATA["\\\\shippingbahrain.com\\data\\ERP_REPORTS\\Reports\\"]]></defaultValueExpression>
     </parameter>
+    <parameter name="SUB_HEADER" class="net.sf.jasperreports.engine.JasperReport"/>
     <queryString>
         <![CDATA[SELECT DTL.EMPLOYEE_POID, EM.EMPLOYEE_CODE, EMPLOYEE_NAME || ' ' || EMPLOYEE_NAME2 AS EMPLOYEE_NAME, DTL.BASIC_SALARY, DTL.BASIC_SALARY_PAYABLE,
       DTL.WORKED_DAYS, DTL.ABSENT_AMOUNT, DTL.OT1_HRS, DTL.OT1_AMT, DTL.OT2_HRS, DTL.OT2_AMT, DTL.SHORT_HRS, DTL.SHORT_HRS_AMOUNT, DTL.MEDICAL_DAYS,
@@ -167,7 +168,7 @@ AND ( NVL(EM.PERSONAL_EMAIL, EM.BUSINESS_EMAIL) IS NULL OR EM.DATE_OF_BIRTH IS N
                     <subreportParameterExpression><![CDATA[$P{LOGIN_COMP_POID}]]></subreportParameterExpression>
                 </subreportParameter>
                 <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-                <subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Templates\\DocHeaderSubReport.jasper"]]></subreportExpression>
+                <subreportExpression><![CDATA[$P{SUB_HEADER}]]></subreportExpression>
             </subreport>
         </band>
     </columnHeader>
