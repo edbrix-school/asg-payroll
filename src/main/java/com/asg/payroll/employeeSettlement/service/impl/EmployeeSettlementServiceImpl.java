@@ -552,7 +552,7 @@ public class EmployeeSettlementServiceImpl implements EmployeeSettlementService 
     }
 
     private void validateDateOverlap(Long transactionPoid, EmployeeSettlementDto dto) {
-        if (dto == null || !"LEAVE".equalsIgnoreCase(dto.getSettlementType())) {
+        if (dto == null) {
             return;
         }
 
