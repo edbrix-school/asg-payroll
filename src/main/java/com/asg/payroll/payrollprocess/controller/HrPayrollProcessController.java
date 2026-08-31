@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -162,8 +163,12 @@ public class HrPayrollProcessController {
     @PostMapping("/{transactionPoid}/send-email")
     public ResponseEntity<?> sendEmail(@PathVariable Long transactionPoid,
                                        @RequestBody(required = false) PayrollActionRequest request) {
-        return success("Payslip email scheduled successfully",
-                hrPayrollProcessService.sendEmail(transactionPoid, request != null ? request : new PayrollActionRequest()));
+        PayrollActionResponse response = hrPayrollProcessService.sendEmail(transactionPoid, request != null ? request : new PayrollActionRequest());
+        if (null != response.getStatus() && !response.getStatus().isBlank() && response.getStatus().contains("ERROR")) {
+            return error(response.getStatus(), HttpStatus.BAD_REQUEST.value());
+        } else {
+            return success(response.getStatus(), response);
+        }
     }
 
     @AllowedAction(UserRolesRightsEnum.PRINT)

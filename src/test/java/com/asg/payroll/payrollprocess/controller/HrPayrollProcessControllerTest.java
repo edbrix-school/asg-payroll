@@ -270,7 +270,9 @@ class HrPayrollProcessControllerTest {
     @Test
     void sendEmail_WithRequest_Success() {
         Long id = 1L;
-        when(hrPayrollProcessService.sendEmail(eq(id), any())).thenReturn(new PayrollActionResponse());
+        PayrollActionResponse serviceResponse = new PayrollActionResponse();
+        serviceResponse.setStatus("SUCCESS");
+        when(hrPayrollProcessService.sendEmail(eq(id), any())).thenReturn(serviceResponse);
 
         ResponseEntity<?> response = controller.sendEmail(id, new PayrollActionRequest());
 
@@ -280,7 +282,9 @@ class HrPayrollProcessControllerTest {
     @Test
     void sendEmail_NullRequest_DefaultsToEmptyRequest() {
         Long id = 1L;
-        when(hrPayrollProcessService.sendEmail(eq(id), any())).thenReturn(new PayrollActionResponse());
+        PayrollActionResponse serviceResponse = new PayrollActionResponse();
+        serviceResponse.setStatus("SUCCESS");
+        when(hrPayrollProcessService.sendEmail(eq(id), any())).thenReturn(serviceResponse);
 
         ResponseEntity<?> response = controller.sendEmail(id, null);
 
